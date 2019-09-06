@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.BdCorresStandDetailDao">
+
+    <resultMap type="com.togest.domain.BdCorresStandDetail" id="BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="standId" column="stand_id"/>
+		<result property="psaId" column="psa_id"/>
+		<result property="psaName" column="psa_name"/>
+		<result property="pillar" column="pillar"/>
+		<result property="glb" column="glb"/>
+		<result property="span" column="span"/>
+		<result property="distance" column="distance"/>
+		<result property="issInductance" column="iss_inductance"/>
+		<result property="note" column="note"/>
+		<result property="sort" column="sort"/>
+    </resultMap>
+    
+    <sql id="baseColumns">
+    	id,
+    	stand_id,
+    	psa_id,
+    	psa_name,
+    	pillar,
+    	glb,
+    	span,
+    	distance,
+    	iss_inductance,
+    	note,
+    	sort
+    </sql>
+    
+    <resultMap type="com.togest.domain.BdCorresStandDetail" id="Result_BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="standId" column="stand_id"/>
+		<result property="psaId" column="psa_id"/>
+		<result property="psaName" column="psa_name"/>
+		<result property="pillar" column="pillar"/>
+		<result property="glb" column="glb"/>
+		<result property="span" column="span"/>
+		<result property="distance" column="distance"/>
+		<result property="issInductance" column="iss_inductance"/>
+		<result property="note" column="note"/>
+		<result property="sort" column="sort"/>
+		<result property="flag" column="flag"/>
+    </resultMap>
+    
+    <sql id="baseConditions">
+		<if test="standId != null"> 
+			and stand_id = #{standId}
+		</if>
+		<if test="psaId != null"> 
+			and psa_id = #{psaId}
+		</if>
+		<if test="psaName != null"> 
+			and psa_name like '%${psaName}%'
+		</if>
+		<if test="pillar != null"> 
+			and pillar = #{pillar}
+		</if>
+		<if test="glb != null"> 
+			and REPLACE(REPLACE(REPLACE(ifnull(glb, 0),'K', ''),'k',''),'+','.') like CONCAT('%',REPLACE(REPLACE(REPLACE(concat(ifnull('${glb}', 0),''),'K', ''),'k',''),'+','.'),'%')
+		</if>
+		<if test="span != null"> 
+			and span = #{span}
+		</if>
+		<if test="distance != null">
+			and REPLACE(REPLACE(REPLACE(ifnull(distance, 0),'K', ''),'k',''),'+','.') like CONCAT('%',REPLACE(REPLACE(REPLACE(concat(ifnull('${distance}', 0),''),'K', ''),'k',''),'+','.'),'%')
+		</if>
+		<if test="issInductance != null"> 
+			and iss_inductance = #{issInductance}
+		</if>
+		<if test="note != null"> 
+			and note like '%${note}%'
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select <include refid="baseColumns"></include>
+		from bd_corres_stand_detail
+		where id = #{id} and del_flag = 0
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="BaseResultMap">
+		select <include refid="baseColumns"></include>
+		from bd_corres_stand_detail
+		where del_flag = 0 and id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.BdCorresStandDetail" resultMap="BaseResultMap">
+		select <include refid="baseColumns"></include>
+		from bd_corres_stand_detail
+		<where>
+			del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.BdCorresStandDetail" resultMap="BaseResultMap">
+		select <include refid="baseColumns"></include>
+		from bd_corres_stand_detail
+		<where>
+			del_flag = 0
+			<include refid="baseConditions"></include>
+			<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by ${orderBy}
+            </when>
+			<otherwise>
+                order by REPLACE(REPLACE(REPLACE(ifnull(glb, 0),'K', ''),'k',''),'+','.')+0
+			</otherwise>
+        </choose>
+		</where>
+	</select>
+	
+	<select id="findListByDistance" parameterType="com.togest.domain.BdCorresStandDetail" resultMap="BaseResultMap">
+		select <include refid="baseColumns"></include>
+		from bd_corres_stand_detail
+		<where>
+			del_flag = 0
+			<if test="standId != null"> 
+				and stand_id = #{standId}
+			</if>
+			<choose>
+				<when test="distance != null">
+					order by abs(REPLACE(REPLACE(REPLACE(ifnull(distance, 0),'K', ''),'k',''),'+','.')+0 - REPLACE(REPLACE(REPLACE(#{distance},'K', ''),'k',''),'+','.')+0) asc, id asc
+				</when>
+				<otherwise>
+					order by abs(REPLACE(REPLACE(REPLACE(ifnull(glb, 0),'K', ''),'k',''),'+','.')+0 - REPLACE(REPLACE(REPLACE(#{glb},'K', ''),'k',''),'+','.')+0) asc, id asc
+				</otherwise>
+			</choose>
+			limit 0,1
+		</where>
+	</select>
+	
+	<select id="findListByDistanceAndGlb" parameterType="com.togest.domain.BdCorresStandDetail" resultMap="Result_BaseResultMap">
+			(
+				select <include refid="baseColumns"></include>,'false' as flag from 
+				(
+					select <include refid="baseColumns"></include>
+					from bd_corres_stand_detail where del_flag = 0 and id != #{id}
+					<if test="standId != null"> 
+						and stand_id = #{standId}
+					</if>
+					<choose>
+			            <when test="distance != null">
+			               and REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 
+			               &lt;= (select REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 from bd_corres_stand_detail
+			               where del_flag = 0 and id=#{id})
+			               order by REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 desc, id asc
+			            </when>
+						<otherwise>
+			              and REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0 
+			               &lt;= (select REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0 from bd_corres_stand_detail
+			               where del_flag = 0 and id=#{id})
+			               order by REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0 desc, id asc
+						</otherwise>
+			        </choose>
+			        limit 0, 25
+		        ) bcsd
+		        <choose>
+		            <when test="distance != null">
+		               order by REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 asc, id asc
+		            </when>
+					<otherwise>
+		               order by REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0  asc, id asc
+					</otherwise>
+			   </choose>
+			   limit 0, 25
+		  )
+	   union all
+	  		 (select <include refid="baseColumns"></include>,'true' as flag from bd_corres_stand_detail where del_flag = 0 and id=#{id})
+	   union all
+	   		(
+		   		select <include refid="baseColumns"></include>,'false' as flag
+				from bd_corres_stand_detail where del_flag = 0 and id != #{id}
+				<if test="standId != null"> 
+					and stand_id = #{standId}
+				</if>
+				<choose>
+		            <when test="distance != null">
+		               and REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 
+		               &gt; (select REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 from bd_corres_stand_detail 
+		               where del_flag = 0 and id=#{id})
+		               order by REPLACE(REPLACE(REPLACE(ifnull(distance,0),'K', ''),'k',''),'+','.')+0 asc, id asc
+		            </when>
+					<otherwise>
+		               and REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0 
+		               &gt; (select REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0 from bd_corres_stand_detail 
+		               where del_flag = 0 and id=#{id})
+		               order by REPLACE(REPLACE(REPLACE(ifnull(glb,0),'K', ''),'k',''),'+','.')+0 asc, id asc
+					</otherwise>
+		        </choose>
+		        limit 0, 25
+	        )
+	</select>
+	
+	<select id="findAllList" parameterType="com.togest.domain.BdCorresStandDetail" resultMap="BaseResultMap">
+		select <include refid="baseColumns"></include>
+		from bd_corres_stand_detail
+		<where>
+			del_flag = 0
+		</where>
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.BdCorresStandDetail">
+		insert into bd_corres_stand_detail
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            stand_id,
+            psa_id,
+            psa_name,
+            pillar,
+            glb,
+            span,
+            distance,
+            iss_inductance,
+            note,
+			<if test="sort!=null">sort,</if>
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{standId},
+			#{psaId},
+			#{psaName},
+			#{pillar},
+			#{glb},
+			#{span},
+			#{distance},
+			#{issInductance},
+			#{note},
+			<if test="sort!=null">#{sort},</if>
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+		</trim>
+	</insert>
+	 
+	 <insert id="insertBatch" parameterType="java.util.List">
+		insert into bd_corres_stand_detail
+		(
+			id,
+            stand_id,
+            psa_id,
+            psa_name,
+            pillar,
+            glb,
+            span,
+            distance,
+            iss_inductance,
+            note,
+            del_flag,
+            create_ip,
+            create_by,
+            create_date
+		)
+		values
+		<foreach collection="list" item="item" index="index" separator=","> 
+		(
+			#{item.id},
+			#{item.standId},
+			#{item.psaId},
+			#{item.psaName},
+			#{item.pillar},
+			#{item.glb},
+			#{item.span},
+			#{item.distance},
+			#{item.issInductance},
+			#{item.note},
+			#{item.delFlag},
+			#{item.createIp},
+			#{item.createBy},
+			#{item.createDate}
+		)
+    	</foreach> 
+	</insert>
+	
+	<update id="update" parameterType="com.togest.domain.BdCorresStandDetail">
+		update bd_corres_stand_detail 
+		
+		<trim prefix="set" suffixOverrides=",">
+				stand_id = #{standId},
+				psa_id = #{psaId},
+				psa_name = #{psaName},
+				pillar = #{pillar},
+				glb = #{glb},
+				span = #{span},
+				distance = #{distance},
+				iss_inductance = #{issInductance},
+				note = #{note},
+				<if test="sort!=null">sort = #{sort},</if>
+				update_ip = #{updateIp},
+				update_by = #{updateBy},
+				update_date = #{updateDate},
+		</trim>
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from bd_corres_stand_detail where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.BdCorresStandDetail">
+		update bd_corres_stand_detail
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+
+</mapper>

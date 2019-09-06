@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.PillarDao">
+
+	<select id="findPillarByGlb" parameterType="com.togest.client.response.Pillar"
+		resultType="com.togest.client.response.Pillar">
+		
+			(select 1, tab.id, tab.start_km as startKm, tab.name as name ,
+			tab.section_id as sectionId, tab.dept_id as deptId ,
+			tab.psa_id as psaId, tab.psa_name as psaName,tab.tunnel_id as tunnelId,tab.tunnel_name as tunnelName
+			from
+			((select
+			base.id, base.pl_id, base.dept_id, base.psa_id,
+			base.section_id,
+			base.direction,
+			base.start_km,psa.name as psa_name,base.name, (#{startKm} - base.start_km) as num,
+			base.tunnel_id,pt.name as tunnel_name
+			from
+			jcw_equ_pillar_info as  base 
+			join p_supply_arm as psa on base.psa_id=psa.id
+			left join p_tunnel as pt on base.tunnel_id=pt.id
+			where
+			base.pl_id= #{plId}
+			<if test="psaId != null">
+				and base.psa_id = #{psaId}
+			</if>
+			<if test="tunnelName != null">
+				and pt.name = #{tunnelName}
+			</if>
+			
+			and base.direction= #{direction}
+			and base.start_km &lt;= #{startKm}
+			and base.del_flag=0
+			order by base.start_km desc
+			limit 1)
+			union all
+			(select
+			base.id, base.pl_id, base.dept_id, base.psa_id,
+			base.section_id,
+			base.direction,
+			base.start_km,psa.name as psa_name, base.name,(base.start_km - #{startKm}) as num,
+			base.tunnel_id as tunnelId,pt.name as tunnel_name
+			from
+			jcw_equ_pillar_info as a
+			join jcw_equ_base_info as base on a.id=base.id
+			join p_supply_arm as psa on base.psa_id=psa.id
+			left join p_tunnel as pt on base.tunnel_id=pt.id
+			where
+			base.pl_id= #{plId}
+			<if test="psaId != null">
+				and base.psa_id = #{psaId}
+			</if>
+			<if test="tunnelName != null">
+				and pt.name = #{tunnelName}
+			</if>
+			<if test="tunnelName == null">
+				and base.tunnel_id is null
+			</if>
+			and base.direction= #{direction}
+			and base.start_km &gt;= #{startKm}
+			and base.del_flag=0
+			order by base.start_km asc
+			limit 1)) as tab
+			order by tab.num asc
+			limit 1)
+		
+	</select>
+	
+		<select id="findPillarByName" parameterType="java.util.List"
+		resultType="com.togest.client.response.Pillar">
+		<foreach item="entity" collection="entityList" separator="union all" open="" close="" index="">
+			(select 1,
+			base.id, base.pl_id as plId, base.dept_id as deptId, base.psa_id as psaId,
+			base.section_id as SectionId, base.longitude as longitude,base.latitude as latitude,
+			base.direction,
+			base.start_km as startkm,psa.name as psaName,base.name,base.tunnel_id as tunnelId,pt.name as tunnelName
+			from
+			jcw_equ_pillar_info as  base 
+			left join p_supply_arm as psa on base.psa_id=psa.id
+			left join p_tunnel as pt on base.tunnel_id=pt.id
+			where
+			base.pl_id= #{entity.plId}
+			and base.direction= #{entity.direction}
+			and base.psa_id = #{entity.psaId}
+			<if test="entity.tunnelName != null">
+				and pt.name = #{entity.tunnelName}
+			</if>
+			<if test="entity.tunnelName == null">
+				and base.tunnel_id is null
+			</if>
+			and base.name = #{entity.name}
+			and base.del_flag=0 
+			order by base.start_km desc
+			limit 1)
+		</foreach> 
+	</select>
+	
+	<select id="findPillarDataByGlb" parameterType="java.util.Map"
+		resultType="com.togest.client.response.Pillar">
+		select
+			base.id, base.pl_id as plId, base.dept_id as deptId, base.psa_id as psaId,
+			base.section_id as sectionId, base.longitude as longitude,base.latitude as latitude,
+			base.direction as direction,
+			base.start_km as startKm,psa.name as psaName, base.name as name, 
+			base.tunnel_id as tunnelId,pt.name as tunnelName
+			from
+			jcw_equ_pillar_info as base
+			join p_supply_arm as psa on base.psa_id=psa.id
+			left join p_tunnel as pt on base.tunnel_id=pt.id
+			where
+			base.pl_id= #{entity.plId}
+			<if test="entity.psaId != null">
+				and base.psa_id = #{entity.psaId}
+			</if>
+			<if test="entity.tunnelName != null">
+				and pt.name = #{entity.tunnelName}
+			</if>
+			and base.direction = #{entity.direction}
+			and base.start_km &gt;= #{entity.startKm}
+			and base.start_km &lt;= #{entity.endKm}
+			and base.del_flag=0
+			<if test="changeFlag!=null">
+				and base.dept_id not in (select id from p_department_extend where change_flag = #{changeFlag})
+			</if>
+			order by base.start_km
+		</select>
+		
+		<select id="findPillarMaxAndMinNumByIds" resultType="java.util.Map">
+			select pt.id, pt.name, min(jep.num) minNum, max(jep.num) maxNum from jcw_equ_pillar_info as jep left join
+			p_tunnel as pt on jep.tunnel_id = pt.id where pt.id in
+			(
+				select distinct base.tunnel_id from jcw_equ_pillar_info as base
+				where base.del_flag=0 and base.num is not null
+				<if test="pillarIdList != null and pillarIdList.size>0" >
+					and base.id in
+					<foreach item="pillarId" collection="pillarIdList" separator="," open="("
+						close=")" index="">
+						#{pillarId}
+					</foreach>
+				</if>
+			)  group by pt.id order by min(jep.num) asc
+		</select>
+ </mapper>

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.C4PicIndexDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.C4PicIndexDTO">
+		<id column="id" property="id" />
+		<result column="station" property="station" />
+		<result column="info_id" property="infoId" />
+		<result column="pillar_num" property="pillarNum" />
+		<result column="km" property="km" />
+		<result column="speed" property="speed" />
+		<result column="index_status" property="indexStatus" />
+		<result column="defect_date" property="defectDate" />
+		<result column="camera_no" property="cameraNo" />
+		<result column="path" property="path" />
+		<result column="sort" property="sort" />
+		<result column="stationName" property="stationName" />
+		<result column="pillarName" property="pillarName" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.station, a.info_id, a.pillar_num, a.km, a.speed, a.index_status,
+		a.defect_date, a.camera_no,a.path, a.sort,psa.name as stationName,pi.name as pillarName
+	</sql>
+
+	<sql id="condition">
+		<if test="station != null">
+			and a.station = #{station}
+		</if>
+		<if test="infoId != null">
+			and a.info_id = #{infoId}
+		</if>
+		<if test="pillarNum != null">
+			and a.pillar_num = #{pillarNum}
+		</if>
+		<if test="km != null">
+			and a.km = #{km}
+		</if>
+		<if test="speed != null">
+			and a.speed = #{speed}
+		</if>
+		<if test="indexStatus != null">
+			and a.index_status = #{indexStatus}
+		</if>
+		<if test="defectDate != null">
+			and a.defect_date = #{defectDate}
+		</if>
+		<if test="cameraNo != null">
+			and a.camera_no = #{cameraNo}
+		</if>
+		<if test="path != null">
+			and a.path = #{path}
+		</if>
+
+		<if test="sort != null">
+			and a.sort = #{sort}
+		</if>
+		and a.del_flag=0
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c4_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		where
+		a.id = #{id} and a.del_flag=0
+	</select>
+	<select id="getByEntity" parameterType="com.togest.domain.C4PicIndexDTO"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c4_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		<where>
+			<include refid="condition"></include>
+		</where>
+	</select>
+	<select id="getListByKeys" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c4_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		<where>
+			q.id in
+			<foreach collection="ids" item="item" index="index" open="("
+				separator="," close=")">#{item}</foreach>
+			and a.del_flag=0
+		</where>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c4_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+
+		where a.del_flag=0
+		order by a.sort
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c4_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		<where>
+			<include refid="condition"></include>
+		</where>
+		order by a.sort
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.C4PicIndexDTO">
+		insert into 6c_c4_pic_index (id, station, info_id,
+		pillar_num, km,
+		speed,
+		index_status, defect_date, camera_no,
+		path,
+		del_flag,create_by,create_ip,
+		create_date
+		<if test="sort!=null or sort==0">,sort</if>
+		)
+		values (#{id}, #{station},
+		#{infoId},
+		#{pillarNum}, #{km}, #{speed},
+		#{indexStatus}, #{defectDate},
+		#{cameraNo},
+		#{path},
+		#{delFlag},
+		#{createBy},#{createIp},
+		#{createDate}
+		<if test="sort!=null or sort==0">,#{sort}</if>
+		)
+
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.C4PicIndexDTO">
+		update 6c_c4_pic_index
+		set
+		<if test="sort!=null or sort==0">sort=#{sort},</if>
+		station = #{station},
+		info_id = #{infoId},
+		pillar_num = #{pillarNum},
+		km
+		= #{km},
+		speed = #{speed},
+		index_status = #{indexStatus},
+		defect_date =
+		#{defectDate},
+		camera_no = #{cameraNo},
+		path = #{path},
+		update_by =
+		#{updateBy},
+		update_ip = #{updateIp},
+		update_date =
+		#{updateDate}
+		where
+		id
+		= #{id}
+	</update>
+	<update id="updateBatch" parameterType="java.util.Map">
+	update 6c_c4_pic_index
+	 <set >
+      <if test="entity.station != null" >
+        station = #{entity.station},
+      </if>
+      <if test="entity.infoId != null" >
+        info_id = #{entity.infoId},
+      </if>
+      <if test="entity.pillarNum != null" >
+        pillar_num = #{entity.pillarNum},
+      </if>
+      <if test="entity.km != null" >
+        km = #{entity.km},
+      </if>
+      <if test="entity.speed != null" >
+        speed = #{entity.speed},
+      </if>
+      <if test="entity.indexStatus != null" >
+        index_status = #{entity.indexStatus},
+      </if>
+      <if test="entity.defectDate != null" >
+        defect_date = #{entity.defectDate},
+      </if>
+      <if test="entity.cameraNo != null" >
+        camera_no = #{entity.cameraNo},
+      </if>
+      <if test="entity.path != null" >
+        path = #{entity.path},
+      </if>
+      <if test="entity.sort != null" >
+        sort = #{entity.sort},
+      </if>
+      <if test="entity.updateIp != null" >
+        update_ip = #{entity.updateIp},
+      </if>
+      <if test="entity.updateBy != null" >
+        update_by = #{entity.updateBy},
+      </if>
+      <if test="entity.updateDate != null" >
+        update_date = #{entity.updateDate},
+      </if>
+    </set>
+    	where
+		id in 
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="deleteFalse" parameterType="com.togest.domain.C4PicIndexDTO">
+		update
+		6c_c4_pic_index
+		set
+		del_flag=1,
+		delete_by=#{deleteBy},delete_ip=#{deleteIp},delete_date=current_timestamp
+		where
+		id
+		= #{id} and del_flag=0
+	</update>
+
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from
+		6c_c4_pic_index
+		where id = #{id}
+		and del_flag=0
+	</delete>
+
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_c4_pic_index set
+		del_flag=1,delete_by=#{deleteBy},delete_ip=#{deleteIp},delete_date=current_timestamp
+		where
+		relation_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<select id="getCanmerNoByInfoId" parameterType="java.lang.String"
+		resultType="com.togest.domain.Naming">
+		select distinct camera_no as id,camera_no as name from 6c_c4_pic_index 
+		where info_id=#{infoId} and del_flag=0 
+		order by camera_no asc
+	</select>
+	<select id="getStationByInfoId" parameterType="java.lang.String"
+		resultType="com.togest.domain.Naming">
+		select distinct station as id,station as name from 6c_c4_pic_index 
+		where info_id=#{infoId} and del_flag=0 
+		order by station asc
+	</select>
+</mapper>

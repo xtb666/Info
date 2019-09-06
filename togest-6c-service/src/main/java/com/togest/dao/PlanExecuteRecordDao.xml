@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.PlanExecuteRecordDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.PlanExecuteRecordDTO">
+		<id column="id" property="id" />
+		<result column="plan_execute_id" property="planExecuteId" />
+		<result column="dept_id" property="deptId" />
+		<result column="patcher" property="patcher" />
+		<result column="multiplication_date" property="multiplicationDate" />
+		<result column="start_station" property="startStation" />
+		<result column="end_station" property="endStation" />
+		<result column="implementation" property="implementation" />
+		<result column="record_status" property="recordStatus" />
+		<result column="remark" property="remark" />
+		<result column="deptName" property="deptName" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="form_key" property="formKey" />
+		<result column="task_name" property="taskName" />
+		<result column="task_id" property="taskId" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.plan_execute_id, a.dept_id, a.patcher,
+		a.multiplication_date,
+		a.start_station, a.end_station,
+		a.implementation, a.record_status,a.remark,p.name as deptName,
+		a.process_instance_id,a.form_key,a.task_name,a.task_id
+	</sql>
+
+
+	<select id="getByKeys" resultMap="BaseResultMap" parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute_record a left join p_department p on
+		a.dept_id=p.id
+		where a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	<select id="getListByIdAndDeptId" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute_record a left join p_department p on
+		a.dept_id=p.id
+		where a.plan_execute_id in
+		<foreach item="item" collection="list" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+		and a.dept_id = #{deptId}
+		and a.del_flag=0
+	</select>
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute_record a left join p_department p on
+		a.dept_id=p.id
+		where a.id = #{id}
+		
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.PlanExecuteRecordDTO">
+		insert into
+		6c_plan_execute_record (id, plan_execute_id, dept_id,
+		patcher,
+		multiplication_date, start_station,
+		end_station, implementation,
+		record_status,
+		del_flag, create_ip, create_by,
+		create_date, remark)
+		values (#{id}, #{planExecuteId}, #{deptId},
+		#{patcher},
+		#{multiplicationDate}, #{startStation},
+		#{endStation},
+		#{implementation}, #{recordStatus},
+		#{delFlag}, #{createIp},
+		#{createBy},
+		#{createDate}, #{remark})
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.PlanExecuteRecordDTO">
+		update 6c_plan_execute_record
+		<set>
+			<if test="planExecuteId != null">
+				plan_execute_id = #{planExecuteId},
+			</if>
+			<if test="deptId != null">
+				dept_id = #{deptId},
+			</if>
+			<if test="patcher != null">
+				patcher = #{patcher},
+			</if>
+			<if test="multiplicationDate != null">
+				multiplication_date = #{multiplicationDate},
+			</if>
+			<if test="startStation != null">
+				start_station = #{startStation},
+			</if>
+			<if test="endStation != null">
+				end_station = #{endStation},
+			</if>
+			<if test="implementation != null">
+				implementation = #{implementation},
+			</if>
+			<if test="recordStatus != null">
+				record_status = #{recordStatus},
+			</if>
+			<if test="updateIp != null">
+				update_ip = #{updateIp},
+			</if>
+			<if test="updateBy != null">
+				update_by = #{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>
+			<if test="remark != null">
+				remark = #{remark},
+			</if>
+		</set>
+		where id =
+		#{id}
+	</update>
+	<update id="updateFlow" parameterType="com.togest.domain.PlanExecuteRecordDTO">
+		update 6c_plan_execute_record
+		<set>
+			<if test="processInstanceId!=null">
+				process_instance_id = #{processInstanceId},
+			</if>
+			form_key = #{formKey},
+			task_name = #{taskName},
+			task_id = #{taskId}
+		</set>
+		where plan_execute_id = #{planExecuteId} and dept_id = #{deptId}
+	</update>
+	<update id="updateRecordStatus" parameterType="java.util.Map">
+		update 6c_plan_execute_record set
+		record_status = #{recordStatus}
+		where
+		id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateRecordStatusByPlanExecuteIds" parameterType="java.util.Map">
+		update 6c_plan_execute_record set
+		record_status = #{recordStatus}
+		where
+		plan_execute_id
+		in
+		<foreach item="item" collection="planExecuteIds" separator=","
+			open="(" close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_plan_execute_record
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalsesByPlanExecuteId" parameterType="java.util.Map">
+		update 6c_plan_execute_record
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where
+		plan_execute_id in
+		<foreach item="item" collection="planExecuteIds" separator=","
+			open="(" close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalsesByPlanBaseId" parameterType="java.util.Map">
+		update 6c_plan_execute_record
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where
+		plan_execute_id in
+		
+		(select id from 6c_plan_execute 
+		where 
+		plan_base_id in
+		<foreach item="item" collection="planBaseIds" separator=","
+			open="(" close=")" index="">
+			#{item}
+		</foreach> )
+		
+	</update>
+
+	<select id="findList" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.PlanExecuteRecordDTO">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute_record a left join p_department p on
+		a.dept_id=p.id
+		<where>
+			a.del_flag=0
+			<if test="planExecuteId != null">
+				and a.plan_execute_id = #{planExecuteId}
+			</if>
+			<if test="deptId != null">
+				and a.dept_id = #{deptId}
+			</if>
+			<if test="patcher != null">
+				and a.patcher = #{patcher}
+			</if>
+			<if test="multiplicationDate != null">
+				and a.multiplication_date = #{multiplicationDate}
+			</if>
+			<if test="startStation != null">
+				and a.start_station = #{startStation}
+			</if>
+			<if test="endStation != null">
+				and a.end_station = #{endStation}
+			</if>
+			<if test="implementation != null">
+				and a.implementation = #{implementation}
+			</if>
+			<if test="recordStatus != null">
+				and a.record_status = #{recordStatus}
+			</if>
+		</where>
+	</select>
+
+	<select id="getByEntity" resultMap="BaseDetailResultMap"
+		parameterType="com.togest.domain.PlanExecuteRecordDTO">
+		select
+		<include refid="base_detail_column" />
+		from
+		<include refid="Response_Base_Table" />
+		<where>
+			a.del_flag=0
+			<if test="planExecuteId != null">
+				and a.plan_execute_id = #{planExecuteId}
+			</if>
+			<if test="deptId != null">
+				and a.dept_id = #{deptId}
+			</if>
+			<if test="patcher != null">
+				and a.patcher = #{patcher}
+			</if>
+			<if test="multiplicationDate != null">
+				and a.multiplication_date = #{multiplicationDate}
+			</if>
+			<if test="startStation != null">
+				and a.start_station = #{startStation}
+			</if>
+			<if test="endStation != null">
+				and a.end_station = #{endStation}
+			</if>
+			<if test="implementation != null">
+				and a.implementation = #{implementation}
+			</if>
+			<if test="recordStatus != null">
+				and a.record_status = #{recordStatus}
+			</if>
+		</where>
+	</select>
+
+	<resultMap id="BaseDetailResultMap" type="com.togest.domain.PlanExecuteRecordDTO">
+		<id column="id" property="id" />
+		<result column="plan_execute_id" property="planExecuteId" />
+		<result column="dept_id" property="deptId" />
+		<result column="patcher" property="patcher" />
+		<result column="multiplication_date" property="multiplicationDate" />
+		<result column="start_station" property="startStation" />
+		<result column="end_station" property="endStation" />
+		<result column="implementation" property="implementation" />
+		<result column="record_status" property="recordStatus" />
+		<result column="remark" property="remark" />
+		<result column="deptName" property="deptName" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="form_key" property="formKey" />
+		<result column="task_name" property="taskName" />
+		<result column="task_id" property="taskId" />
+
+		<association property="planExecute" javaType="com.togest.domain.PlanExecuteDTO">
+			<id column="pe_id" property="id" />
+			<result column="plan_base_id" property="planBaseId" />
+			<result column="plan_detail_id" property="planDetailId" />
+			<result column="responsible_dept_id" property="responsibleDeptId" />
+			<result column="pe_start_station" property="startStation" />
+			<result column="pe_end_station" property="endStation" />
+			<result column="audit_person" property="auditPerson" />
+			<result column="audit_date" property="auditDate" />
+			<result column="add_date" property="addDate" />
+			<result column="confirm_person" property="confirmPerson" />
+			<result column="confirm_date" property="confirmDate" />
+			<result column="section_id" property="sectionId" />
+			<result column="system_id" property="systemId" />
+			<result column="execute_status" property="executeStatus" />
+			<result column="peRemark" property="remark" />
+			<result column="peImplementation" property="implementation" />
+			<result column="pePatcher" property="patcher" />
+			<result column="audit_status" property="auditStatus" />
+			<result column="flow_tag" property="flowTag" />
+			
+			<result column="responsibleDeptName" property="responsibleDeptName" />
+			<result column="planBaseTrainNumber" property="planBaseTrainNumber" />
+			<result column="planBaseTrainId" property="planBaseTrainId" />
+			<result column="planBaseTrainName" property="planBaseTrainName" />
+			<result column="planBaseContacts" property="planBaseContacts" />
+			<result column="planBaseRemark" property="planBaseRemark" />
+			<result column="planBasePlanDate" property="planBasePlanDate" />
+
+			<result column="planDetailLineId" property="planDetailLineId" />
+			<result column="planDetailDirection" property="planDetailDirection" />
+			<result column="planDetailDirectionName" property="planDetailDirectionName" />
+			<result column="planDetailLineName" property="planDetailLineName" />
+			<result column="planDetailCheckRegion" property="planDetailCheckRegion" />
+			<result column="planDetailStartStation" property="planDetailStartStation" />
+			<result column="planDetailEndStation" property="planDetailEndStation" />
+			<result column="planDetailStartStationName" property="planDetailStartStationName" />
+			<result column="planDetailEndStationName" property="planDetailEndStationName" />
+			<result column="planDetailDetectMileage" property="planDetailDetectMileage" />
+			
+			<result column="actual_add_date" property="actualAddDate" />
+			<result column="actual_patcher" property="actualPatcher" />
+			<result column="actual_check_region" property="actualCheckRegion" />
+			<result column="actual_add_train_number" property="actualAddTrainNumber" />
+			<result column="actual_add_traffic_number" property="actualAddTrafficNumber" />
+			<result column="equ_no" property="equNo" />
+			<result column="equ_operation" property="equOperation" />
+		
+		
+		</association>
+	</resultMap>
+
+	<sql id="base_detail_column">
+		a.id, a.plan_execute_id, a.dept_id, a.patcher,
+		a.multiplication_date,
+		a.start_station, a.end_station,
+		a.implementation, a.record_status,a.remark,
+		a.process_instance_id,a.form_key,a.task_name,a.task_id,
+		d2.name as
+		deptName,
+		pe.id as pe_id, pe.plan_base_id, pe.plan_detail_id,
+		pe.actual_add_date,pe.actual_patcher,pe.actual_check_region,
+		pe.actual_add_train_number,pe.actual_add_traffic_number,
+		pe.equ_no,pe.equ_operation,
+		pe.responsible_dept_id,pe.flow_tag,
+		pe.start_station as pe_start_station,
+		pe.end_station as pe_end_station,
+		pe.audit_person,pe.audit_date,
+		pe.add_date,pe.confirm_person,pe.confirm_date,
+		pe.section_id, pe.system_id,
+		pe.execute_status,
+		pe.audit_status,
+		pe.remark as peRemark,pe.implementation as peImplementation,pe.patcher as pePatcher,
+	
+		pb.plan_date as planBasePlanDate,
+		pb.train_number as planBaseTrainNumber,
+		pb.train_id as planBaseTrainId,
+		pb.contacts as
+		planBaseContacts,
+		pb.remark as planBaseRemark,
+		pd.line_id as
+		planDetailLineId,
+		pd.direction as planDetailDirection,
+		pdi.name as planDetailDirectionName,
+		pd.check_region as planDetailCheckRegion,
+		pd.start_station
+		as planDetailStartStation,
+		pd.end_station
+		as planDetailEndStation,
+		p1.name
+		as planDetailStartStationName,
+		p2.name
+		as planDetailEndStationName,
+		pd.detect_mileage
+		as planDetailDetectMileage,
+		ct.train_num as planBaseTrainName,
+		d1.name as responsibleDeptName,
+		pl.name as planDetailLineName
+	</sql>
+
+	<sql id="Response_Base_Table">
+		6c_plan_execute_record a
+		left join 6c_plan_execute pe on a.plan_execute_id = pe.id
+		left join 6c_plan_base pb on pe.plan_base_id= pb.id
+		left join 6c_check_train ct on ct.id = pb.train_id
+		left join 6c_plan_detail pd on pe.plan_detail_id= pd.id
+		left join p_supply_arm p1 on pd.start_station = p1.id
+		left join p_supply_arm p2 on pd.end_station = p2.id
+		left join p_department d1 on pe.responsible_dept_id= d1.id
+		left join p_line pl on pd.line_id = pl.id
+		left join p_department d2 on a.dept_id= d2.id
+		left join p_dictionary_item pdi on pd.direction=pdi.id
+	</sql>
+
+	<select id="findLists" resultMap="BaseDetailResultMap"
+		parameterType="com.togest.request.PlanQueryFilter">
+		select
+		<include refid="base_detail_column" />
+		from
+		<include refid="Response_Base_Table" />
+		<where>
+			a.del_flag = 0
+			<if test="planBaseId != null">
+				and pe.plan_base_id = #{planBaseId}
+			</if>
+			<if test="planDetailId != null">
+				and pe.plan_detail_id = #{planDetailId}
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pd.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pd.direction = #{direction}
+			</if>
+			<if test="startStation !=null">
+				and pd.start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and pd.end_station =#{endStation}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(pe.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and
+					del_flag=0)
+					or pe.responsible_dept_id = #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (a.dept_id = #{did} 
+					or pe.responsible_dept_id=#{did}
+					or pe.dept_id=#{did}
+					)
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (pe.section_id = #{sectionId} or
+				(pe.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or pe.responsible_dept_id = #{sectionId}))
+
+			</if>
+			<if test="planStatus != null">
+				and pb.plan_status = #{planStatus}
+			</if>
+			<if test="executeStatus != null">
+				and a.record_status = #{executeStatus}
+			</if>
+			<if test="systemId != null">
+				and pe.system_id = #{systemId}
+			</if>
+			<if test="flowTag != null">
+				and pe.flow_tag = #{flowTag}
+			</if>
+		</where>
+		order by pb.plan_date desc,pd.line_id,pd.direction
+	</select>
+	
+	<select id="getDetailByKey" resultMap="BaseDetailResultMap">
+	select
+		<include refid="base_detail_column" />
+		from
+		<include refid="Response_Base_Table" />
+		where a.id=#{id}
+	</select>
+	<select id="getDetailByKeys" resultMap="BaseDetailResultMap">
+	select
+		<include refid="base_detail_column" />
+		from
+		<include refid="Response_Base_Table" />
+		where a.id in 
+			<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	<select id="getDetailByPeKeys" resultMap="BaseDetailResultMap">
+	select
+		<include refid="base_detail_column" />
+		from
+		<include refid="Response_Base_Table" />
+		where a.plan_execute_id in 
+			<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByPeAndPbIdAndRecordStatus" parameterType="java.util.Map" resultType="java.lang.String">
+		<!-- select id from 6c_plan_execute_record 
+		where plan_execute_id in(select id from 6c_plan_execute where plan_base_id in(select plan_base_id from 6c_plan_execute where id = #{planExecuteId} and del_flag = 0) and del_flag = 0 )  
+		and record_status!= #{recordStatus} and del_flag = 0 -->
+		select id from 6c_plan_execute
+		where id in(select id from 6c_plan_execute where plan_base_id in(select plan_base_id from 6c_plan_execute where id = #{planExecuteId} and del_flag = 0) and del_flag = 0 )  
+		and execute_status!= #{recordStatus} and del_flag = 0
+	</select>
+	
+	<select id="getByPlanExecuteIdAndRecordStatus" parameterType="java.lang.String"  resultType="java.lang.String">
+		select id from 6c_plan_execute_record
+		where plan_execute_id = #{planExecuteId} and 
+		<if test="recordStatus == 4">
+		record_status in ('2','3')
+		</if>
+		<if test="recordStatus == 5">
+		record_status in ('2','3','4')
+		</if>
+		and del_flag = 0
+	</select>
+	
+
+</mapper>

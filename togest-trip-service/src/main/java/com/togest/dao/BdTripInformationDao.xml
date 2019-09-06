@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.BdTripInformationDao">
+
+    <resultMap type="com.togest.domain.dto.BdTripInformationDTO" id="BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="pavilionId" column="pavilion_id"/>
+		<result property="psPdId" column="ps_pd_id"/>
+		<result property="time" column="time"/>
+		<result property="localWeather" column="local_weather"/>
+		<result property="breakerNumber" column="breaker_number"/>
+		<result property="protect" column="protect"/>
+		<result property="faultType" column="fault_type"/>
+		<result property="tlineVoltage" column="tline_voltage"/>
+		<result property="flineVoltage" column="fline_voltage"/>
+		<result property="tlineCurrent" column="tline_current"/>
+		<result property="flineCurrent" column="fline_current"/>
+		<result property="impedanceAngle" column="impedance_angle"/>
+		<result property="standardDistance" column="standard_distance"/>
+		<result property="coincidenceGate" column="coincidence_gate"/>
+		<result property="sendTime" column="send_time"/>
+		<result property="armRunNum" column="arm_run_num"/>
+		<result property="flineInfluence" column="fline_influence"/>
+		<result property="flineInfo" column="fline_info"/>
+		<result property="foreignInfor" column="foreign_infor"/>
+		<result property="jcwFaultPoint" column="jcw_fault_point"/>
+		<result property="speedLimitRequir" column="speed_limit_requir"/>
+		<result property="direction" column="direction"/>
+		<result property="powerCutRange" column="power_cut_range"/>
+		<result property="kiloDistance" column="kilo_distance"/>
+		<result property="mark" column="mark"/>
+		<result property="composeVoltage" column="compose_voltage"/>
+		<result property="composeCurrent" column="compose_current"/>
+		<result property="dzResistance" column="dz_resistance"/>
+		<result property="sort" column="sort"/>
+		
+		<result property="lineName" column="lineName"/>
+		<result property="pavilionName" column="pavilionName"/>
+		<result property="psPdName" column="psPdName"/>
+    </resultMap>
+    
+     <sql id="Base_Table">
+		bd_trip_information bti
+		left join p_line pl on bti.line_id = pl.id
+		left join p_pavilion pp on bti.pavilion_id = pp.id
+		left join p_supply_power_section ps on bti.ps_pd_id = ps.id
+	</sql>
+	
+    <sql id="Base_Column_List">
+    	bti.id,
+    	bti.line_id,
+    	bti.pavilion_id,
+    	bti.ps_pd_id,
+    	bti.time,
+    	bti.local_weather,
+    	bti.breaker_number,
+    	bti.protect,
+    	bti.fault_type,
+    	bti.tline_voltage,
+    	bti.fline_voltage,
+    	bti.tline_current,
+    	bti.fline_current,
+    	bti.impedance_angle,
+    	bti.standard_distance,
+    	bti.coincidence_gate,
+    	bti.send_time,
+    	bti.arm_run_num,
+    	bti.fline_influence,
+    	bti.fline_info,
+    	bti.foreign_infor,
+    	bti.jcw_fault_point,
+    	bti.speed_limit_requir,
+    	bti.direction,
+    	bti.power_cut_range,
+    	bti.kilo_distance,
+    	bti.mark,
+    	bti.compose_voltage,
+    	bti.compose_current,
+    	bti.dz_resistance,
+    	bti.sort,
+    	pl.name as lineName,
+		pp.name as pavilionName,
+		ps.name as psPdName
+    </sql>
+    
+    <sql id="baseConditions">
+		<if test="lineId != null"> 
+			and bti.line_id = #{lineId}
+		</if>
+		<if test="pavilionId != null"> 
+			and bti.pavilion_id = #{pavilionId}
+		</if>
+		<if test="psPdId != null"> 
+			and bti.ps_pd_id = #{psPdId}
+		</if>
+		<if test="time != null"> 
+			and bti.time = #{time}
+		</if>
+		<if test="localWeather != null"> 
+			and bti.local_weather = #{localWeather}
+		</if>
+		<if test="breakerNumber != null"> 
+			and bti.breaker_number = #{breakerNumber}
+		</if>
+		<if test="protect != null"> 
+			and bti.protect = #{protect}
+		</if>
+		<if test="faultType != null"> 
+			and bti.fault_type = #{faultType}
+		</if>
+		<if test="tlineVoltage != null"> 
+			and bti.tline_voltage = #{tlineVoltage}
+		</if>
+		<if test="flineVoltage != null"> 
+			and bti.fline_voltage = #{flineVoltage}
+		</if>
+		<if test="tlineCurrent != null"> 
+			and bti.tline_current = #{tlineCurrent}
+		</if>
+		<if test="flineCurrent != null"> 
+			and bti.fline_current = #{flineCurrent}
+		</if>
+		<if test="impedanceAngle != null"> 
+			and bti.impedance_angle = #{impedanceAngle}
+		</if>
+		<if test="standardDistance != null"> 
+			and REPLACE(REPLACE(REPLACE(ifnull(bti.standard_distance, 0),'K', ''),'k',''),'+','.') like CONCAT('%',REPLACE(REPLACE(REPLACE(concat(ifnull('${standardDistance}', 0),''),'K', ''),'k',''),'+','.'),'%')
+		</if>
+		<if test="coincidenceGate != null"> 
+			and bti.coincidence_gate = #{coincidenceGate}
+		</if>
+		<if test="sendTime != null"> 
+			and bti.send_time = #{sendTime}
+		</if>
+		<if test="armRunNum != null"> 
+			and bti.arm_run_num = #{armRunNum}
+		</if>
+		<if test="flineInfluence != null"> 
+			and bti.fline_influence = #{flineInfluence}
+		</if>
+		<if test="flineInfo != null"> 
+			and bti.fline_info = #{flineInfo}
+		</if>
+		<if test="foreignInfor != null"> 
+			and bti.foreign_infor = #{foreignInfor}
+		</if>
+		<if test="jcwFaultPoint != null"> 
+			and bti.jcw_fault_point = #{jcwFaultPoint}
+		</if>
+		<if test="speedLimitRequir != null"> 
+			and bti.speed_limit_requir = #{speedLimitRequir}
+		</if>
+		<if test="direction != null"> 
+			and bti.direction = #{direction}
+		</if>
+		<if test="powerCutRange != null"> 
+			and bti.power_cut_range = #{powerCutRange}
+		</if>
+		<if test="kiloDistance != null"> 
+		    and REPLACE(REPLACE(REPLACE(ifnull(bti.kilo_distance, 0),'K', ''),'k',''),'+','.') like CONCAT('%',REPLACE(REPLACE(REPLACE(concat(ifnull('${kiloDistance}', 0),''),'K', ''),'k',''),'+','.'),'%')
+		</if>
+		<if test="mark != null"> 
+			and bti.mark = #{mark}
+		</if>
+		<if test="composeVoltage != null"> 
+			and bti.compose_voltage = #{composeVoltage}
+		</if>
+		<if test="composeCurrent != null"> 
+			and bti.compose_current = #{composeCurrent}
+		</if>
+		<if test="dzResistance != null"> 
+			and bti.dz_resistance = #{dzResistance}
+		</if>
+		<if test="lineName != null"> 
+			and pl.name = #{lineName}
+		</if>
+		<if test="pavilionName != null"> 
+			and pp.name = #{pavilionName}
+		</if>
+		<if test="psPdName != null"> 
+			and ps.name = #{psPdName}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where bti.id = #{id} and bti.del_flag = 0
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where bti.del_flag = 0 and bti.id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.dto.BdTripInformationDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			bti.del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.dto.BdTripInformationDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+		 	bti.del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+		<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by bti.${orderBy}
+            </when>
+			<otherwise>
+			  <!-- convert(pl.name using gbk) asc,convert(pp.name using gbk) asc,convert(ps.name using gbk) asc,  -->
+              order by bti.time desc
+			</otherwise>
+        </choose>
+	</select>
+	
+	<select id="findTripInformationList" parameterType="com.togest.request.BdInfoQueryFilter" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+		 	bti.del_flag = 0
+			<include refid="baseConditions"></include>
+			<if test="deptId !=null and deptId !=''">
+				<if test="isChild==true">
+					and (
+							bti.line_id in 
+							(
+								select distinct pl_id from p_dept_line where dept_id in
+								(select id from p_department where parent_ids like '%${deptId}%' or id=#{deptId} )  
+							)
+							and bti.pavilion_id in 
+							(
+								select plp.pavilion_id from p_line_pavilion plp left join p_pavilion pp on plp.pavilion_id = pp.id
+								 where plp.line_id in 
+								(
+									select distinct pl_id from p_dept_line where dept_id in
+									(select id from p_department where parent_ids like '%${deptId}%' or id=#{deptId})  
+								) and pp.work_area_id in 
+								(
+									(select id from p_department where parent_ids like '%${deptId}%' or id=#{deptId})  
+								)
+							)
+						)
+				</if>
+				<if test="isChild==false">
+					and (
+							bti.line_id in 
+							(
+								select distinct pl_id from p_dept_line where dept_id=#{deptId} 
+							)
+							and bti.pavilion_id in 
+							(
+								select plp.pavilion_id from p_line_pavilion plp left join p_pavilion pp on plp.pavilion_id = pp.id
+								 where plp.line_id in 
+								(
+									select distinct pl_id from p_dept_line where dept_id=#{deptId}
+								) and pp.work_area_id in 
+								(
+									select id from p_department where dept_id=#{deptId}
+								)
+							)
+						)
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (
+						bti.line_id in 
+						(
+							select distinct pl_id from p_dept_line where section_id=#{sectionId} 
+						)
+						and bti.pavilion_id in 
+						(
+							select plp.pavilion_id from p_line_pavilion plp left join p_pavilion pp on plp.pavilion_id = pp.id
+							 where plp.line_id in 
+							(
+								select distinct pl_id from p_dept_line where section_id=#{sectionId} 
+							) and pp.work_area_id in 
+							(
+								select id from p_department where section_id=#{sectionId} 
+							)
+						)
+					)
+			</if>
+		</where>
+		<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by bti.${orderBy}
+            </when>
+			<otherwise>
+			   <!-- convert(pl.name using gbk) asc,convert(pp.name using gbk) asc,convert(ps.name using gbk) asc,  -->
+               order by bti.time desc
+			</otherwise>
+        </choose>
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+	</select>
+	
+	<select id="findAllList" parameterType="com.togest.domain.dto.BdTripInformationDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where bti.del_flag = 0
+		order by bti.time desc
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.dto.BdTripInformationDTO">
+		insert into bd_trip_information
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            line_id,
+            pavilion_id,
+            ps_pd_id,
+            time,
+            local_weather,
+            breaker_number,
+            protect,
+            fault_type,
+            tline_voltage,
+            fline_voltage,
+            tline_current,
+            fline_current,
+            impedance_angle,
+            standard_distance,
+            coincidence_gate,
+            send_time,
+            arm_run_num,
+            fline_influence,
+            fline_info,
+            foreign_infor,
+            jcw_fault_point,
+            speed_limit_requir,
+            direction,
+            power_cut_range,
+            kilo_distance,
+            mark,
+            compose_voltage,
+            compose_current,
+            dz_resistance,
+			<if test="sort!=null">sort,</if>
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{lineId},
+			#{pavilionId},
+			#{psPdId},
+			#{time},
+			#{localWeather},
+			#{breakerNumber},
+			#{protect},
+			#{faultType},
+			#{tlineVoltage},
+			#{flineVoltage},
+			#{tlineCurrent},
+			#{flineCurrent},
+			#{impedanceAngle},
+			#{standardDistance},
+			#{coincidenceGate},
+			#{sendTime},
+			#{armRunNum},
+			#{flineInfluence},
+			#{flineInfo},
+			#{foreignInfor},
+			#{jcwFaultPoint},
+			#{speedLimitRequir},
+			#{direction},
+			#{powerCutRange},
+			#{kiloDistance},
+			#{mark},
+			#{composeVoltage},
+			#{composeCurrent},
+			#{dzResistance},
+			<if test="sort!=null">#{sort},</if>
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.dto.BdTripInformationDTO">
+		update bd_trip_information 
+		
+		<trim prefix="set" suffixOverrides=",">
+				line_id = #{lineId},
+				pavilion_id = #{pavilionId},
+				ps_pd_id = #{psPdId},
+				time = #{time},
+				local_weather = #{localWeather},
+				breaker_number = #{breakerNumber},
+				protect = #{protect},
+				fault_type = #{faultType},
+				tline_voltage = #{tlineVoltage},
+				tline_current = #{tlineCurrent},
+				fline_voltage = #{flineVoltage},
+				fline_current = #{flineCurrent},
+				impedance_angle = #{impedanceAngle},
+				standard_distance = #{standardDistance},
+				coincidence_gate = #{coincidenceGate},
+				send_time = #{sendTime},
+				arm_run_num = #{armRunNum},
+				fline_influence = #{flineInfluence},
+				fline_info = #{flineInfo},
+				foreign_infor = #{foreignInfor},
+				jcw_fault_point = #{jcwFaultPoint},
+				speed_limit_requir = #{speedLimitRequir},
+				direction = #{direction},
+				power_cut_range = #{powerCutRange},
+				kilo_distance = #{kiloDistance},
+				mark = #{mark},
+				compose_voltage = #{composeVoltage},
+				compose_current = #{composeCurrent},
+				dz_resistance = #{dzResistance},
+				<if test="sort!=null">sort = #{sort},</if>
+				update_ip = #{updateIp},
+				update_by = #{updateBy},
+				update_date = #{updateDate},
+		</trim>
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from bd_trip_information where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.dto.BdTripInformationDTO">
+		update bd_trip_information
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+	</update>
+</mapper>

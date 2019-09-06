@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.BdTripVideoMenuDao">
+
+    <resultMap type="com.togest.domain.dto.BdTripVideoMenuDTO" id="BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="kind" column="kind"/>
+		<result property="glb" column="glb"/>
+		<result property="distance" column="distance"/>
+		<result property="mark" column="mark"/>
+		<result property="psaId" column="psa_id"/>
+		<result property="psaName" column="psa_name"/>
+		<result property="sort" column="sort"/>
+		<result property="psaId" column="psa_id"/>
+		
+		<result property="lineName" column="lineName"/>
+    </resultMap>
+    
+    <resultMap type="com.togest.domain.dto.BdTripVideoMenuDTO" id="Result_BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="kind" column="kind"/>
+		<result property="glb" column="glb"/>
+		<result property="distance" column="distance"/>
+		<result property="mark" column="mark"/>
+		<result property="psaId" column="psa_id"/>
+		<result property="psaName" column="psa_name"/>
+		<result property="sort" column="sort"/>
+		<result property="psaId" column="psa_id"/>
+		
+		<result property="lineName" column="lineName"/>
+		<result property="flag" column="flag"/>
+    </resultMap>
+    
+    <sql id="Base_Table">
+		bd_trip_video_menu btvm
+		left join p_line pl on btvm.line_id = pl.id
+	</sql>
+	
+    <sql id="Base_Column_List">
+    	btvm.id,
+    	btvm.line_id,
+    	btvm.psa_id,
+    	btvm.psa_name,
+    	btvm.kind,
+    	btvm.glb,
+    	btvm.distance,
+    	btvm.mark,
+    	btvm.sort,
+    	pl.name as lineName
+    </sql>
+    
+    <sql id="Result_Base_Column_List">
+    	btvm.id,
+    	btvm.line_id,
+    	btvm.psa_id,
+    	btvm.psa_name,
+    	btvm.kind,
+    	btvm.glb,
+    	btvm.distance,
+    	btvm.mark,
+    	btvm.sort,
+    	btvm.lineName as lineName
+    </sql>
+    
+    <sql id="baseConditions">
+		<if test="lineId != null"> 
+			and btvm.line_id = #{lineId}
+		</if>
+		<if test="kind != null"> 
+			and btvm.kind like '%${kind}%'
+		</if>
+		<if test="glb != null">
+			and REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.') like CONCAT('%',REPLACE(REPLACE(REPLACE(concat(ifnull('${glb}', 0),''),'K', ''),'k',''),'+','.'),'%') 
+		</if>
+		<if test="distance != null"> 
+			and REPLACE(REPLACE(REPLACE(ifnull(btvm.distance, 0),'K', ''),'k',''),'+','.') like CONCAT('%',REPLACE(REPLACE(REPLACE(concat(ifnull('${distance}', 0),''),'K', ''),'k',''),'+','.'),'%') 
+		</if>
+		<if test="mark != null"> 
+			and btvm.mark like '%${mark}%'
+		</if>
+		<if test="psaId != null"> 
+			and btvm.psa_id = #{psaId}
+		</if>
+		<if test="psaName != null"> 
+			and btvm.psa_name like '%${psaName}%'
+		</if>
+		<if test="lineName != null"> 
+			and pl.name = #{lineName}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where btvm.id = #{id} and btvm.del_flag = 0
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where btvm.del_flag = 0 and btvm.id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			btvm.del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			btvm.del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+		<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by btvm.${orderBy}
+            </when>
+			<otherwise>
+            	order by convert(pl.name using gbk) asc, REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 asc, id asc
+			</otherwise>
+        </choose>
+	</select>
+	
+	<select id="findTripVideoMenuList" parameterType="com.togest.request.BdInfoQueryFilter" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+		 	btvm.del_flag = 0
+			<include refid="baseConditions"></include>
+			<if test="deptId !=null and deptId !=''">
+				<if test="isChild==true">
+					and (
+							btvm.line_id in 
+							(
+								select distinct pl_id from p_dept_line where dept_id in
+								(select id from p_department where parent_ids like '%${deptId}%')  or dept_id=#{deptId} 
+							)
+						)
+				</if>
+				<if test="isChild==false">
+					and btvm.line_id in (select distinct pl_id from p_dept_line where dept_id=#{deptId})
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and btvm.line_id in (select distinct pl_id from p_dept_line where section_id=#{sectionId})
+			</if>
+		</where>
+		<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by btvm.${orderBy}
+            </when>
+			<otherwise>
+            	order by convert(pl.name using gbk) asc, REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 asc, id asc
+			</otherwise>
+        </choose>
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+	</select>
+	
+	<select id="findListByGlb" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			btvm.del_flag = 0
+			<if test="lineId != null">
+				and btvm.line_id = #{lineId}
+			</if>
+			<choose>
+				<when test="glb != null">
+					order by abs(REPLACE(REPLACE(REPLACE(ifnull(glb, 0),'K', ''),'k',''),'+','.')+0 - REPLACE(REPLACE(REPLACE(#{glb},'K', ''),'k',''),'+','.')+0) asc, id asc
+				</when>
+				<otherwise>
+					and 1 = 0
+				</otherwise>
+			</choose>
+			limit 0,1
+		</where>
+	</select>
+	
+	<select id="findListByDistanceAndGlb" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO" resultMap="Result_BaseResultMap">
+			(
+				select <include refid="Result_Base_Column_List"></include>,'false' as flag from 
+				(
+					select <include refid="Base_Column_List"></include>
+					from <include refid="Base_Table"></include> where btvm.del_flag = 0 and btvm.id != #{id}
+					<if test="lineId != null">
+						and btvm.line_id = #{lineId}
+					</if>
+					<choose>
+			            <when test="glb != null">
+			               and REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 &lt;= (select glb+0 from  <include refid="Base_Table"></include> where btvm.del_flag = 0 and btvm.id=#{id})
+			               order by REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 desc, btvm.id asc
+			            </when>
+						<otherwise>
+						   and 1 = 0
+						</otherwise>
+			        </choose>
+			        limit 0, 25
+		        ) btvm
+		        <choose>
+		            <when test="glb != null">
+		               order by REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 asc, btvm.id asc
+		            </when>
+					<otherwise>
+					   and 1 = 0
+					</otherwise>
+			   </choose>
+			   limit 0, 25
+		  )
+	   union all
+	  		 (select <include refid="Base_Column_List"></include>,'true' as flag from <include refid="Base_Table"></include> where btvm.del_flag = 0 and btvm.id=#{id})
+	   union all
+	   		(
+		   		select <include refid="Base_Column_List"></include>,'false' as flag
+				from <include refid="Base_Table"></include> where btvm.del_flag = 0 and btvm.id != #{id}
+				<if test="lineId != null">
+					and btvm.line_id = #{lineId}
+				</if>
+				<choose>
+		            <when test="glb != null">
+		               and REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 &gt; (select btvm.glb+0 from <include refid="Base_Table"></include> where btvm.del_flag = 0 and btvm.id=#{id})
+		               order by REPLACE(REPLACE(REPLACE(ifnull(btvm.glb, 0),'K', ''),'k',''),'+','.')+0 asc, btvm.id asc
+		            </when>
+					<otherwise>
+					   and 1 = 0
+					</otherwise>
+		        </choose>
+		        limit 0, 25
+	        )
+	</select>
+	
+	<select id="findAllList" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where btvm.del_flag = 0 
+		order by btvm.sort desc
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO">
+		insert into bd_trip_video_menu
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            line_id,
+            kind,
+            glb,
+            distance,
+            mark,
+            psa_id,
+            psa_name,
+			<if test="sort!=null">sort,</if>
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{lineId},
+			#{kind},
+			#{glb},
+			#{distance},
+			#{mark},
+			#{psaId},
+			#{psaName},
+			<if test="sort!=null">#{sort},</if>
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO">
+		update bd_trip_video_menu 
+		<set >
+		line_id = #{lineId},
+		kind = #{kind},
+		glb = #{glb},
+		distance = #{distance},
+		mark = #{mark},
+		psa_id = #{psaId},
+		psa_name = #{psaName},
+		<if test="sort!=null">sort = #{sort},</if>
+		update_ip = #{updateIp},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		</set >
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from bd_trip_video_menu where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.dto.BdTripVideoMenuDTO">
+		update bd_trip_video_menu
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+
+</mapper>

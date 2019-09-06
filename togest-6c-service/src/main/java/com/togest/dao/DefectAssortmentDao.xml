@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectAssortmentDao" >
+<resultMap id="BaseResultMap" type="com.togest.domain.DefectAssortmentDTO" >
+    <id column="id" property="id" />
+    <result column="equ_id" property="equId" />
+    <result column="defect_type_id" property="defectTypeId" />
+    <result column="defect_describe" property="defectDescribe" />
+    <result column="data_variable" property="dataVariable" />
+    <result column="defect_data_level" property="defectDataLevel" />
+    <result column="speed_type" property="speedType" />
+    <result column="system_id" property="systemId" />
+    <result column="defect_data_category" property="defectDataCategory" />
+    <result column="min_speed" property="minSpeed" />
+    <result column="max_speed" property="maxSpeed" />
+    <result column="expression" property="expression" />
+    <result column="sort" property="sort" />
+    <result column="equName" property="equName" />
+    <result column="defectTypeName" property="defectTypeName" />
+    <result column="systemName" property="systemName" />
+   </resultMap>
+ <sql id="Base_Column_List" >
+    a.id, a.equ_id, a.defect_type_id, a.defect_describe, a.data_variable, a.defect_data_level, a.system_id, 
+    a.defect_data_category,a.min_speed,a.max_speed,a.expression,a.sort, dt.name as defectTypeName,e.name as equName, s.name as systemName,
+    a.speed_type
+  </sql>
+  <sql id="Base_Table">
+  6c_defect_assortment a
+  left join 6c_defect_type dt on a.defect_type_id = dt.id
+  left join 6c_equ_position e on a.equ_id = e.id
+  left join 6c_system s on a.system_id = s.id
+  </sql>
+  
+  <select id="getByKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List"></include>
+  from
+  <include refid="Base_Table"></include>
+  where a.id=#{id} and a.del_flag=0
+  </select>
+  <select id="getByEntity" parameterType="com.togest.domain.DefectAssortmentDTO" resultMap="BaseResultMap">
+	  select
+	  <include refid="Base_Column_List"></include>
+	  from
+	  <include refid="Base_Table"></include>
+	  <where>
+	  	a.del_flag = 0
+	  	<if test="equId != null">
+	  		and a.equ_id = #{equId}
+	  	</if>
+	  	<if test="defectTypeId != null">
+	  		and a.defect_type_id = #{defectTypeId}
+	  	</if>
+	  	<if test="defectDescribe != null">
+	  		and a.defect_describe = #{defectDescribe}
+	  	</if>
+	  	<if test="dataVariable != null">
+	  		and a.data_variable = #{dataVariable}
+	  	</if>
+	  	<if test="dataVariable != null">
+	  		and a.data_variable = #{dataVariable}
+	  	</if>
+	  	<if test="defectDataLevel != null">
+	  		and a.defect_data_level = #{defectDataLevel}
+	  	</if>
+	  	<if test="speedType != null">
+	  		and a.speed_type = #{speedType}
+	  	</if>
+	  	<if test="systemId != null">
+	  		and a.system_id = #{systemId}
+	  	</if>
+	  	<if test="defectDataCategory != null">
+	  		and a.defect_data_category = #{defectDataCategory}
+	  	</if>
+	  	<if test="minSpeed != null">
+	  		and a.min_speed = #{minSpeed}
+	  	</if>
+	  	<if test="maxSpeed != null">
+	  		and a.max_speed = #{maxSpeed}
+	  	</if>
+	  	<if test="expression != null">
+	  		and a.expression = #{expression}
+	  	</if>
+  </where>
+  </select>
+  
+  <select id="findList" parameterType="com.togest.domain.DefectAssortmentDTO" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List"></include>
+  from
+  <include refid="Base_Table"></include>
+  <where>
+  	  a.del_flag=0
+   	  <if test="equId != null" >
+       and a.equ_id = #{equId}
+      </if>
+      <if test="defectTypeId != null" >
+       and a.defect_type_id = #{defectTypeId}
+      </if>
+      <if test="defectDescribe != null" >
+       and a.defect_describe = #{defectDescribe}
+      </if>
+      <if test="dataVariable != null" >
+       and a.data_variable = #{dataVariable}
+      </if>
+      <if test="defectDataLevel != null" >
+       and a.defect_data_level = #{defectDataLevel}
+      </if>
+      <if test="speedType != null" >
+       and a.speed_type = #{speedType}
+      </if>
+      <if test="systemId != null" >
+       and a.system_id = #{systemId}
+      </if>
+      <if test="defectDataCategory != null" >
+       and a.defect_data_category = #{defectDataCategory}
+      </if>
+      <if test="sort != null" >
+       and a.sort = #{sort}
+      </if>
+  </where>
+  order by a.system_id,a.sort
+  </select>
+  
+  <insert id="insert" parameterType="com.togest.domain.DefectAssortmentDTO" >
+    insert into 6c_defect_assortment (id, equ_id, defect_type_id, 
+      defect_describe, data_variable, defect_data_level,speed_type,
+      system_id, sort, del_flag,defect_data_category,min_speed,max_speed,expression, 
+      create_ip, create_by, create_date
+      )
+    values (#{id}, #{equId}, #{defectTypeId}, 
+      #{defectDescribe}, #{dataVariable}, #{defectDataLevel}, #{speedType},
+      #{systemId}, #{sort}, #{delFlag},#{defectDataCategory},#{minSpeed},#{maxSpeed},#{expression},
+      #{createIp}, #{createBy}, #{createDate}
+      )
+  </insert>
+  
+   <update id="update" parameterType="com.togest.domain.DefectAssortmentDTO" >
+    update 6c_defect_assortment
+    set equ_id = #{equId},
+      defect_type_id = #{defectTypeId},
+      defect_describe = #{defectDescribe},
+      data_variable = #{dataVariable},
+      defect_data_level = #{defectDataLevel},
+      defect_data_category = #{defectDataCategory},
+      min_speed = #{minSpeed},
+      max_speed = #{maxSpeed},
+      expression = #{expression},
+      speed_type = #{speedType},
+      system_id = #{systemId},
+      sort = #{sort},
+      update_ip = #{updateIp},
+      update_by = #{updateBy},
+      update_date = #{updateDate}
+      where id = #{id}
+  </update>
+   <update id="deleteFalses" parameterType="java.util.Map" >
+    update 6c_defect_assortment
+    set del_flag=1,delete_ip = #{deleteIp},delete_by=#{deleteBy},delete_date=#{deleteDate}
+      where id in 
+      <foreach collection="ids" item="item" open="(" close=")" separator=",">
+      #{item}
+      </foreach>
+  </update>
+  
+  
+
+	</mapper>

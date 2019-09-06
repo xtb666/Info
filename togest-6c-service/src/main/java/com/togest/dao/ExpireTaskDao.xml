@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.ExpireTaskDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.ExpireTask">
+		<id column="id" property="id" />
+		<result column="create_date" property="createDate" />
+		<result column="expire_date" property="expireDate" />
+		<result column="bussiness_type" property="bussinessType" />
+		<result column="payload" property="payload" />
+		<result column="lock_version" property="lockVersion" />
+		<result column="data_id" property="dataId" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.create_date, a.expire_date, a.bussiness_type, a.payload, a.lock_version,
+		a.data_id
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_expire_task a
+		where
+		a.id = #{id}
+	</select>
+	<select id="getByDataId" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_expire_task a
+		where
+		a.data_id = #{dataId}
+		and a.bussiness_type = #{bussinessType}
+	</select>
+	
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_expire_task a
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.ExpireTask"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_expire_task a
+		<where>
+			<if test="createDate != null">
+				and a.create_date = #{createDate}
+			</if>
+			<if test="expireDate != null">
+				and a.expire_date = #{expireDate}
+			</if>
+			<if test="bussinessType != null">
+				and a.bussiness_type = #{bussinessType}
+			</if>
+			<if test="payload != null">
+				and a.payload = #{payload}
+			</if>
+			<if test="lockVersion != null">
+				and a.lock_version = #{lockVersion}
+			</if>
+			<if test="dataId != null">
+				and a.data_id = #{dataId}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.ExpireTask">
+		insert into 6c_expire_task(
+		id, create_date, expire_date, bussiness_type, payload,
+		lock_version, data_id
+		)
+		values(
+		#{id}, #{createDate}, #{expireDate}, #{bussinessType}, #{payload},
+		#{lockVersion}, #{dataId}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.ExpireTask">
+		update 6c_expire_task
+		set
+		create_date = #{createDate},
+		expire_date = #{expireDate},
+		bussiness_type = #{bussinessType},
+		payload = #{payload},
+		lock_version = #{lockVersion},
+		data_id = #{dataId}
+		where
+		id = #{id}
+	</update>
+	<update id="updateExpireDate" parameterType="java.util.Map">
+		update 6c_expire_task
+		set expire_date = #{expireDate}
+		where  data_id = #{dataId} and bussiness_type = #{bussinessType}
+	</update>
+	
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from
+		6c_expire_task
+		where id = #{id}
+	</delete>
+	
+	<delete id="deleteByKeys" parameterType="java.util.Map">
+		delete from 
+		6c_expire_task 
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByDataIds" parameterType="java.util.Map">
+		delete from 
+		6c_expire_task 
+		where data_id
+		in
+		<foreach item="item" collection="dataIds" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

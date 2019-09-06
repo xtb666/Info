@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectDelayDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectDelay">
+		<id column="id" property="id" />
+		<result column="delay_person" property="delayPerson" />
+		<result column="delay_date" property="delayDate" />
+		<result column="delay_to_date" property="delayToDate" />
+		<result column="remark" property="remark" />
+		<result column="defect_id" property="defectId" />
+		<result column="delay_status" property="delayStatus" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.delay_person, a.delay_date, a.delay_to_date, a.remark, a.defect_id,
+		a.delay_status
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_delay a
+		where
+		a.id = #{id}
+	</select>
+	
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_delay a
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.DefectDelay"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_delay a
+		<where>
+			<if test="delayPerson != null">
+				and a.delay_person = #{delayPerson}
+			</if>
+			<if test="delayDate != null">
+				and a.delay_date = #{delayDate}
+			</if>
+			<if test="delayToDate != null">
+				and a.delay_to_date = #{delayToDate}
+			</if>
+			<if test="remark != null">
+				and a.remark = #{remark}
+			</if>
+			<if test="defectId != null">
+				and a.defect_id = #{defectId}
+			</if>
+			<if test="delayStatus != null">
+				and a.delay_status = #{delayStatus}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectDelay">
+		insert into 6c_defect_delay(
+		id, delay_person, delay_date, delay_to_date, remark, defect_id,
+		delay_status
+		)
+		values(
+		#{id}, #{delayPerson}, #{delayDate}, #{delayToDate}, #{remark}, #{defectId}, 
+		#{delayStatus}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectDelay">
+		update 6c_defect_delay
+		<trim prefix="set" suffixOverrides=",">
+			<!-- <if test=" != null">	
+			</if> -->
+			<if test="delayPerson != null">
+				delay_person = #{delayPerson},
+			</if>
+			<if test="delayPerson != null">
+				delay_person = #{delayPerson},
+			</if>
+			<if test="delayDate != null">
+				delay_date = #{delayDate},
+			</if>
+			<if test="delayToDate != null">
+				delay_to_date = #{delayToDate},
+			</if>
+			<if test="remark != null">
+				remark = #{remark},
+			</if>
+			<if test="defectId != null">
+				defect_id = #{defectId},
+			</if>
+			<if test="delayStatus != null">
+				delay_status = #{delayStatus},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+	
+	<update id="updateDefectStatusBatch" parameterType="java.util.Map">
+		update 6c_defect_delay set
+		delay_status = #{delayStatus}
+		where defect_id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from
+		6c_defect_delay
+		where id = #{id}
+	</delete>
+</mapper>

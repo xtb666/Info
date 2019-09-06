@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.C2PicIndexDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.C2PicIndexDTO">
+		<id column="id" property="id" />
+		<result column="station" property="station" />
+		<result column="info_id" property="infoId" />
+		<result column="pillar_num" property="pillarNum" />
+		<result column="km" property="km" />
+		<result column="speed" property="speed" />
+		<result column="index_status" property="indexStatus" />
+		<result column="defect_date" property="defectDate" />
+		<result column="panoramis_start_frame" property="panoramisStartFrame" />
+		<result column="panoramis_end_frame" property="panoramisEndFrame" />
+		<result column="panoramis_start_path" property="panoramisStartPath" />
+		<result column="panoramis_end_path" property="panoramisEndPath" />
+		<result column="part_start_frame" property="partStartFrame" />
+		<result column="part_end_frame" property="partEndFrame" />
+		<result column="part_start_path" property="partStartPath" />
+		<result column="part_end_path" property="partEndPath" />
+		<result column="sort" property="sort" />
+		<result column="stationName" property="stationName" />
+		<result column="pillarName" property="pillarName" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.station, a.info_id, a.pillar_num, a.km, a.speed, a.index_status,
+		a.defect_date, a.panoramis_start_frame,
+		a.panoramis_end_frame,
+		a.panoramis_start_path, a.panoramis_end_path, a.part_start_frame,
+		a.part_end_frame, a.part_start_path, a.part_end_path, a.sort,
+		psa.name as stationName,pi.name as pillarName
+		
+	</sql>
+
+	<sql id="condition">
+		<if test="station != null">
+			and a.station = #{station}
+		</if>
+		<if test="infoId != null">
+			and a.info_id = #{infoId}
+		</if>
+		<if test="pillarNum != null">
+			and a.pillar_num = #{pillarNum}
+		</if>
+		<if test="km != null">
+			and a.km = #{km}
+		</if>
+		<if test="speed != null">
+			and a.speed = #{speed}
+		</if>
+		<if test="indexStatus != null">
+			and a.index_status = #{indexStatus}
+		</if>
+		<if test="defectDate != null">
+			and a.defect_date = #{defectDate}
+		</if>
+		<if test="panoramisStartFrame != null">
+			and a.panoramis_start_frame = #{panoramisStartFrame}
+		</if>
+		<if test="panoramisEndFrame != null">
+			and a.panoramis_end_frame = #{panoramisEndFrame}
+		</if>
+		<if test="panoramisStartPath != null">
+			and a.panoramis_start_path = #{panoramisStartPath}
+		</if>
+		<if test="panoramisEndPath != null">
+			and a.panoramis_end_path = #{panoramisEndPath}
+		</if>
+		<if test="partStartFrame != null">
+			and a.part_start_frame = #{partStartFrame}
+		</if>
+		<if test="partEndFrame != null">
+			and a.part_end_frame = #{partEndFrame}
+		</if>
+		<if test="partStartPath != null">
+			and a.part_start_path = #{partStartPath}
+		</if>
+		<if test="partEndPath != null">
+			and a.part_end_path = #{partEndPath}
+		</if>
+		<if test="sort != null">
+			and a.sort = #{sort}
+		</if>
+		and a.del_flag=0
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c2_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		where
+		a.id = #{id} and a.del_flag=0
+	</select>
+	<select id="getByEntity" parameterType="com.togest.domain.C2PicIndexDTO"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c2_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		<where>
+			<include refid="condition"></include>
+		</where>
+	</select>
+	<select id="getListByKeys" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c2_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		<where>
+			a.id in
+			<foreach collection="ids" item="item" index="index" open="("
+				separator="," close=")">#{item}</foreach>
+			and a.del_flag=0
+		</where>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c2_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+
+		where a.del_flag=0
+		order by a.sort
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_c2_pic_index a 
+		left join p_supply_arm psa on psa.id = a.station
+		left join jcw_equ_pillar_info pi on pi.id = a.pillar_num
+		<where>
+			<include refid="condition"></include>
+		</where>
+		order by a.sort
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.C2PicIndexDTO">
+		insert into 6c_c2_pic_index (id, station, info_id,
+		pillar_num, km,
+		speed,
+		index_status, defect_date, panoramis_start_frame,
+		panoramis_end_frame, panoramis_start_path,
+		panoramis_end_path,
+		part_start_frame, part_end_frame,
+		part_start_path, part_end_path,
+		del_flag,create_by,create_ip,
+		create_date
+		<if test="sort!=null or sort==0">,sort</if>
+		)
+		values (#{id}, #{station},
+		#{infoId},
+		#{pillarNum}, #{km}, #{speed},
+		#{indexStatus}, #{defectDate},
+		#{panoramisStartFrame},
+		#{panoramisEndFrame},
+		#{panoramisStartPath},
+		#{panoramisEndPath},
+		#{partStartFrame}, #{partEndFrame},
+		#{partStartPath}, #{partEndPath},
+		#{delFlag},
+		#{createBy},#{createIp},
+		#{createDate}
+		<if test="sort!=null or sort==0">,#{sort}</if>
+		)
+
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.C2PicIndexDTO">
+		update 6c_c2_pic_index
+		set
+		<if test="sort!=null or sort==0">sort=#{sort},</if>
+		station = #{station},
+		info_id = #{infoId},
+		pillar_num = #{pillarNum},
+		km
+		= #{km},
+		speed = #{speed},
+		index_status = #{indexStatus},
+		defect_date =
+		#{defectDate},
+		panoramis_start_frame = #{panoramisStartFrame},
+		panoramis_end_frame = #{panoramisEndFrame},
+		panoramis_start_path =
+		#{panoramisStartPath},
+		panoramis_end_path = #{panoramisEndPath},
+		part_start_frame = #{partStartFrame},
+		part_end_frame = #{partEndFrame},
+		part_start_path = #{partStartPath},
+		part_end_path = #{partEndPath},
+		update_by = #{updateBy},
+		update_ip = #{updateIp},
+		update_date =
+		#{updateDate}
+		where
+		id = #{id}
+	</update>
+
+	<update id="deleteFalse" parameterType="com.togest.domain.C2PicIndexDTO">
+		update
+		6c_c2_pic_index
+		set
+		del_flag=1,
+		delete_by=#{deleteBy},delete_ip=#{deleteIp},delete_date=current_timestamp
+		where
+		id
+		= #{id} and del_flag=0
+	</update>
+	<update id="updateBatch" parameterType="java.util.Map">
+		update 6c_c2_pic_index
+		<set >
+      <if test="entity.station != null" >
+        station = #{entity.station},
+      </if>
+      <if test="entity.infoId != null" >
+        info_id = #{entity.infoId},
+      </if>
+      <if test="entity.pillarNum != null" >
+        pillar_num = #{entity.pillarNum},
+      </if>
+      <if test="entity.km != null" >
+        km = #{entity.km},
+      </if>
+      <if test="entity.speed != null" >
+        speed = #{entity.speed},
+      </if>
+      <if test="entity.indexStatus != null" >
+        index_status = #{entity.indexStatus},
+      </if>
+      <if test="entity.defectDate != null" >
+        defect_date = #{entity.defectDate},
+      </if>
+      <if test="entity.panoramisStartFrame != null" >
+        panoramis_start_frame = #{entity.panoramisStartFrame},
+      </if>
+      <if test="entity.panoramisEndFrame != null" >
+        panoramis_end_frame = #{entity.panoramisEndFrame},
+      </if>
+      <if test="entity.panoramisStartPath != null" >
+        panoramis_start_path = #{entity.panoramisStartPath},
+      </if>
+      <if test="entity.panoramisEndPath != null" >
+        panoramis_end_path = #{entity.panoramisEndPath},
+      </if>
+      <if test="entity.partStartFrame != null" >
+        part_start_frame = #{entity.partStartFrame},
+      </if>
+      <if test="entity.partEndFrame != null" >
+        part_end_frame = #{entity.partEndFrame},
+      </if>
+      <if test="entity.partStartPath != null" >
+        part_start_path = #{entity.partStartPath},
+      </if>
+      <if test="entity.partEndPath != null" >
+        part_end_path = #{entity.partEndPath},
+      </if>
+      <if test="entity.sort != null" >
+        sort = #{entity.sort},
+      </if>
+      </set>
+		where
+		id in 
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+		
+	</update>
+
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from
+		6c_c2_pic_index
+		where id = #{id}
+		and del_flag=0
+	</delete>
+
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_c2_pic_index set
+		del_flag=1,delete_by=#{deleteBy},delete_ip=#{deleteIp},delete_date=current_timestamp
+		where
+		relation_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+</mapper>

@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.NoticeSectionDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.NoticeSectionDTO">
+		<id column="id" property="id" />
+		<result column="section_id" property="sectionId" />
+		<result column="status" property="status" />
+		<result column="receipt_date" property="receiptDate" />
+		<result column="send_person" property="sendPerson" />
+		<result column="send_date" property="sendDate" />
+		<result column="receipt_person" property="receiptPerson" />
+		<result column="overtime" property="overtime" />
+		<result column="feedback_content" property="feedbackContent" />
+		<result column="feedback_person" property="feedbackPerson" />
+		<result column="feedback_date" property="feedbackDate" />
+		<result column="notice_id" property="noticeId" />
+		<result column="flow_id" property="flowId" />
+	</resultMap>
+
+	<resultMap id="DetailMap" type="com.togest.domain.NoticeSectionDTO">
+		<id column="id" property="id" />
+		<result column="section_id" property="sectionId" />
+		<result column="status" property="status" />
+		<result column="send_person" property="sendPerson" />
+		<result column="send_date" property="sendDate" />
+		<result column="receipt_date" property="receiptDate" />
+		<result column="receipt_person" property="receiptPerson" />
+		<result column="overtime" property="overtime" />
+		<result column="feedback_content" property="feedbackContent" />
+		<result column="feedback_person" property="feedbackPerson" />
+		<result column="feedback_date" property="feedbackDate" />
+		<result column="notice_id" property="noticeId" />
+		<result column="flow_id" property="flowId" />
+		<result column="sectionName" property="sectionName" />
+
+		<association property="notice" javaType="com.togest.domain.NoticeDTO">
+			<id column="noticeId" property="id" />
+			<result column="issue_date" property="issueDate" />
+			<result column="issue_person" property="issuePerson" />
+			<result column="responsible_person" property="responsiblePerson" />
+			<result column="notice_number_year" property="noticeNumberYear" />
+			<result column="notice_number_str" property="noticeNumberStr" />
+			<result column="rectify_date" property="rectifyDate" />
+			<result column="rectify_content" property="rectifyContent" />
+			<result column="notice_number" property="noticeNumber" />
+			<result column="notice_status" property="noticeStatus" />
+			<result column="system_id" property="systemId" />
+			<result column="systemName" property="systemName" />
+		</association>
+
+		<collection property="defects" javaType="java.util.List"
+			ofType="com.togest.response.DefectResponse">
+			<id column="d_id" property="id" />
+			<result column="p_name" property="name" />
+			<result column="d_flow_id" property="flowId" />
+		</collection>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, section_id, status, send_date,send_person,receipt_date, receipt_person,
+		overtime,
+		feedback_content, feedback_person, feedback_date, notice_id
+	</sql>
+
+	<sql id="Base_Table">
+	
+	</sql>
+
+	<sql id="Detail_Column">
+		a.id, a.section_id, a.status,
+		a.send_person,a.send_date,
+		a.receipt_date,
+		a.receipt_person, a.overtime,
+		a.feedback_content, a.feedback_person,
+		a.feedback_date, a.notice_id,
+		n.id as noticeId, n.issue_date,
+		n.issue_person, n.responsible_person, n.notice_number_year,
+		n.notice_number_str, n.rectify_date, n.rectify_content,
+		n.notice_number, n.notice_status,
+		n.system_id,sys.name as systemName,
+		d.id as d_id, p.name as
+		p_name, dfd.process_instance_id as d_flow_id,
+		df.process_instance_id as
+		flow_id
+	</sql>
+
+	<sql id="Detail_Table">
+		6c_notice_section a
+		left join 6c_defect_flow df on df.id =
+		a.id
+		left join 6c_notice n on a.notice_id = n.id
+		left join
+		6c_notice_defect nd on nd.notice_section_id = a.id
+		left join 6c_defect
+		d on d.id = nd.defect_id
+		left join 6c_defect_flow dfd on dfd.id = d.id
+		left join jcw_equ_pillar_info p on p.id = d.pillar_id
+		left join 6c_system sys on n.system_id = sys.id
+	</sql>
+
+	<select id="getNoticeSectionDetail" resultMap="DetailMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Detail_Column" />
+		from
+		<include refid="Detail_Table" />
+		where
+		a.id = #{id}
+	</select>
+
+	<select id="getByKey" resultMap="DetailMap" parameterType="java.lang.String">
+		select
+		a.id, a.section_id, a.status, a.receipt_date, a.receipt_person,
+		a.overtime,a.send_person,a.send_date,
+		a.feedback_content, a.feedback_person, a.feedback_date,
+		a.notice_id, df.process_instance_id as flow_id,
+		n.id as noticeId,
+		n.issue_date, n.issue_person, n.responsible_person,
+		n.notice_number_year,
+		n.notice_number_str, n.rectify_date,
+		n.rectify_content, n.notice_number, n.notice_status,
+		n.system_id
+		from
+		6c_notice_section a
+		left join 6c_notice n on a.notice_id = n.id
+		left
+		join 6c_defect_flow df on df.id = a.id
+		where
+		a.id = #{id}
+		and a.del_flag
+		= 0
+		and n.del_flag = 0
+	</select>
+
+	<select id="getByEntity" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.NoticeSectionDTO">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice_section
+		<where>
+			del_flag = 0
+			<if test="sectionId != null">
+				and section_id = #{sectionId}
+			</if>
+			<if test="status != null">
+				and status = #{status}
+			</if>
+			<if test="sendDate != null">
+				and send_date = #{sendDate}
+			</if>
+			<if test="sendPerson != null">
+				and send_person = #{sendPerson}
+			</if>
+			<if test="receiptDate != null">
+				and receipt_date = #{receiptDate}
+			</if>
+			<if test="receiptPerson != null">
+				and receipt_person = #{receiptPerson}
+			</if>
+			<if test="overtime != null">
+				and overtime = #{overtime}
+			</if>
+			<if test="feedbackContent != null">
+				and feedback_content = #{feedbackContent}
+			</if>
+			<if test="feedbackPerson != null">
+				and feedback_person = #{feedbackPerson}
+			</if>
+			<if test="feedbackDate != null">
+				and feedback_date = #{feedbackDate}
+			</if>
+			<if test="noticeId != null">
+				and notice_id = #{noticeId}
+			</if>
+		</where>
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.NoticeSectionDTO">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice_section
+		<where>
+			del_flag = 0
+			<if test="sectionId != null">
+				and section_id = #{sectionId}
+			</if>
+			<if test="statusList != null">
+				and status in
+				<foreach item="item" collection="statusList" separator=","
+					open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="sendDate != null">
+				and send_date = #{sendDate}
+			</if>
+			<if test="sendPerson != null">
+				and send_person = #{sendPerson}
+			</if>
+			<if test="receiptDate != null">
+				and receipt_date = #{receiptDate}
+			</if>
+			<if test="receiptPerson != null">
+				and receipt_person = #{receiptPerson}
+			</if>
+			<if test="overtime != null">
+				and overtime = #{overtime}
+			</if>
+			<if test="feedbackContent != null">
+				and feedback_content = #{feedbackContent}
+			</if>
+			<if test="feedbackPerson != null">
+				and feedback_person = #{feedbackPerson}
+			</if>
+			<if test="feedbackDate != null">
+				and feedback_date = #{feedbackDate}
+			</if>
+			<if test="noticeId != null">
+				and notice_id = #{noticeId}
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice_section
+		where and del_flag = 0
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.NoticeSectionDTO">
+		insert into 6c_notice_section(
+		id, section_id, status,send_person,send_date, receipt_date, receipt_person, overtime,
+		feedback_content, feedback_person, feedback_date, notice_id
+		)
+		values(
+		#{id}, #{sectionId}, #{status},#{sendPerson},#{sendDate}, #{receiptDate}, #{receiptPerson},
+		#{overtime},
+		#{feedbackContent}, #{feedbackPerson}, #{feedbackDate}, #{noticeId}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.NoticeSectionDTO">
+		update 6c_notice_section
+		<trim prefix="set" suffixOverrides=",">
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="overtime != null">
+				overtime = #{overtime},
+			</if>
+			<if test="sendDate != null">
+				send_date = #{sendDate},
+			</if>
+			<if test="sendPerson != null">
+				send_person = #{sendPerson},
+			</if>
+			<if test="receiptDate != null">
+				receipt_date = #{receiptDate},
+			</if>
+			<if test="receiptPerson != null">
+				receipt_person = #{receiptPerson},
+			</if>
+			<if test="feedbackContent != null">
+				feedback_content = #{feedbackContent},
+			</if>
+			<if test="feedbackPerson != null">
+				feedback_person = #{feedbackPerson},
+			</if>
+			<if test="feedbackDate != null">
+				feedback_date = #{feedbackDate},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+
+	<update id="updateStatus" parameterType="java.util.Map">
+		update 6c_notice_section
+		set
+		status = #{status}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateFeedbackInfo" parameterType="java.util.Map">
+		update 6c_notice_section
+		set
+		feedback_person = #{feedbackPerson},
+		feedback_content =
+		#{feedbackContent},
+		feedback_date = #{feedbackDate}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateOvertime" parameterType="java.util.List">
+		update 6c_notice_section
+		set
+		overtime = 1
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="deleteFalse" parameterType="java.util.Map">
+		update 6c_notice_section
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<select id="findNoticeSection" resultMap="DetailMap"
+		parameterType="com.togest.request.NoticeQueryFilter">
+		select
+		a.id, a.section_id, a.status,a.send_person,a.send_date, a.receipt_date, a.receipt_person,
+		a.overtime,
+		a.feedback_content, a.feedback_person, a.feedback_date,
+		a.notice_id, df.process_instance_id as flow_id,
+		n.id as noticeId,
+		n.issue_date, n.issue_person, n.responsible_person,
+		n.notice_number_year,
+		n.notice_number_str, n.rectify_date,
+		n.rectify_content, n.notice_number, n.notice_status,
+		n.system_id,sys.name as systemName
+		from
+		6c_notice_section a
+		left join 6c_notice n on a.notice_id = n.id
+		left join 6c_defect_flow df on df.id = a.id
+		left join 6c_system sys on n.system_id= sys.id
+		<where>
+			a.del_flag = 0
+			and n.del_flag = 0
+			<!-- <if test="noticeNumberYear != null"> and n.notice_number_year = #{noticeNumberYear} 
+				</if> <if test="noticeNumberStr != null"> and n.notice_number_str = #{noticeNumberStr} 
+				</if> -->
+			<if test="number != null">
+				and
+				CONCAT(n.notice_number_year,'第',n.notice_number_str,'号') like
+				'%${number}%'
+			</if>
+			<if test="beginIssueDate != null">
+				and n.issue_date &gt;= #{beginIssueDate}
+			</if>
+			<if test="endIssueDate != null">
+				and n.issue_date &lt;= #{endIssueDate}
+			</if>
+			<if test="issueDate != null">
+				and n.issue_date = #{issueDate}
+			</if>
+			<if test="beginReceiptDate != null">
+				and a.receipt_date &gt;= #{beginReceiptDate}
+			</if>
+			<if test="endReceiptDate != null">
+				and a.receipt_date &lt;= #{endReceiptDate}
+			</if>
+			<if test="sendDate != null">
+				and a.send_date = #{sendDate}
+			</if>
+			<if test="sendPerson != null">
+				and a.send_person = #{sendPerson}
+			</if>
+			<if test="receiptDate != null">
+				and a.receipt_date = #{receiptDate}
+			</if>
+			<if test="receiptPerson != null">
+				and a.receipt_person = #{receiptPerson}
+			</if>
+
+			<if test="feedbackDate != null">
+				and a.feedback_date = #{feedbackDate}
+			</if>
+			<if test="beginFeedbackDate != null">
+				and a.feedback_date &gt;= #{beginFeedbackDate}
+			</if>
+			<if test="endFeedbackDate != null">
+				and a.feedback_date &lt;= #{endFeedbackDate}
+			</if>
+			<if test="feedbackPerson != null">
+				and a.feedback_person = #{feedbackPerson}
+			</if>
+			<if test="statusList != null">
+				and a.status in
+				<foreach item="item" collection="statusList" separator=","
+					open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="systemId != null">
+				and n.system_id = #{systemId}
+			</if>
+			<if test="overtime != null">
+				and a.overtime = #{overtime}
+			</if>
+			order by issue_date desc,notice_number_str desc
+		</where>
+	</select>
+
+	<select id="getByNoticeId" resultMap="DetailMap" parameterType="java.lang.String">
+		select
+		a.id, a.section_id, a.send_person,a.send_date,a.status, a.receipt_date, a.receipt_person,
+		a.overtime,
+		a.feedback_content, a.feedback_person, a.feedback_date,
+		a.notice_id, df.process_instance_id as flow_id,
+		n.id as noticeId,
+		n.issue_date, n.issue_person, n.responsible_person,
+		n.notice_number_year,
+		n.notice_number_str, n.rectify_date,
+		n.rectify_content, n.notice_number, n.notice_status,
+		n.system_id,p.name as sectionName
+		from
+		6c_notice_section a
+		left join 6c_notice n on a.notice_id = n.id
+		left join 6c_defect_flow
+		df on df.id = a.id
+		left join p_department p on a.section_id = p.id
+		where
+		a.notice_id = #{noticeId}
+		and a.del_flag = 0
+		and n.del_flag = 0
+	</select>
+
+	<select id="getIdByNoticeId" resultType="java.lang.String"
+		parameterType="java.util.List">
+		select id
+		from 6c_notice_section
+		where
+		del_flag = 0
+		and notice_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<delete id="deleteByNoticeId" parameterType="java.util.List">
+		delete from 6c_notice_section
+		where notice_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</delete>
+
+	<select id="findStatusList" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		select status
+		from 6c_notice_section
+		where notice_id =
+		(select notice_id from 6c_notice_section where id = #{id})
+	</select>
+
+	<select id="getProcessInstanceIds" resultType="java.lang.String"
+		parameterType="java.util.List">
+		select df.process_instance_id
+		from
+		6c_notice_section a
+		left join 6c_defect_flow df on df.id = a.id
+		where
+		a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getNoticeIdByNoticeSectionId" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		select notice_id from 6c_notice_section where id = #{id}
+	</select>
+
+	<update id="deleteFalseByNoticeId" parameterType="java.util.Map">
+		update 6c_notice_section
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where notice_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<select id="findNoticeFlowCount" resultType="com.togest.response.statistics.NoticeFlowCountData" parameterType="com.togest.request.NoticeQueryFilter">
+		SELECT COUNT(a.id) AS num,
+		(SELECT  COUNT(a.id)
+		FROM 6c_notice a
+		WHERE a.del_flag = 0
+		AND a.notice_status = '1') AS sendNum,
+		COUNT(CASE WHEN a.status='2' THEN
+		a.id END) AS sendedNum,
+		COUNT(CASE WHEN a.status='4' THEN
+		a.id END) AS cancelNum
+		FROM	6c_notice_section a
+		LEFT JOIN 6c_notice n ON a.notice_id = n.id
+		LEFT JOIN 6c_defect_flow df ON df.id = a.id
+		LEFT JOIN 6c_system sys ON n.system_id= sys.id
+		WHERE a.del_flag = 0
+			AND n.del_flag = 0
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="systemId != null">
+				and n.system_id = #{systemId}
+			</if>
+	</select>
+</mapper>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.WireHeightLineMinDao">
+
+    <resultMap type="com.togest.domain.WireHeightLineMin" id="wireHeightLineMinMap">
+		<result property="id" column="id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="minValue" column="min_value"/>
+		<result property="sort" column="sort"/>
+    </resultMap>
+    
+    <sql id="baseColumns">
+    	id,
+    	line_id,
+    	min_value,
+    	sort
+    </sql>
+    
+    <sql id="baseConditions">
+    	<if test="workAreaId !=null and workAreaId !=''">
+				<if test="isChild==true">
+				and line_id in (select distinct pl_id from p_dept_line where dept_id in
+					(select id from p_department where parent_ids like '%${workAreaId}%' or id=#{workAreaId}))
+				</if>
+				<if test="isChild==false">
+					and line_id in (select distinct pl_id from p_dept_line where dept_id =#{workAreaId})
+				</if>
+		</if>
+		<if test="sectionId != null">
+			and line_id in (select distinct pl_id from p_dept_line where section_id=#{sectionId})
+		</if>
+		<if test="lineId != null"> 
+			and line_id = #{lineId}
+		</if>
+		<if test="minValue != null"> 
+			and min_value = #{minValue}
+		</if>
+		<if test="delFlag != null"> 
+			and del_flag = #{delFlag}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="wireHeightLineMinMap">
+		select <include refid="baseColumns"></include>
+		from 6c_wire_height_line_min
+		where id = #{id}
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="wireHeightLineMinMap">
+		select <include refid="baseColumns"></include>
+		from 6c_wire_height_line_min
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.WireHeightLineMin" resultMap="wireHeightLineMinMap">
+		select <include refid="baseColumns"></include>
+		from 6c_wire_height_line_min
+		<where>
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.WireHeightLineMin" resultMap="wireHeightLineMinMap">
+		select <include refid="baseColumns"></include>
+		from 6c_wire_height_line_min
+		<where>
+			<include refid="baseConditions"></include>
+			<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by ${orderBy}
+            </when>
+			<otherwise>
+                order by sort desc
+			</otherwise>
+        </choose>
+		</where>
+	</select>
+	<select id="findAllList" parameterType="com.togest.domain.WireHeightLineMin" resultMap="wireHeightLineMinMap">
+		select <include refid="baseColumns"></include>
+		from 6c_wire_height_line_min
+		<where>
+			del_flag = 0
+		</where>
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.WireHeightLineMin">
+		insert into 6c_wire_height_line_min
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            line_id,
+            min_value,
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+			<if test="sort!=null">sort</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{lineId},
+			#{minValue},
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+			<if test="sort!=null">#{sort}</if>
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.WireHeightLineMin">
+		update 6c_wire_height_line_min 
+		<set >
+		line_id = #{lineId},
+		min_value = #{minValue},
+		update_ip = #{updateIp},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		<if test="sort!=null">sort = #{sort}</if>
+		</set >
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from 6c_wire_height_line_min where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.WireHeightLineMin">
+		update 6c_wire_height_line_min
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+
+</mapper>

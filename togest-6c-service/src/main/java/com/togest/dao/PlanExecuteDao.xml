@@ -1,0 +1,1764 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.PlanExecuteDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.PlanExecuteDTO">
+		<id column="id" property="id" />
+		<result column="plan_base_id" property="planBaseId" />
+		<result column="plan_detail_id" property="planDetailId" />
+		<result column="start_station" property="startStation" />
+		<result column="end_station" property="endStation" />
+		<result column="responsible_dept_id" property="responsibleDeptId" />
+		<result column="dept_id" property="deptId" />
+		<result column="audit_person" property="auditPerson" />
+		<result column="audit_date" property="auditDate" />
+		<result column="patcher" property="patcher" />
+		<result column="add_date" property="addDate" />
+		<result column="confirm_person" property="confirmPerson" />
+		<result column="confirm_date" property="confirmDate" />
+
+		<result column="actual_add_date" property="actualAddDate" />
+		<result column="actual_patcher" property="actualPatcher" />
+		<result column="actual_check_region" property="actualCheckRegion" />
+		<result column="actual_add_train_number" property="actualAddTrainNumber" />
+		<result column="actual_add_traffic_number" property="actualAddTrafficNumber" />
+		<result column="equ_no" property="equNo" />
+		<result column="equ_operation" property="equOperation" />
+		
+		<result column="implementation" property="implementation" />
+		<result column="section_id" property="sectionId" />
+		<result column="system_id" property="systemId" />
+		<result column="execute_status" property="executeStatus" />
+		<result column="remark" property="remark" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="flow_tag" property="flowTag" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, plan_base_id, plan_detail_id, start_station,
+		end_station,
+		responsible_dept_id,
+		dept_id, 
+		audit_person,audit_date,
+		patcher, add_date,
+		confirm_person,confirm_date,
+		actual_add_date,actual_patcher,actual_check_region,actual_add_train_number,actual_add_traffic_number,equ_no,equ_operation,
+		implementation, section_id, system_id,
+		execute_status, remark,
+		audit_status,flow_tag
+	</sql>
+
+	<!-- <select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String"> 
+		select <include refid="Base_Column_List" /> from 6c_plan_execute where id 
+		= #{id,jdbcType=VARCHAR} </select> -->
+	<select id="getByPlanBaseId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select distinct
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute
+		where plan_base_id = #{planBaseId}
+	</select>
+	<select id="getByPlanBaseIds" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select distinct
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute
+		where plan_base_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	<select id="getByEntity" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.PlanExecuteDTO">
+		select distinct
+		<include refid="Base_Column_List" />
+		from 6c_plan_execute
+		<where>
+		 del_flag = 0
+			<if test="planBaseId != null">
+				and plan_base_id = #{planBaseId}
+			</if>
+			<if test="planDetailId != null">
+				and plan_detail_id = #{planDetailId}
+			</if>
+			<if test="startStation != null">
+				and start_station = #{startStation}
+			</if>
+			<if test="endStation != null">
+				and end_station = #{endStation}
+			</if>
+			<if test="responsibleDeptId != null">
+				and responsible_dept_id = #{responsibleDeptId}
+			</if>
+			<if test="deptId != null">
+				and dept_id = #{deptId}
+			</if>
+			<if test="sectionId != null">
+				and section_id = #{sectionId}
+			</if>
+			<if test="systemId != null">
+				and system_id = #{systemId}
+			</if>
+			<if test="equNo != null">
+				and equ_no = #{equNo}
+			</if>
+			<if test="executeStatus != null">
+				and execute_status = #{executeStatus}
+			</if>
+			<!-- <if test="auditStatus != null"> and audit_status = #{auditStatus} 
+				</if> -->
+			<if test="flowTag != null">
+				and flow_tag = #{flowTag}
+			</if>
+		</where>
+	</select>
+	<select id="findRepeat" parameterType="com.togest.domain.PlanExecuteDTO"
+		resultType="int">
+		select count(*)
+		from 6c_plan_execute a
+		join 6c_plan_base b on
+		a.plan_base_id = b.id
+		join 6c_plan_detail c on a.plan_detail_id = c.id
+		<where>
+			b.plan_date = #{planBasePlanDate}
+			and b.train_number =
+			#{planBaseTrainNumber}
+			and a.dept_id = #{deptId}
+			and c.line_id =
+			#{planDetailLineId}
+			and c.direction = #{planDetailDirection}
+			and
+			a.del_flag = 0
+		</where>
+	</select>
+
+
+	<insert id="insert" parameterType="com.togest.domain.PlanExecuteDTO">
+		insert into 6c_plan_execute
+		(id, plan_base_id, plan_detail_id,
+		start_station, end_station,
+		responsible_dept_id,
+		dept_id,
+		audit_person,audit_date,
+		patcher, add_date,
+		confirm_person,confirm_date,
+		actual_add_date,actual_patcher,actual_check_region,actual_add_train_number,actual_add_traffic_number,equ_no,equ_operation,
+		implementation,
+		section_id, system_id,
+		execute_status, del_flag, create_ip,
+		create_by,
+		create_date, remark,
+		audit_status , flow_tag
+		)
+		values
+		(#{id,jdbcType=VARCHAR},
+		#{planBaseId,jdbcType=VARCHAR},
+		#{planDetailId,jdbcType=VARCHAR},
+		#{startStation,jdbcType=VARCHAR},
+		#{endStation,jdbcType=VARCHAR},
+		#{responsibleDeptId,jdbcType=VARCHAR},
+		#{deptId,jdbcType=VARCHAR},
+		#{auditPerson,jdbcType=VARCHAR},
+		#{auditDate,jdbcType=TIMESTAMP},
+		#{patcher,jdbcType=VARCHAR},
+		#{addDate,jdbcType=TIMESTAMP},
+		#{confirmPerson,jdbcType=VARCHAR},
+		#{confirmDate,jdbcType=TIMESTAMP},
+		#{actualAddDate,jdbcType=TIMESTAMP},
+		#{actualPatcher,jdbcType=VARCHAR},
+		#{actualCheckRegion,jdbcType=VARCHAR},
+		#{actualAddTrainNumber,jdbcType=VARCHAR},
+		#{actualAddTrafficNumber,jdbcType=VARCHAR},
+		#{equNo,jdbcType=VARCHAR},
+		#{equOperation,jdbcType=VARCHAR},
+		#{implementation,jdbcType=VARCHAR},
+		#{sectionId,jdbcType=VARCHAR},
+		#{systemId,jdbcType=VARCHAR},
+		#{executeStatus,jdbcType=VARCHAR},
+		#{delFlag,jdbcType=SMALLINT},
+		#{createIp,jdbcType=VARCHAR},
+		#{createBy,jdbcType=VARCHAR},
+		#{createDate,jdbcType=TIMESTAMP},
+		#{remark,jdbcType=LONGVARCHAR},
+		#{auditStatus,jdbcType=VARCHAR},
+		#{flowTag,jdbcType=SMALLINT}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.PlanExecuteDTO">
+		update 6c_plan_execute
+		<set>
+			<if test="planBaseId != null">
+				plan_base_id = #{planBaseId,jdbcType=VARCHAR},
+			</if>
+			<if test="planDetailId != null">
+				plan_detail_id = #{planDetailId,jdbcType=VARCHAR},
+			</if>
+			<if test="startStation != null">
+				start_station = #{startStation,jdbcType=VARCHAR},
+			</if>
+			<if test="endStation != null">
+				end_station = #{endStation,jdbcType=VARCHAR},
+			</if>
+			<if test="responsibleDeptId != null">
+				responsible_dept_id =
+				#{responsibleDeptId,jdbcType=VARCHAR},
+			</if>
+			<if test="deptId != null">
+				dept_id = #{deptId,jdbcType=VARCHAR},
+			</if>
+			<if test="auditPerson != null">
+				audit_person = #{auditPerson,jdbcType=VARCHAR},
+			</if>
+			<if test="auditDate != null">
+				audit_date = #{auditDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="patcher != null">
+				patcher = #{patcher,jdbcType=VARCHAR},
+			</if>
+			<if test="addDate != null">
+				add_date = #{addDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="confirmPerson != null">
+				confirm_person = #{confirmPerson,jdbcType=VARCHAR},
+			</if>
+			<if test="confirmDate != null">
+				confirm_date = #{confirmDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="actualAddDate != null">
+				actual_add_date = #{actualAddDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="actualPatcher != null">
+				actual_patcher = #{actualPatcher,jdbcType=VARCHAR},
+			</if>
+			<if test="actualCheckRegion != null">
+				actual_check_region = #{actualCheckRegion,jdbcType=VARCHAR},
+			</if>
+			<if test="actualAddTrainNumber != null">
+				actual_add_train_number = #{actualAddTrainNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="actualAddTrafficNumber != null">
+				actual_add_traffic_number = #{actualAddTrafficNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="equNo != null">
+				equ_no = #{equNo,jdbcType=VARCHAR},
+			</if>
+			<if test="equOperation != null">
+				equ_operation = #{equOperation,jdbcType=VARCHAR},
+			</if>
+			<if test="implementation != null">
+				implementation = #{implementation,jdbcType=VARCHAR},
+			</if>
+			<if test="sectionId != null">
+				section_id = #{sectionId,jdbcType=VARCHAR},
+			</if>
+			<if test="systemId != null">
+				system_id = #{systemId,jdbcType=VARCHAR},
+			</if>
+			<if test="executeStatus != null">
+				execute_status = #{executeStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="updateIp != null">
+				update_ip = #{updateIp,jdbcType=VARCHAR},
+			</if>
+			<if test="updateBy != null">
+				update_by = #{updateBy,jdbcType=VARCHAR},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=LONGVARCHAR},
+			</if>
+			<if test="auditStatus != null">
+				audit_status = #{auditStatus,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id =
+		#{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateExecuteStatus" parameterType="java.util.Map">
+		update 6c_plan_execute set
+		execute_status = #{executeStatus}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateAuditStatus" parameterType="java.util.Map">
+		update 6c_plan_execute set
+		audit_status = #{auditStatus}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateFlowTag" parameterType="java.util.Map">
+		update 6c_plan_execute set
+		flow_tag = #{flowTag}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_plan_execute
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalsesByPlanBaseId" parameterType="java.util.Map">
+		update 6c_plan_execute
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where plan_base_id
+		in
+		<foreach item="item" collection="planBaseIds" separator=","
+			open="(" close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalsesByPlanDetailId" parameterType="java.util.Map">
+		update 6c_plan_execute
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where
+		plan_detail_id in
+		<foreach item="item" collection="planDetailIds" separator=","
+			open="(" close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<select id="findPlanExecuteByPlanBaseId" parameterType="java.lang.String"
+		resultMap="Response_BaseResultMap">
+		select distinct
+		<include refid="Response_Base_Column_List" />
+		from
+		<include refid="Response_Base_Table"></include>
+		where a.plan_base_id = #{planBaseId} and a.del_flag = 0
+	</select>
+
+	<resultMap id="Response_BaseResultMap" type="com.togest.domain.PlanExecuteDTO">
+		<id column="id" property="id" />
+		<result column="plan_base_id" property="planBaseId" />
+		<result column="plan_detail_id" property="planDetailId" />
+		<result column="start_station" property="startStation" />
+		<result column="end_station" property="endStation" />
+		<result column="responsible_dept_id" property="responsibleDeptId" />
+		<result column="dept_id" property="deptId" />
+		<result column="audit_person" property="auditPerson" />
+		<result column="audit_date" property="auditDate" />
+		<result column="patcher" property="patcher" />
+		<result column="add_date" property="addDate" />
+		<result column="confirm_person" property="confirmPerson" />
+		<result column="confirm_date" property="confirmDate" />
+
+		<result column="actual_add_date" property="actualAddDate" />
+		<result column="actual_patcher" property="actualPatcher" />
+		<result column="actual_check_region" property="actualCheckRegion" />
+		<result column="actual_add_train_number" property="actualAddTrainNumber" />
+		<result column="actual_add_traffic_number" property="actualAddTrafficNumber" />
+		<result column="equ_no" property="equNo" />
+		<result column="equ_operation" property="equOperation" />
+		
+		<result column="implementation" property="implementation" />
+		<result column="section_id" property="sectionId" />
+		<result column="system_id" property="systemId" />
+		<result column="systemName" property="systemName" />
+		<result column="execute_status" property="executeStatus" />
+		<result column="remark" property="remark" />
+		<result column="deptName" property="deptName" />
+		<result column="responsibleDeptName" property="responsibleDeptName" />
+
+		<result column="planBaseTrainNumber" property="planBaseTrainNumber" />
+		<result column="planBaseTrainId" property="planBaseTrainId" />
+		<result column="planBaseTrainName" property="planBaseTrainName" />
+		<result column="planBaseContacts" property="planBaseContacts" />
+		<result column="planBaseRemark" property="planBaseRemark" />
+		<result column="planBasePlanDate" property="planBasePlanDate" />
+
+		<result column="planDetailLineId" property="planDetailLineId" />
+		<result column="planDetailDirection" property="planDetailDirection" />
+		<result column="planDetailLineName" property="planDetailLineName" />
+		<result column="planDetailCheckRegion" property="planDetailCheckRegion" />
+		<result column="planDetailStartStation" property="planDetailStartStation" />
+		<result column="planDetailEndStation" property="planDetailEndStation" />
+		<result column="planDetailStartStationName" property="planDetailStartStationName" />
+		<result column="planDetailEndStationName" property="planDetailEndStationName" />
+		<result column="planDetailDetectMileage" property="planDetailDetectMileage" />
+
+		<result column="flowId" property="flowId" />
+		<result column="formKey" property="formKey" />
+
+		<result column="auditStatus" property="auditStatus" />
+		<result column="flowTag" property="flowTag" />
+
+		<collection property="deptList" ofType="com.togest.domain.Naming">
+			<id column="d_dept_id" property="id" />
+			<result column="d_name" property="name" />
+		</collection>
+
+	</resultMap>
+
+	<sql id="Response_Base_Column_List">
+		a.id, a.plan_base_id, a.plan_detail_id, a.start_station,
+		a.end_station,
+		a.responsible_dept_id,
+		a.dept_id,
+		a.audit_person,a.audit_date,
+		a.patcher, a.add_date,
+		a.confirm_person,a.confirm_date,
+		a.actual_add_date,a.actual_patcher,a.actual_check_region,a.actual_add_train_number,a.actual_add_traffic_number,a.equ_no,a.equ_operation,
+		a.implementation, a.section_id, a.system_id,sys.name as systemName,
+		a.execute_status,
+		a.remark,a.flow_tag,
+		pb.plan_date as planBasePlanDate,
+		pb.train_number
+		as planBaseTrainNumber,
+		pb.train_id as planBaseTrainId,
+		pb.contacts as
+		planBaseContacts,
+		pb.remark as planBaseRemark,
+		pd.line_id as
+		planDetailLineId,
+		pd.direction as planDetailDirection,
+		pd.check_region
+		as planDetailCheckRegion,
+		pd.start_station
+		as planDetailStartStation,
+		pd.end_station
+		as planDetailEndStation,
+		pd.start_station_name
+		as planDetailStartStationName,
+		pd.end_station_name
+		as planDetailEndStationName,
+		pd.detect_mileage
+		as planDetailDetectMileage,
+		ct.train_num as planBaseTrainName,
+		d.name as
+		deptName,
+		d1.name as
+		responsibleDeptName,
+		pl.name as planDetailLineName,
+		df.process_instance_id as flowId,
+		df.form_key as formKey,
+		per.dept_id as
+		d_dept_id,
+		d2.name as d_name,
+		a.audit_status as auditStatus,
+		a.flow_tag
+		as flowTag
+	</sql>
+
+	<sql id="Response_Base_Table">
+		6c_plan_execute a
+		left join 6c_system sys on a.system_id = sys.id
+		left join 6c_plan_base pb on a.plan_base_id= pb.id
+		left join 6c_check_train ct on ct.id =
+		pb.train_id
+		left join 6c_plan_detail pd on a.plan_detail_id= pd.id
+		<!-- left join p_supply_arm p1 on pd.start_station = p1.id
+		left join p_supply_arm p2 on pd.end_station = p2.id -->
+		left join p_department d on a.dept_id= d.id
+		left join p_department d1 on
+		a.responsible_dept_id= d1.id
+		left join p_line pl on pd.line_id = pl.id
+		left join 6c_defect_flow df on a.id = df.id
+		left join
+		6c_plan_execute_record per on a.id = per.plan_execute_id
+		left join
+		p_department d2 on per.dept_id= d2.id
+	</sql>
+	<select id="getByKey" resultMap="Response_BaseResultMap"
+		parameterType="java.lang.String">
+		select distinct
+		<include refid="Response_Base_Column_List" />
+		from
+		<include refid="Response_Base_Table"></include>
+		where a.id = #{id,jdbcType=VARCHAR}
+	</select>
+
+	<select id="getListByKeys" resultMap="Response_BaseResultMap"
+		parameterType="java.util.List">
+		select distinct
+		<include refid="Response_Base_Column_List" />
+		from
+		<include refid="Response_Base_Table"></include>
+		where a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<!-- <select id="getListByKeys" resultMap="BaseResultMap" parameterType="java.util.List"> 
+		select distinct <include refid="Base_Column_List" /> from 6c_plan_execute 
+		where id in <foreach item="item" collection="ids" separator="," open="(" 
+		close=")" index=""> #{item} </foreach> </select> -->
+
+	<select id="findLists" resultMap="Response_BaseResultMap"
+		parameterType="com.togest.request.PlanQueryFilter">
+		select distinct
+		<include refid="Response_Base_Column_List"></include>
+		from
+		(select distinct a.*
+		from
+		<include refid="Response_Base_Table"></include>
+		<where>
+			a.del_flag = 0
+			<if test="planBaseId != null">
+				and a.plan_base_id = #{planBaseId}
+			</if>
+			<if test="planDetailId != null">
+				and a.plan_detail_id = #{planDetailId}
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pd.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pd.direction = #{direction}
+			</if>
+			<if test="startStation !=null">
+				and pd.start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and pd.end_station =#{endStation}
+			</if>
+			<if test="detectMileage !=null">
+				and pd.detect_mileage =#{detectMileage}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}))
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="addDeptId != null">
+				and a.dept_id = #{addDeptId}
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="planStatus != null">
+				and pb.plan_status = #{planStatus}
+			</if>
+			<if test="executeStatusList != null">
+				and a.execute_status in
+				<foreach item="item" collection="executeStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<!-- <if test="auditStatus != null"> and a.audit_status = #{auditStatus} 
+				</if> -->
+			<if test="flowTag != null">
+				and a.flow_tag = #{flowTag}
+			</if>
+				<if test="actualAddDate != null">
+				and a.actual_add_date = #{actualAddDate}
+			</if>
+			<if test="actualPatcher != null">
+				and a.actual_patcher = #{actualPatcher}
+			</if>
+			<if test="actualCheckRegion != null">
+			and a.actual_check_region = #{actualCheckRegion}
+			</if>
+			<if test="actualAddTrainNumber != null">
+				and a.actual_add_train_number = #{actualAddTrainNumber}
+			</if>
+			<if test="actualAddTrafficNumber != null">
+				and a.and a.actual_add_traffic_number = #{actualAddTrafficNumber}
+			</if>
+			<if test="equNo != null">
+				and a.equ_no = #{equNo},
+			</if>
+			<if test="equOperation != null">
+				and a.equ_operation = #{equOperation}
+			</if>
+			
+			<if test="auditPerson != null">
+				and a.audit_person LIKE CONCAT('%',#{auditPerson},'%')
+			</if>
+			<if test="patcher != null">
+				and a.patcher LIKE CONCAT('%',#{patcher},'%')
+			</if>
+			<if test="implementation != null">
+				and a.implementation LIKE CONCAT('%',#{implementation},'%')
+			</if>
+		</where>
+		order by pb.plan_date desc,pd.line_id,pd.direction
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+		)a
+		left join 6c_system sys on a.system_id = sys.id
+		left join 6c_plan_base pb on a.plan_base_id= pb.id
+		left join
+		6c_check_train ct on ct.id = pb.train_id
+		left join 6c_plan_detail pd on
+		a.plan_detail_id= pd.id
+		<!-- left join p_supply_arm p1 on pd.start_station = p1.id
+		left join p_supply_arm p2 on pd.end_station = p2.id -->
+		left join p_department d on a.dept_id= d.id
+		left join p_department d1 on a.responsible_dept_id= d1.id
+		left join
+		p_line pl on pd.line_id = pl.id
+		left join 6c_defect_flow df on a.id =
+		df.id
+		left join 6c_plan_execute_record per on a.id =
+		per.plan_execute_id
+		left join p_department d2 on per.dept_id= d2.id
+		<where>
+			a.del_flag = 0
+			<if test="planBaseId != null">
+				and a.plan_base_id = #{planBaseId}
+			</if>
+			<if test="planDetailId != null">
+				and a.plan_detail_id = #{planDetailId}
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pd.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pd.direction = #{direction}
+			</if>
+			<if test="startStation !=null">
+				and pd.start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and pd.end_station =#{endStation}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}))
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="planStatus != null">
+				and pb.plan_status = #{planStatus}
+			</if>
+			<if test="executeStatusList != null">
+				and a.execute_status in
+				<foreach item="item" collection="executeStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<!-- <if test="auditStatus != null"> and a.audit_status = #{auditStatus} 
+				</if> -->
+			<if test="flowTag != null">
+				and a.flow_tag = #{flowTag}
+			</if>
+		</where>
+		order by pb.plan_date desc,pd.line_id,pd.direction
+	</select>
+	<select id="findListsCounts" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="java.lang.Integer">
+		select count( distinct a.id )
+		from
+		<include refid="Response_Base_Table"></include>
+		<where>
+			a.del_flag = 0
+			<if test="planBaseId != null">
+				and a.plan_base_id = #{planBaseId}
+			</if>
+			<if test="planDetailId != null">
+				and a.plan_detail_id = #{planDetailId}
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pd.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pd.direction = #{direction}
+			</if>
+			<if test="startStation !=null">
+				and pd.start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and pd.end_station =#{endStation}
+			</if>
+			<if test="addDeptId != null">
+				and a.dept_id = #{addDeptId}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+
+			</if>
+			<if test="planStatus != null">
+				and pb.plan_status = #{planStatus}
+			</if>
+			<if test="executeStatusList != null">
+				and a.execute_status in
+				<foreach item="item" collection="executeStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="equNo != null">
+				and a.equ_no = #{equNo}
+			</if>
+			<!-- <if test="auditStatus != null"> and a.audit_status = #{auditStatus} 
+				</if> -->
+			<if test="flowTag != null">
+				and a.flow_tag = #{flowTag}
+			</if>
+		</where>
+		order by pb.plan_date desc,pd.line_id,pd.direction
+	</select>
+
+	<select id="findPlanTaskFlow" parameterType="java.util.List"
+		resultType="com.togest.response.PlanTaskFlowResponse">
+		select a.id,
+		a.dept_id as deptId,a.patcher as patcher,
+		d.process_instance_id as
+		processInstanceId, d.form_key as formKey,
+		d.task_name as taskName, d.task_id as taskId,
+		a.audit_status as
+		auditStatus, a.flow_tag as flow_tag
+		from 6c_plan_execute a
+		left join
+		6c_defect_flow d on a.id=d.id
+		where a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findPlanStatisticsData" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="com.togest.response.statistics.PlanStatisticsData">
+		SELECT COUNT(DISTINCT a.id) AS pENum,
+		COUNT(CASE WHEN a.execute_status='5' 
+		THEN a.id END) AS reformPENum,
+		COUNT(CASE WHEN (d.defect_data_status='1' and d.del_flag = 0)  
+		OR (e.defect_data_status='1' and e.del_flag = 0) 
+		OR (f.defect_data_status='1' and f.del_flag = 0) 
+		THEN a.id END) AS analysisDataNum,
+		COUNT(CASE WHEN (d.plan_id=pd.id and d.del_flag = 0) 
+		OR (e.plan_id=pd.id and e.del_flag = 0)  
+		OR (f.plan_id=pd.id and f.del_flag = 0)  
+		THEN pd.id END) AS uploadDataNum
+
+		FROM 6c_plan_execute a 
+		LEFT JOIN 6c_plan_base pb ON a.plan_base_id = pb.id 
+		LEFT JOIN 6c_plan_execute_record per ON a.id = per.plan_execute_id 
+		LEFT JOIN 6c_plan_detail pd ON pd.plan_base_id = pb.id 
+		LEFT JOIN 6c_c1_info d ON d.plan_id = pd.id
+		LEFT JOIN 6c_c2_info e ON e.plan_id = pd.id
+		LEFT JOIN 6c_c4_info f ON f.plan_id = pd.id
+		<where>
+			a.del_flag = 0 
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pd.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pd.direction = #{direction}
+			</if>
+			<if test="startStation !=null">
+				and pd.start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and pd.end_station =#{endStation}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+		</where>
+	</select>
+
+
+	<select id="planDataFromByMon" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="com.togest.response.statistics.PlanMonData">
+		select count(a.id) AS num,DATE_FORMAT(pb.plan_date,'%m') AS planDate
+		,a.system_id AS systemId,COUNT(CASE WHEN a.execute_status='5' THEN
+		a.id END) AS cancelNum
+		from 6c_plan_execute a
+		left join 6c_plan_base pb on a.plan_base_id = pb.id
+		left join 6c_plan_detail pd on pd.plan_base_id = pb.id
+		left join 6c_plan_execute_record per on a.id = per.plan_execute_id
+		<where>
+			a.del_flag = 0
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="executeStatus != null">
+				and a.execute_status = #{executeStatus}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+		</where>
+		group by planDate,systemId
+	</select>
+
+	<select id="planDataFromByLine" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="com.togest.response.statistics.PlanMonData">
+		select count(a.id) as num,p.name AS lineName,pd.line_id as lineId
+		,count(case when
+		a.execute_status='5' THEN a.id END) AS cancelNum
+		,a.system_id AS
+		systemId
+		from 6c_plan_execute a
+		left join 6c_plan_base pb ON a.plan_base_id = pb.id
+		left join 6c_plan_detail pd on pd.plan_base_id = pb.id
+		left join p_line p on p.id = pd.line_id
+		left join 6c_plan_execute_record per on a.id = per.plan_execute_id
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="executeStatus != null">
+				and a.execute_status = #{executeStatus}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+		</where>
+		group by pd.line_id,a.system_id
+	</select>
+	<select id="planFlowCount" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="com.togest.response.statistics.FlowCountData">
+		select count(a.id) as num,a.execute_status as status
+		from
+		<include refid="Response_Base_Table"></include>
+		<where>
+			a.del_flag = 0
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="flowTag != null">
+				and a.flow_tag = #{flowTag}
+			</if>
+		</where>
+		group by a.execute_status
+	</select>
+	<select id="planTopRefromCount" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="com.togest.response.statistics.TopPlanRectifyRate">
+		select
+		round(count(case when a.execute_status in (5) theN a.id end)/count(a.id)*100,2) as nub
+		<if test="systemId == null"> ,line.name as name</if>
+		<if test="systemId != null"> ,a.system_id as name</if>
+		from 6c_plan_execute a
+		left join 6c_plan_base pb on a.plan_base_id = pb.id
+		left join 6c_plan_detail pd on pd.plan_base_id = pb.id
+		left join 6c_plan_execute_record per on a.id = per.plan_execute_id
+		<if test="systemId == null"> left join p_line line on pd.line_id = line.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="executeStatus != null">
+				and a.execute_status = #{executeStatus}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+		</where>
+		<if test="systemId != null">  group by a.system_id  </if>
+		<if test="systemId == null">  group by pd.line_id  </if>
+		order by nub desc
+		limit 1
+	</select>
+	
+	<select id="findPlanExecuteByIds" parameterType="java.lang.String"
+		resultMap="Response_BaseResultMap">
+	select distinct
+		<include refid="Response_Base_Column_List" />
+		from
+		<include refid="Response_Base_Table"></include>
+		where a.id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	
+	<update id="updateAuditData">
+		update 6c_plan_execute
+		<set>
+			<if test="auditPerson != null">
+				audit_person = #{auditPerson,jdbcType=VARCHAR},
+			</if>
+				audit_date = #{auditDate,jdbcType=TIMESTAMP}
+		</set>
+		where id
+		in
+		<foreach item="item" collection="ids.split(',')" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateAddData">
+		update 6c_plan_execute
+		<set>
+			<if test="patcher != null">
+				patcher = #{patcher,jdbcType=VARCHAR},
+			</if>
+				add_date = #{addDate,jdbcType=TIMESTAMP}
+		</set>
+		where id
+		in
+		<foreach item="item" collection="ids.split(',')" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateConfirmationData">
+		update 6c_plan_execute
+		<set>
+			<if test="confirmPerson != null">
+				confirm_person = #{confirmPerson,jdbcType=VARCHAR},
+			</if>
+				confirm_date = #{confirmDate,jdbcType=TIMESTAMP}
+		</set>
+		where id
+		in
+		<foreach item="item" collection="ids.split(',')" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<select id="findMonthAndAccumulativeFrom"  resultType="com.togest.response.statistics.PlanMonthAccumulativeData">
+		SELECT count(a.id) as num,a.system_id as systemId,a.execute_status excuteStatus,left(a.create_date,7) AS date
+	
+		FROM 
+				6c_plan_execute a
+	
+		WHERE 
+				a.del_flag = '0'
+	
+		GROUP BY 
+				a.system_id,a.execute_status,date
+	</select>
+	
+	<select id="checkPlanExecuteRP" parameterType="com.togest.domain.PlanExecuteDTO" resultMap="Response_BaseResultMap">
+		select distinct
+		<include refid="Response_Base_Column_List" />
+		from
+		<include refid="Response_Base_Table"></include>
+		WHERE a.del_flag = '0' AND pb.del_flag = '0' AND pd.del_flag = '0' and a.execute_status != '5'
+			<choose>
+			 <when test="planBasePlanDate !=null">
+			   and pb.plan_date = #{planBasePlanDate}
+			   </when>
+			    <otherwise>
+				and pb.plan_date is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			   <when test="planBaseTrainId !=null">
+			   and pb.train_id = #{planBaseTrainId} 
+			   </when>
+			   <when test="planBaseTrainNumber != null">
+				and pb.train_number = #{planBaseTrainNumber}		    
+			   </when>
+			   <otherwise>
+				and pb.train_id is null		    
+			   </otherwise>
+			</choose>
+			<choose>
+			 <when test="planDetailLineId !=null">
+			   and pd.line_id = #{planDetailLineId} 
+			   </when>
+			    <otherwise>
+				and pd.line_id is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			 <when test="planDetailDirection !=null">
+			   and pd.direction = #{planDetailDirection} 
+			   </when>
+			    <otherwise>
+				and pd.direction is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			    <when test="planDetailCheckRegion !=null">
+			    and pd.check_region = #{planDetailCheckRegion} 
+			    </when>
+			    <otherwise>
+				and pd.check_region is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			 <when test="systemId !=null">
+			   and a.system_id = #{systemId} 
+			   </when>
+			    <otherwise>
+				and a.system_id is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			 <when test="deptId != null">
+			   and a.dept_id = #{deptId} 
+			   </when>
+			    <otherwise>
+				and a.dept_id is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			 <when test="responsibleDeptId != null">
+			   and a.responsible_dept_id = #{responsibleDeptId}
+			   </when>
+			    <otherwise>
+				and a.responsible_dept_id is null			    
+			    </otherwise>
+			</choose>
+			<choose>
+			 <when test="patcher != null">
+			   and a.patcher = #{patcher} 
+			   </when>
+			    <otherwise>
+				and a.patcher is null			    
+			    </otherwise>
+			</choose>
+	</select>
+	<select id="planDataFromBySection" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="com.togest.response.statistics.PlanMonData">
+		select count(a.id) as num,p.name AS sectionName,a.section_id as sectionId
+		,count(case when
+		a.execute_status='5' THEN a.id END) AS cancelNum
+		,a.system_id AS
+		systemId
+		from 6c_plan_execute a
+		left join 6c_plan_base pb ON a.plan_base_id = pb.id
+		left join 6c_plan_detail pd on pd.plan_base_id = pb.id
+		left join p_department p on p.id = a.section_id
+		left join 6c_plan_execute_record per on a.id = per.plan_execute_id
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and((a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+			<if test="beginCheckDate != null">
+				and pb.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="executeStatus != null">
+				and a.execute_status = #{executeStatus}
+			</if>
+			<if test="endCheckDate != null">
+				and pb.plan_date &lt;= #{endCheckDate}
+			</if>
+		</where>
+		group by a.section_id,a.system_id
+	</select>
+	<select id="planFlowCount1C" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="java.util.Map">
+		(SELECT  a.plan_status as status,COUNT(a.id) as num
+		 FROM 6c_plan_base a
+		 left join 6c_plan_execute pe on pe.plan_base_id = a.id
+		<where>
+			 a.del_flag=0
+			AND a.system_id='C1'
+			AND a.plan_status='1'
+			<if test="beginCheckDate != null">
+				and DATE(a.plan_date) &gt;= DATE(#{beginCheckDate})
+			</if>
+			<if test="endCheckDate != null">
+				and DATE(a.plan_date) &lt;= DATE(#{endCheckDate})
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and((pe.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or pe.dept_id = #{did}) 
+					or 
+					(pe.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or pe.responsible_dept_id = #{did}) )
+				</if>
+				<if test="isChild == false">
+					and (pe.dept_id = #{did} or pe.responsible_dept_id=#{did} )
+				</if>
+			</if>
+		</where>) 
+		UNION ALL
+		 (SELECT  a.execute_status as status,COUNT(a.id) as num
+		FROM 6c_plan_execute a
+		left join 6c_plan_base pb on a.plan_base_id= pb.id
+		LEFT JOIN 6c_plan_execute_record per ON per.plan_execute_id = a.id
+		<where>
+			a.del_flag=0
+			AND a.system_id='C1'
+			AND a.execute_status='2'
+			and a.flow_tag = '1'
+			<if test="beginCheckDate != null">
+				and DATE(pb.plan_date) &gt;= DATE(#{beginCheckDate})
+			</if>
+			<if test="endCheckDate != null">
+				and DATE(pb.plan_date) &lt;= DATE(#{endCheckDate})
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}))
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+		</where>
+		GROUP BY a.execute_status)
+		UNION ALL 
+		(SELECT  per.record_status as status,COUNT(per.id)  as num
+		FROM 6c_plan_execute a
+		LEFT JOIN 6c_plan_execute_record per ON per.plan_execute_id = a.id
+		left join 6c_plan_base pb on a.plan_base_id= pb.id
+		<where> 
+			a.del_flag=0
+			AND a.system_id='C1'
+			and a.flow_tag = '1'
+			AND (per.record_status='3' OR per.record_status='4')
+			<if test="beginCheckDate != null">
+				and DATE(pb.plan_date) &gt;=  DATE(#{beginCheckDate})
+			</if>
+			<if test="endCheckDate != null">
+				and DATE(pb.plan_date) &lt;= DATE(#{endCheckDate})
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}))
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+		</where>
+		GROUP BY per.record_status) 
+	</select>
+	<select id="planFlowCount1CSection" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="java.util.Map">
+		 (SELECT  a.execute_status AS status,COUNT(a.id) as num
+		FROM 6c_plan_execute a
+		left join 6c_plan_base pb on a.plan_base_id= pb.id
+		LEFT JOIN 6c_plan_execute_record per ON per.plan_execute_id = a.id
+		<where>
+			a.del_flag=0
+			AND a.system_id='C1'
+			and a.flow_tag = '0'
+			AND (a.execute_status='1' OR a.execute_status='2')
+			<if test="beginCheckDate != null">
+				and DATE(pb.plan_date) &gt;= DATE(#{beginCheckDate})
+			</if>
+			<if test="endCheckDate != null">
+				and DATE(pb.plan_date) &lt;= DATE(#{endCheckDate})
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}))
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+		</where>
+		GROUP BY a.execute_status)
+		UNION ALL 
+		(SELECT  per.record_status AS status,COUNT(per.id) as num FROM 6c_plan_execute a
+		LEFT JOIN 6c_plan_execute_record per ON per.plan_execute_id = a.id
+		left join 6c_plan_base pb on a.plan_base_id= pb.id
+		<where> 
+			a.del_flag=0
+			AND a.system_id='C1'
+			AND per.del_flag=0
+			and a.flow_tag = '0'
+			AND (per.record_status='3' OR per.record_status='4')
+			<if test="beginCheckDate != null">
+				and DATE(pb.plan_date) &gt;=  DATE(#{beginCheckDate})
+			</if>
+			<if test="endCheckDate != null">
+				and DATE(pb.plan_date) &lt;= DATE(#{endCheckDate})
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(
+					(a.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.dept_id = #{did})
+					or
+					(per.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or per.dept_id = #{did})
+					or
+					(a.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.responsible_dept_id
+					= #{did}))
+				</if>
+				<if test="isChild == false">
+					and (per.dept_id = #{did} or
+					a.responsible_dept_id=#{did} or a.dept_id=#{did} )
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and (a.section_id = #{sectionId} or
+				(a.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${sectionId}%' and del_flag=0)
+				or
+				a.responsible_dept_id = #{sectionId}))
+			</if>
+		</where>
+		GROUP BY per.record_status) 
+	</select>
+	
+	<!-- 计划统计查询条件  -->
+	<sql id="plan_condition">
+		<if test="did != null">
+			<if test="isChild == true">
+				and((pe.dept_id in (select id from
+				p_department where
+				parent_ids like '%${did}%' and del_flag=0)
+				or pe.dept_id = #{did})
+				or
+				(per.dept_id in (select id from
+				p_department where
+				parent_ids like
+				'%${did}%' and del_flag=0)
+				or per.dept_id = #{did})
+				or
+				(pe.responsible_dept_id in (select id from
+				p_department where
+				parent_ids like '%${did}%' and del_flag=0)
+				or pe.responsible_dept_id
+				= #{did}) )
+			</if>
+			<if test="isChild == false">
+				and (per.dept_id = #{did} or
+				pe.responsible_dept_id=#{did} or pe.dept_id=#{did} )
+			</if>
+		</if>
+		<if test="sectionId != null">
+			and (pe.section_id = #{sectionId} or
+			(pe.responsible_dept_id in (select id from
+			p_department where
+			parent_ids like '%${sectionId}%' and del_flag=0)
+			or
+			pe.responsible_dept_id = #{sectionId}))
+		</if>
+		<if test="beginCheckDate != null">
+			and pb.plan_date &gt;= #{beginCheckDate}
+		</if>
+		<if test="endCheckDate != null">
+			and pb.plan_date &lt;= #{endCheckDate}
+		</if>
+	</sql>
+	
+	<!-- 计划统计查询  -->
+	<select id="planFlowCountNew" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="java.util.Map">
+		(#1c处 编
+		SELECT 
+			COUNT(pb.id) as count,pb.plan_status AS STATUS,pb.system_id,'1' AS flow_tag
+		FROM
+			6c_plan_base pb
+			LEFT JOIN 6c_plan_execute pe ON pb.id=pe.plan_base_id
+			LEFT JOIN 6c_plan_execute_record per on per.plan_execute_id=pe.id
+		WHERE
+			pb.del_flag=0
+			AND pb.plan_status='1'
+			AND pb.system_id='C1'
+			AND pe.flow_tag=1
+			<include refid="plan_condition"></include>
+		GROUP BY
+			pb.plan_status)
+		UNION ALL 
+		(#1c处 审
+		SELECT 
+			COUNT(pe.id) as count,pe.execute_status AS STATUS,pe.system_id,pe.flow_tag
+		FROM
+			6c_plan_execute pe
+			LEFT JOIN 6c_plan_base pb ON pb.id=pe.plan_base_id
+			LEFT JOIN 6c_plan_execute_record per on per.plan_execute_id=pe.id
+		WHERE
+			pe.del_flag=0
+			AND pe.execute_status='2'
+			AND pe.system_id='C1'
+			AND pe.flow_tag=1
+			<include refid="plan_condition"></include>
+		GROUP BY
+			pe.execute_status)
+		UNION ALL 
+		(#1c段处 添、确
+		SELECT
+			COUNT(per.id) as count,per.record_status AS STATUS,'C1' AS system_id,flow_tag
+		FROM
+			6c_plan_execute_record per
+			LEFT JOIN 6c_plan_execute pe ON per.plan_execute_id=pe.id
+			LEFT JOIN 6c_plan_base pb ON pb.id=pe.plan_base_id
+		WHERE
+			per.del_flag=0
+			AND per.record_status IN ('3','4')
+			<include refid="plan_condition"></include>
+		GROUP BY
+			per.record_status,flow_tag)
+		UNION ALL 
+		(#1c段 编、审
+		SELECT
+			COUNT(pe.id) as count,pe.execute_status AS STATUS,pe.system_id,pe.flow_tag
+		FROM	
+			6c_plan_execute pe
+			LEFT JOIN 6c_plan_base pb ON pb.id=pe.plan_base_id
+			LEFT JOIN 6c_plan_execute_record per on per.plan_execute_id=pe.id
+		WHERE
+			pe.del_flag=0
+			AND pe.execute_status IN ('1','2')
+			AND pe.system_id='C1'
+			AND pe.flow_tag='0'
+			<include refid="plan_condition"></include>
+		GROUP BY
+			pe.execute_status,pe.flow_tag)
+		UNION ALL 	
+		(#2c4c编、审、添、确
+		SELECT
+			COUNT(pe.id) as count,pe.execute_status AS STATUS,pe.system_id,'0' AS flow_tag
+		FROM
+			6c_plan_execute pe
+			LEFT JOIN 6c_plan_base pb ON pb.id=pe.plan_base_id
+			LEFT JOIN 6c_plan_execute_record per on per.plan_execute_id=pe.id
+		WHERE
+			pe.del_flag=0
+			AND pe.system_id IN ('C2','C4')
+			<include refid="plan_condition"></include>
+		GROUP BY
+			pe.system_id,pe.execute_status)
+	</select>
+	
+	<select id="findPlanFormList" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="java.util.Map">
+		SELECT  d.system_id,d.id id,pb.plan_date,a.ID_ id_,b.task_id,a.PROC_INST_ID_,b.process_instance_id,a.name_,b.task_name,d.execute_status
+		FROM activiti.act_ru_task a 
+		JOIN togest_platform.6c_defect_flow b ON a.PROC_INST_ID_ = b.process_instance_id 
+		JOIN togest_platform.6c_plan_execute d on b.id = d.id 
+		join togest_platform.6c_plan_detail pd on pd.id = d.plan_detail_id
+		join togest_platform.6c_plan_base pb on pb.id = d.plan_base_id
+		where b.task_id!=a.ID_ and b.task_name != a.name_ and d.del_flag = 0
+		<if test="systemId != null">
+			and d.system_id = 'C2'
+		</if>
+		<if test="executeStatus != null">
+			and d.execute_status= 2
+		</if>
+		order by pb.plan_date desc
+	</select>
+	
+	<select id="getTaskFlowResponseByIds" parameterType="java.util.List"
+		resultType="com.togest.domain.TaskFlowResponse">
+		SELECT b.task_id as taskId,b.task_name as taskName,
+		b.process_instance_id as processInstanceId
+		FROM togest_platform.6c_plan_execute d 
+		JOIN togest_platform.6c_defect_flow b on b.id = d.id  
+		WHERE 
+		d.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+</mapper>

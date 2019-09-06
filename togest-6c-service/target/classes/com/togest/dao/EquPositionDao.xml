@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.EquPositionDao">
+
+    <resultMap type="com.togest.domain.EquPosition" id="equPositionMap">
+		<result property="id" column="id"/>
+		<result property="equId" column="equ_id"/>
+		<result property="code" column="code"/>
+		<result property="name" column="name"/>
+		<result property="systemId" column="system_id"/>
+		<result property="systemName" column="systemName"/>
+		<result property="remark" column="remark"/>
+		<result property="sort" column="sort"/>
+    </resultMap>
+    
+    <sql id="baseColumns">
+    	a.id,
+    	a.equ_id,
+    	a.code,
+    	a.name,
+    	a.system_id,
+    	s.name as systemName,
+    	a.remark,
+    	a.sort
+
+    </sql>
+    
+    <sql id="baseConditions">
+		<if test="equId != null"> 
+			and a.equ_id = #{equId}
+		</if>
+		<if test="code != null"> 
+			and a.code = #{code}
+		</if>
+		<if test="name != null"> 
+			and a.name = #{name}
+		</if>
+		<if test="systemId != null"> 
+			and a.system_id = #{systemId}
+		</if>
+		<if test="remark != null"> 
+			and a.remark = #{remark}
+		</if>
+		<if test="delFlag != null"> 
+			and a.del_flag = #{delFlag}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="equPositionMap">
+		select <include refid="baseColumns"></include>
+		from 6c_equ_position a
+		left join 6c_system s on a.system_id = s.id
+		where a.id = #{id}
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="equPositionMap">
+		select <include refid="baseColumns"></include>
+		from 6c_equ_position a
+		left join 6c_system s on a.system_id = s.id
+		where a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.EquPosition" resultMap="equPositionMap">
+		select <include refid="baseColumns"></include>
+		from 6c_equ_position a
+		left join 6c_system s on a.system_id = s.id
+		<where>
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.EquPosition" resultMap="equPositionMap">
+		select <include refid="baseColumns"></include>
+		from 6c_equ_position a
+		left join 6c_system s on a.system_id = s.id
+		<where>
+			<include refid="baseConditions"></include>
+			<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by ${orderBy}
+            </when>
+			<otherwise>
+                order by a.system_id,a.sort desc
+			</otherwise>
+        </choose>
+		</where>
+	</select>
+	<select id="findAllList" parameterType="com.togest.domain.EquPosition" resultMap="equPositionMap">
+		select <include refid="baseColumns"></include>
+		from 6c_equ_position a
+		left join 6c_system s on a.system_id = s.id
+		<where>
+			a.del_flag = 0
+		</where>
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.EquPosition">
+		insert into 6c_equ_position
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            equ_id,
+            code,
+            name,
+            system_id,
+            remark,
+			<if test="sort!=null">sort,</if>
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{equId},
+			#{code},
+			#{name},
+			#{systemId},
+			#{remark},
+			<if test="sort!=null">#{sort},</if>
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.EquPosition">
+		update 6c_equ_position 
+		<set >
+		equ_id = #{equId},
+		code = #{code},
+		name = #{name},
+		system_id = #{systemId},
+		remark = #{remark},
+		<if test="sort!=null">sort = #{sort},</if>
+		update_ip = #{updateIp},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		</set >
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from 6c_equ_position where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.EquPosition">
+		update 6c_equ_position
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+
+</mapper>

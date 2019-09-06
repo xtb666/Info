@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.TrainTimeTableDao">
+
+    <resultMap type="com.togest.domain.TrainTimeTable" id="trainTimeTableMap">
+		<result property="id" column="id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="trainDate" column="train_date"/>
+		<result property="startStation" column="start_station"/>
+		<result property="startTime" column="start_time"/>
+		<result property="endStation" column="end_station"/>
+		<result property="endTime" column="end_time"/>
+		<result property="trainNumber" column="train_number"/>
+		<result property="sectionId" column="section_id"/>
+		<result property="singleGroup" column="single_group"/>
+		<result property="reconnection" column="reconnection"/>
+		<result property="remark" column="remark"/>
+		<result property="sort" column="sort"/>
+		<result property="lineName" column="lineName"/>
+    </resultMap>
+    
+    <sql id="baseColumns">
+    	a.id,
+    	a.train_date,
+    	a.line_id,
+    	a.start_station,
+    	a.start_time,
+    	a.end_station,
+    	a.end_time,
+    	a.train_number,
+    	a.section_id,
+    	a.single_group,
+    	a.reconnection,
+    	a.remark,
+    	a.sort,
+    	l.name as lineName
+    </sql>
+    
+    <sql id="baseConditions">
+		<if test="lineId != null"> 
+			and a.line_id = #{lineId}
+		</if>
+		<if test="startTrainDate != null"> 
+			and a.train_date &gt;= #{startTrainDate}
+		</if>
+		<if test="endTrainDate != null"> 
+			and a.train_date &lt;= #{endTrainDate}
+		</if>
+		<if test="trainDate != null"> 
+			and a.train_date = #{trainDate}
+		</if>
+		<if test="startStation != null"> 
+			and a.start_station = #{startStation}
+		</if>
+		<if test="startTime != null"> 
+			and a.start_time = #{startTime}
+		</if>
+		<if test="endStation != null"> 
+			and a.end_station = #{endStation}
+		</if>
+		<if test="endTime != null"> 
+			and a.end_time = #{endTime}
+		</if>
+		<if test="trainNumber != null"> 
+			and a.train_number = #{trainNumber}
+		</if>
+		<if test="sectionId != null"> 
+			and a.section_id = #{sectionId}
+		</if>
+		<if test="singleGroup != null"> 
+			and a.single_group = #{singleGroup}
+		</if>
+		<if test="reconnection != null"> 
+			and a.reconnection = #{reconnection}
+		</if>
+		<if test="remark != null"> 
+			and a.remark = #{remark}
+		</if>
+		<if test="delFlag != null"> 
+			and a.del_flag = #{delFlag}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="trainTimeTableMap">
+		select <include refid="baseColumns"></include>
+		from 
+		6c_train_time_table a 
+		left join p_line l on a.line_id = l.id
+		
+		where a.id = #{id}
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="trainTimeTableMap">
+		select <include refid="baseColumns"></include>
+		from 6c_train_time_table a 
+		left join p_line l on a.line_id = l.id
+		
+		where a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.TrainTimeTable" resultMap="trainTimeTableMap">
+		select <include refid="baseColumns"></include>
+		from 6c_train_time_table a 
+		left join p_line l on a.line_id = l.id
+		
+		<where>
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.TrainTimeTable" resultMap="trainTimeTableMap">
+		select <include refid="baseColumns"></include>
+		from 6c_train_time_table a 
+		left join p_line l on a.line_id = l.id
+		
+		<where>
+			<include refid="baseConditions"></include>
+			<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by a.${orderBy}
+            </when>
+			<otherwise>
+                order by a.train_date desc
+			</otherwise>
+        </choose>
+		</where>
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.TrainTimeTable">
+		insert into 6c_train_time_table
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            train_date,
+            line_id,
+            start_station,
+            start_time,
+            end_station,
+            end_time,
+            train_number,
+            section_id,
+            single_group,
+            reconnection,
+            remark,
+            del_flag,
+            create_by,
+            create_date,
+            create_ip,
+			<if test="sort!=null">sort</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{trainDate},
+			#{lineId},
+			#{startStation},
+			#{startTime},
+			#{endStation},
+			#{endTime},
+			#{trainNumber},
+			#{sectionId},
+			#{singleGroup},
+			#{reconnection},
+			#{remark},
+			#{delFlag},
+			#{createBy},
+			#{createDate},
+			#{createIp},
+			<if test="sort!=null">#{sort}</if>
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.TrainTimeTable">
+		update 6c_train_time_table 
+		<set >
+		train_date = #{trainDate},
+		line_id = #{lineId},
+		start_station = #{startStation},
+		start_time = #{startTime},
+		end_station = #{endStation},
+		end_time = #{endTime},
+		train_number = #{trainNumber},
+		section_id = #{sectionId},
+		single_group = #{singleGroup},
+		reconnection = #{reconnection},
+		remark = #{remark},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		update_ip = #{updateIp},
+		<if test="sort!=null">sort = #{sort}</if>
+		</set >
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from 6c_train_time_table where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.TrainTimeTable">
+		update 6c_train_time_table
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+
+</mapper>

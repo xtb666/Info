@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectCheckHandleDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectCheckHandle">
+		<id column="id" property="id" />
+		<result column="review_person" property="reviewPerson" />
+		<result column="review_date" property="reviewDate" />
+		<result column="review_conclusion" property="reviewConclusion" />
+		<result column="review_photo" property="reviewPhoto" />
+		<result column="static_measurement" property="staticMeasurement" /> 
+		<result column="last_static_measurement" property="lastStaticMeasurement" /> 
+		<result column="rail_standard_value" property="railStandardValue" /> 
+		<result column="last_rail_standard_value" property="lastRailStandardValue" /> 
+		<result column="side_critical_value" property="sideCriticalValue" />
+		<result column="last_side_critical_value" property="lastSideCriticalValue" />
+		<result column="outer_rail_height" property="outerRailHeight" />
+		<result column="last_outer_rail_height" property="lastOuterRailHeight" />
+		<result column="review_value" property="reviewValue" />
+		<result column="is_reform" property="isReform" />
+		<result column="remark" property="remark" />
+		<result column="informant" property="informant" />
+		<result column="pillar_photo" property="pillarPhoto" />
+		<result column="defect_device_attributes" property="defectDeviceAttributes" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.review_person, a.review_date, a.review_conclusion, a.review_photo, a.review_value,
+		a.is_reform, a.remark, a.informant, a.pillar_photo, a.defect_device_attributes,a.side_critical_value,
+		a.last_static_measurement,a.rail_standard_value,a.static_measurement,a.last_rail_standard_value,
+		a.last_side_critical_value,a.outer_rail_height,a.last_outer_rail_height
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_check_handle a
+		where
+		a.id = #{id}
+	</select>
+	
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_check_handle a
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.DefectCheckHandle"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_check_handle a
+		<where>
+			<if test="reviewPerson != null">
+				and a.review_person = #{reviewPerson}
+			</if>
+			<if test="reviewDate != null">
+				and a.review_date = #{reviewDate}
+			</if>
+			<if test="reviewConclusion != null">
+				and a.review_conclusion = #{reviewConclusion}
+			</if>
+			<if test="sideCriticalValue != null">
+				and a.side_critical_value = #{sideCriticalValue}    
+			</if>
+			<if test="lastStaticMeasurement != null">
+				and a.last_static_measurement = #{lastStaticMeasurement}
+			</if>
+			<if test="railStandardValue != null">
+				and a.rail_standard_value = #{railStandardValue}
+			</if>
+			<if test="reviewValue != null">
+				and a.review_value = #{reviewValue}
+			</if>
+			<if test="isReform != null">
+				and a.is_reform = #{isReform}
+			</if>
+			<if test="informant != null">
+				and a.informant = #{informant}
+			</if>
+			<if test="defectDeviceAttributes != null">
+				and a.defect_device_attributes = #{defectDeviceAttributes}
+			</if>
+			
+			<if test="staticMeasurement != null">
+				and a.static_measurement = #{staticMeasurement}
+			</if>
+			<if test="lastRailStandardValue != null">
+				and a.last_rail_standard_value = #{lastRailStandardValue}
+			</if>
+			<if test="lastSideCriticalValue != null">
+				and a.last_side_critical_value = #{lastSideCriticalValue}
+			</if>
+			<if test="outerRailHeight != null">
+				and a.outer_rail_height = #{outerRailHeight}
+			</if>
+			<if test="lastOuterRailHeight != null">
+				and a.last_outer_rail_height = #{lastOuterRailHeight}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectCheckHandle">
+		insert into 6c_defect_check_handle(
+		id, review_person, review_date, review_conclusion, review_photo, review_value,
+		is_reform, remark, informant, pillar_photo, defect_device_attributes,side_critical_value,
+		last_static_measurement,rail_standard_value,
+		static_measurement,last_rail_standard_value,last_side_critical_value,outer_rail_height,
+		last_outer_rail_height
+		)
+		values(
+		#{id}, #{reviewPerson}, #{reviewDate}, #{reviewConclusion}, #{reviewPhoto}, #{reviewValue}, 
+		#{isReform}, #{remark}, #{informant}, #{pillarPhoto}, #{defectDeviceAttributes},#{sideCriticalValue},
+		#{lastStaticMeasurement},#{railStandardValue},
+		#{staticMeasurement},#{lastRailStandardValue},#{lastSideCriticalValue},#{outerRailHeight},
+		#{lastOuterRailHeight}
+		)
+	</insert>
+	<insert id="insertList" parameterType="java.util.List">
+		insert into 6c_defect_check_handle(
+		id, review_person, review_date, review_conclusion, review_photo, review_value,
+		is_reform, remark, informant, pillar_photo, defect_device_attributes,side_critical_value,
+		last_static_measurement,rail_standard_value,
+		static_measurement,last_rail_standard_value,last_side_critical_value,outer_rail_height,
+		last_outer_rail_height
+		)
+		<foreach collection="list" item="item" separator="union all" index="index" >
+		select
+		(
+		#{item.id}, #{item.reviewPerson}, #{item.reviewDate}, #{item.reviewConclusion}, #{item.reviewPhoto}, #{item.reviewValue}, 
+		#{item.isReform}, #{item.remark}, #{item.informant}, #{item.pillarPhoto}, #{item.defectDeviceAttributes},#{sideCriticalValue},
+		#{lastStaticMeasurement},#{railStandardValue},
+		#{staticMeasurement},#{lastRailStandardValue},#{lastSideCriticalValue},#{outerRailHeight},
+		#{lastOuterRailHeight}
+		)
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectCheckHandle">
+		update 6c_defect_check_handle
+		<trim prefix="set" suffixOverrides=",">
+			<if test="reviewPerson != null">
+				review_person = #{reviewPerson}, 
+			</if>
+			<if test="reviewDate != null">
+				review_date = #{reviewDate}, 
+			</if>
+			<if test="reviewConclusion != null">
+				review_conclusion = #{reviewConclusion}, 
+			</if>
+			<if test="reviewPhoto != null">
+				review_photo = #{reviewPhoto}, 
+			</if>
+			<if test="sideCriticalValue != null">
+				side_critical_value = #{sideCriticalValue},    
+			</if>
+			<if test="lastStaticMeasurement != null">
+				last_static_measurement = #{lastStaticMeasurement},
+			</if>
+			<if test="railStandardValue != null">
+				rail_standard_value = #{railStandardValue},
+			</if>
+			<if test="reviewValue != null">
+				review_value = #{reviewValue},
+			</if>
+			<if test="isReform != null">
+				is_reform = #{isReform}, 	
+			</if>
+			<if test="remark != null">
+				remark = #{remark}, 	
+			</if>
+			<if test="informant != null">
+				informant = #{informant}, 
+			</if>
+			<if test="pillarPhoto != null">
+				pillar_photo = #{pillarPhoto},
+			</if>
+			<if test="defectDeviceAttributes != null">
+				defect_device_attributes = #{defectDeviceAttributes},
+			</if>
+			
+			<if test="staticMeasurement != null">
+				static_measurement = #{staticMeasurement},
+			</if>
+			<if test="lastRailStandardValue != null">
+				last_rail_standard_value = #{lastRailStandardValue},
+			</if>
+			<if test="lastSideCriticalValue != null">
+				last_side_critical_value = #{lastSideCriticalValue},
+			</if>
+			<if test="outerRailHeight != null">
+				outer_rail_height = #{outerRailHeight},
+			</if>
+			<if test="lastOuterRailHeight != null">
+				last_outer_rail_height = #{lastOuterRailHeight}
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+</mapper>

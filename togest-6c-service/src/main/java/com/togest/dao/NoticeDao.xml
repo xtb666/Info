@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.NoticeDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.NoticeDTO">
+		<id column="id" property="id" />
+		<result column="issue_date" property="issueDate" />
+		<result column="issue_person" property="issuePerson" />
+		<result column="responsible_person" property="responsiblePerson" />
+		<result column="notice_number_year" property="noticeNumberYear" />
+		<result column="notice_number_str" property="noticeNumberStr" />
+		<result column="rectify_date" property="rectifyDate" />
+		<result column="rectify_content" property="rectifyContent" />
+		<result column="notice_number" property="noticeNumber" />
+		<result column="notice_status" property="noticeStatus" />
+		<result column="system_id" property="systemId" />
+		<result column="systemName" property="systemName" />
+		<result column="flow_id" property="flowId" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, issue_date, issue_person, responsible_person,
+		notice_number_year,
+		notice_number_str, rectify_date, rectify_content,
+		notice_number, notice_status,
+		system_id
+	</sql>
+
+	<sql id="Base_Table">
+	</sql>
+	<sql id="Base_Column_List_2">
+		a.id, a.issue_date, a.issue_person, a.responsible_person,
+		a.notice_number_year,
+		a.notice_number_str, a.rectify_date,
+		a.rectify_content, a.notice_number, a.notice_status,
+		a.system_id,sys.name as systemName
+	</sql>
+
+	<sql id="Base_Table_2">
+		6c_notice a
+		left join 6c_system sys on system_id = sys.id
+	</sql>
+
+	<resultMap id="DetailMap" type="com.togest.domain.NoticeDTO">
+		<id column="id" property="id" />
+		<result column="issue_date" property="issueDate" />
+		<result column="issue_person" property="issuePerson" />
+		<result column="responsible_person" property="responsiblePerson" />
+		<result column="notice_number_year" property="noticeNumberYear" />
+		<result column="notice_number_str" property="noticeNumberStr" />
+		<result column="rectify_date" property="rectifyDate" />
+		<result column="rectify_content" property="rectifyContent" />
+		<result column="notice_number" property="noticeNumber" />
+		<result column="notice_status" property="noticeStatus" />
+		<result column="system_id" property="systemId" />
+		<result column="flow_id" property="flowId" />
+
+		<!-- <collection property="noticeSections" javaType="java.util.List" ofType="com.togest.domain.NoticeSectionDTO"> 
+			<id column="noticeSection_id" property="id" /> <result column="section_id" 
+			property="sectionId" /> <result column="status" property="status" /> <result 
+			column="receipt_date" property="receiptDate" /> <result column="receipt_person" 
+			property="receiptPerson" /> <result column="overtime" property="overtime" 
+			/> <result column="feedback_content" property="feedbackContent" /> <result 
+			column="feedback_person" property="feedbackPerson" /> <result column="feedback_date" 
+			property="feedbackDate" /> <result column="notice_id" property="noticeId" 
+			/> </collection> -->
+
+		<collection property="defects" javaType="java.util.List"
+			ofType="com.togest.response.DefectResponse">
+			<id column="d_id" property="id" />
+			<result column="p_name" property="name" />
+			<result column="d_flow_id" property="flowId" />
+		</collection>
+	</resultMap>
+
+	<sql id="Detail_Column">
+		a.id, a.issue_date, a.issue_person, a.responsible_person,
+		a.notice_number_year,
+		a.notice_number_str, a.rectify_date,
+		a.rectify_content, a.notice_number, a.notice_status,
+		a.system_id,sys.name as systemName,
+		<!-- ns.id, ns.section_id, ns.status, ns.receipt_date, ns.receipt_person, 
+			ns.overtime, ns.feedback_content, ns.feedback_person, ns.feedback_date, ns.notice_id, -->
+		d.id as d_id, p.name as p_name, dfd.process_instance_id as d_flow_id
+	</sql>
+
+	<sql id="Detail_Table">
+		6c_notice a
+		left join 6c_notice_section ns on a.id =
+		ns.notice_id
+		left join 6c_notice_defect nd on nd.notice_section_id =
+		ns.id
+		left join 6c_defect d on d.id = nd.defect_id
+		left join
+		6c_defect_flow dfd on dfd.id = d.id
+		left join jcw_equ_pillar_info p on
+		p.id = d.pillar_id
+		left join 6c_system sys on a.system_id = sys.id
+	</sql>
+
+	<select id="getNoticeDetails" resultMap="DetailMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Detail_Column" />
+		from
+		<include refid="Detail_Table" />
+		where
+		a.id = #{id}
+	</select>
+
+	<select id="getNoticeNumberStr" resultType="java.lang.String">
+		select
+		notice_number_str
+		from 6c_notice
+		order by notice_number_year desc, notice_number_str desc
+		limit 1
+	</select>
+
+	<select id="getNoticeNumber" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select notice_number
+		from 6c_notice
+		where notice_number_year = #{noticeNumberYear}
+		order by
+		notice_number_year desc, notice_number desc
+		limit 1
+	</select>
+
+	<select id="checkNumberRepeat" resultType="java.lang.String" parameterType="java.util.Map">
+		select id
+		from 6c_notice
+		where
+		del_flag = 0
+		and notice_number_year = #{noticeNumberYear} and notice_number =
+		#{noticeNumber}
+	</select>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice
+		where
+		id = #{id}
+	</select>
+
+	<select id="getListByKeys" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice
+		where
+		del_flag = 0
+		and id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getByEntity" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.NoticeDTO">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice
+		<where>
+			del_flag = 0
+			<if test="issueDate != null">
+				and issue_date = #{issueDate}
+			</if>
+			<if test="issuePerson != null">
+				and issue_person = #{issuePerson}
+			</if>
+			<if test="responsiblePerson != null">
+				and responsible_person = #{responsiblePerson}
+			</if>
+			<if test="noticeNumberYear != null">
+				and notice_number_year = #{noticeNumberYear}
+			</if>
+			<if test="noticeNumberStr != null">
+				and notice_number_str = #{noticeNumberStr}
+			</if>
+			<if test="rectifyDate != null">
+				and rectify_date = #{rectifyDate}
+			</if>
+			<if test="rectifyContent != null">
+				and rectify_content = #{rectifyContent}
+			</if>
+			<if test="noticeNumber != null">
+				and notice_number = #{noticeNumber}
+			</if>
+			<if test="noticeStatusList != null">
+				and notice_status in
+				<foreach item="item" collection="noticeStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<select id="findList" resultMap="BaseResultMap" parameterType="com.togest.domain.NoticeDTO">
+		select
+		<include refid="Base_Column_List_2" />
+		from 
+		<include refid="Base_Table_2" />
+		<where>
+			a.del_flag = 0
+			<if test="issueDate != null">
+				and a.issue_date = #{issueDate}
+			</if>
+			<if test="issuePerson != null">
+				and a.issue_person = #{issuePerson}
+			</if>
+			<if test="responsiblePerson != null">
+				and a.responsible_person = #{responsiblePerson}
+			</if>
+			<if test="noticeNumberYear != null">
+				and a.notice_number_year = #{noticeNumberYear}
+			</if>
+			<if test="noticeNumberStr != null">
+				and a.notice_number_str = #{noticeNumberStr}
+			</if>
+			<if test="rectifyDate != null">
+				and a.rectify_date = #{rectifyDate}
+			</if>
+			<if test="rectifyContent != null">
+				and a.rectify_content = #{rectifyContent}
+			</if>
+			<if test="noticeNumber != null">
+				and a.notice_number = #{noticeNumber}
+			</if>
+			<if test="noticeStatusList != null">
+				and a.notice_status in
+				<foreach item="item" collection="noticeStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_notice
+		where del_flag = 0
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.NoticeDTO">
+		insert into 6c_notice(
+		id, issue_date, issue_person, responsible_person, notice_number_year,
+		notice_number_str, rectify_date, rectify_content, notice_number,
+		notice_status,
+		system_id
+		)
+		values(
+		#{id}, #{issueDate}, #{issuePerson}, #{responsiblePerson},
+		#{noticeNumberYear},
+		#{noticeNumberStr}, #{rectifyDate}, #{rectifyContent}, #{noticeNumber}, #{noticeStatus},
+		#{systemId}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.NoticeDTO">
+		update 6c_notice
+		<trim prefix="set" suffixOverrides=",">
+			<!-- <if test=" != null"> </if> -->
+			<if test="issueDate != null">
+				issue_date = #{issueDate},
+			</if>
+			<if test="issuePerson != null">
+				issue_person = #{issuePerson},
+			</if>
+			<if test="responsiblePerson != null">
+				responsible_person = #{responsiblePerson},
+			</if>
+			<if test="noticeNumberYear != null">
+				notice_number_year = #{noticeNumberYear},
+			</if>
+			<if test="noticeNumberStr != null">
+				notice_number_str = #{noticeNumberStr},
+			</if>
+			<if test="rectifyDate != null">
+				rectify_date = #{rectifyDate},
+			</if>
+			<if test="rectifyContent != null">
+				rectify_content = #{rectifyContent},
+			</if>
+			<if test="noticeNumber != null">
+				notice_number = #{noticeNumber},
+			</if>
+			<if test="noticeStatus != null">
+				notice_status = #{noticeStatus},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+
+	<update id="deleteFalse" parameterType="java.util.Map">
+		update 6c_notice
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by =
+		#{deleteBy},
+		delete_date = #{deleteDate}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateNoticeStatus" parameterType="java.util.Map">
+		update 6c_notice
+		set
+		notice_status = #{noticeStatus}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<!-- <delete id="delete" parameterType="java.util.List"> delete from 6c_notice 
+		where id in <foreach item="item" collection="ids" separator="," open="(" 
+		close=")" index=""> #{item} </foreach> </delete> -->
+
+	<select id="defectCount" parameterType="com.togest.request.NoticeQueryFilter"
+		resultType="java.lang.Integer">
+		select count(id)
+		from 6c_defect
+		<where>
+			del_flag = 0
+			<if test="checkDate != null">
+				and check_date = #{checkDate}
+			</if>
+			<if test="defectLevel != null">
+				and defect_level = #{defectLevel}
+			</if>
+			<if test="defectStatus != null">
+				and defect_status = #{defectStatus}
+			</if>
+			<if test="systemId != null">
+				and system_id = #{systemId}
+			</if>
+		</where>
+	</select>
+
+	<select id="findNotice" resultMap="BaseResultMap"
+		parameterType="com.togest.request.NoticeQueryFilter">
+		select
+		<include refid="Base_Column_List_2" />
+		from 
+		<include refid="Base_Table_2" />
+		<where>
+			a.del_flag = 0
+			<if test="beginIssueDate != null">
+				and a.issue_date &gt;= #{beginIssueDate}
+			</if>
+			<if test="endIssueDate != null">
+				and a.issue_date &lt;= #{endIssueDate}
+			</if>
+			<if test="issueDate != null">
+				and a.issue_date = #{issueDate}
+			</if>
+			<if test="issuePerson != null">
+				and a.issue_person = #{issuePerson}
+			</if>
+			<if test="responsiblePerson != null">
+				and a.responsible_person = #{responsiblePerson}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<!-- <if test="noticeNumberYear != null"> and notice_number_year = #{noticeNumberYear} 
+				</if> <if test="noticeNumberStr != null"> and notice_number_str = #{noticeNumberStr} 
+				</if> -->
+			<if test="number != null">
+				and CONCAT(a.notice_number_year,'第',notice_number_str,'号')
+				like '%${number}%'
+			</if>
+			<if test="noticeStatusList != null">
+				and a.notice_status in
+				<foreach item="item" collection="noticeStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		order by a.issue_date desc,a.notice_number_str desc
+	</select>
+
+	<resultMap id="DTOMap" type="com.togest.domain.NoticeDTO">
+		<id column="id" property="id" />
+		<result column="issue_date" property="issueDate" />
+		<result column="issue_person" property="issuePerson" />
+		<result column="responsible_person" property="responsiblePerson" />
+		<result column="notice_number_year" property="noticeNumberYear" />
+		<result column="notice_number_str" property="noticeNumberStr" />
+		<result column="rectify_date" property="rectifyDate" />
+		<result column="rectify_content" property="rectifyContent" />
+		<result column="notice_number" property="noticeNumber" />
+		<result column="notice_status" property="noticeStatus" />
+		<result column="system_id" property="systemId" />
+		<result column="flow_id" property="flowId" />
+
+		<collection property="namings" javaType="java.util.List"
+			ofType="com.togest.domain.Naming">
+			<id column="d_id" property="id" />
+			<result column="defect_name" property="name" />
+		</collection>
+	</resultMap>
+
+	<select id="getById" resultMap="DTOMap" parameterType="java.lang.String">
+		select
+		a.id, a.issue_date, a.issue_person, a.responsible_person,
+		a.notice_number_year,
+		a.notice_number_str, a.rectify_date,
+		a.rectify_content, a.notice_number, a.notice_status,
+		a.system_id, d.id
+		as d_id, d.defect_name,sys.name as systemName
+		from
+		6c_notice a
+		left join 6c_notice_section ns on
+		ns.notice_id = a.id
+		left join 6c_notice_defect nd on
+		nd.notice_section_id = ns.id
+		left join 6c_defect d on d.id =
+		nd.defect_id
+		left join 6c_system sys on a.system_id = sys.id
+		where a.id = #{id}
+	</select>
+
+	<insert id="insertNoticeCheck" parameterType="java.util.Map">
+		insert into 6c_notice_check(notice_id,check_id)
+		values(#{noticeId},#{checkId})
+	</insert>
+	<delete id="deleteNoticeCheck" parameterType="java.util.Map">
+		delete from 6c_notice_check
+		<where>
+			<if test="noticeId!=null">
+				notice_id = #{noticeId}
+			</if>
+			<if test="checkId!=null">
+				and check_id = #{checkId}
+			</if>
+			<if test="noticeId==null and checkId==null">
+				and 1=0
+			</if>
+		</where>
+	</delete>
+	<delete id="deleteNoticeChecks" parameterType="java.util.Map">
+		delete from 6c_notice_check
+		where notice_id in
+		<foreach item="item" collection="noticeIds" separator=","
+			open="(" close=")" index="">
+			#{item}
+		</foreach>
+
+	</delete>
+	<select id="findNoticeCheck" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select notice_id as noticeId,check_id as checkId from 6c_notice_check
+		<where>
+			<if test="noticeId!=null">
+				notice_id = #{noticeId}
+			</if>
+			<if test="checkId!=null">
+				and check_id = #{checkId}
+			</if>
+			<if test="noticeId==null and checkId==null">
+				and 1=0
+			</if>
+		</where>
+	</select>
+</mapper>

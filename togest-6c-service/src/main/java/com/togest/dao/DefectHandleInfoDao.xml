@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectHandleInfoDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectHandleInfo">
+		<id column="id" property="id" />
+		<result column="confirm_person" property="confirmPerson" />
+		<result column="confirm_date" property="confirmDate" />
+		<result column="cancel_person" property="cancelPerson" />
+		<result column="cancelDate" property="cancelDate" />
+		<result column="plan_complete_date" property="planCompleteDate" />
+		<result column="complete_date" property="completeDate" />
+		<result column="is_reformed" property="isReformed" />
+		<result column="is_canceled" property="isCanceled" />
+		<result column="is_confirmed" property="isConfirmed" />
+		<result column="is_timeouted" property="isTimeouted" />
+		<result column="is_needreform" property="isNeedreform" />
+		<result column="is_delayed" property="isDelayed" />
+		<result column="confirm_status" property="confirmStatus" />
+		<result column="delay_count" property="delayCount" />
+		<result column="confirm_remark" property="confirmRemark" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="comment" property="comment" />
+		<result column="check_timeouted" property="checkTimeouted" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.confirm_person, a.confirm_date, a.cancel_person,
+		a.cancel_date, a.plan_complete_date,
+		a.complete_date, a.is_reformed,a.check_timeouted,
+		a.is_canceled, a.is_confirmed, a.is_timeouted, a.is_needreform,
+		a.is_delayed, a.confirm_status,a.delay_count, a.confirm_remark, a.audit_status,a.comment
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_handle_info a
+		where
+		a.id = #{id}
+	</select>
+	<select id="getByKeys" resultMap="BaseResultMap" parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_handle_info a
+		where
+		a.id in
+		<foreach collection="ids" item="item" open="(" close=")"
+			separator="," index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_handle_info a
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.DefectHandleInfo"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_handle_info a
+		<where>
+			<if test="confirmPerson != null">
+				and a.confirm_person = #{confirmPerson}
+			</if>
+			<if test="confirmDate != null">
+				and a.confirm_date = #{confirmDate}
+			</if>
+			<if test="cancelPerson != null">
+				and a.cancel_person = #{cancelPerson}
+			</if>
+			<if test="cancelDate != null">
+				and a.cancel_date = #{cancelDate}
+			</if>
+			<if test="planCompleteDate != null">
+				and a.plan_complete_date = #{planCompleteDate}
+			</if>
+			<if test="completeDate != null">
+				and a.complete_date = #{completeDate}
+			</if>
+			<if test="isReformed != null">
+				and a.is_reformed = #{isReformed}
+			</if>
+			<if test="isCanceled != null">
+				and a.is_canceled = #{isCanceled}
+			</if>
+			<if test="isConfirmed != null">
+				and a.is_confirmed = #{isConfirmed}
+			</if>
+			<if test="isTimeouted != null">
+				and a.is_timeouted = #{isTimeouted}
+			</if>
+			<if test="isNeedreform != null">
+				and a.is_needreform = #{isNeedreform}
+			</if>
+			<if test="isDelayed != null">
+				and a.is_delayed = #{isDelayed}
+			</if>
+			<if test="confirmStatus != null">
+				and a.confirm_status = #{confirmStatus}
+			</if>
+			<if test="delayCount != null">
+				and a.delay_count = #{delayCount}
+			</if>
+			<if test="auditStatus != null">
+				and a.audit_status = #{auditStatus}
+			</if>
+			<if test="comment != null">
+				and a.comment = #{comment}
+			</if>
+			<if test="checkTimeouted">
+				and a.check_timeouted = #{checkTimeouted}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insertBatch" parameterType="com.togest.domain.DefectHandleInfo">
+		insert into
+		6c_defect_handle_info(
+		id, confirm_person, confirm_date, cancel_person,
+		cancel_date, plan_complete_date,
+		complete_date, is_reformed,
+		is_canceled, is_confirmed, is_timeouted, is_needreform,
+		is_delayed,confirm_status,
+		delay_count, confirm_remark, audit_status,comment,check_timeouted
+		)
+		values
+		<foreach collection="list" item="item" index="index" separator=","> 
+		(
+		#{item.id},
+		#{item.confirmPerson}, #{item.confirmDate}, #{item.cancelPerson}, #{item.cancelDate},
+		#{item.planCompleteDate},
+		#{item.completeDate}, #{item.isReformed}, #{item.isCanceled}, #{item.isConfirmed}, #{item.isTimeouted},
+		#{item.isNeedreform},
+		#{item.isDelayed},#{item.confirmStatus},#{item.delayCount}, #{item.confirmRemark}, #{item.auditStatus},
+		#{item.comment},#{item.checkTimeouted}
+		)
+		</foreach>
+	</insert>
+	<insert id="insert" parameterType="com.togest.domain.DefectHandleInfo">
+		insert into
+		6c_defect_handle_info(
+		id, confirm_person, confirm_date, cancel_person,
+		cancel_date, plan_complete_date,
+		complete_date, is_reformed,
+		is_canceled, is_confirmed, is_timeouted, is_needreform,
+		is_delayed,confirm_status,
+		delay_count, confirm_remark, audit_status,comment,check_timeouted
+		)
+		values(
+		#{id},
+		#{confirmPerson}, #{confirmDate}, #{cancelPerson}, #{cancelDate},
+		#{planCompleteDate},
+		#{completeDate}, #{isReformed}, #{isCanceled}, #{isConfirmed}, #{isTimeouted},
+		#{isNeedreform},
+		#{isDelayed},#{confirmStatus},#{delayCount}, #{confirmRemark}, #{auditStatus},
+		#{comment},#{checkTimeouted}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectHandleInfo">
+		update 6c_defect_handle_info
+		<trim prefix="set" suffixOverrides=",">
+			<if test="confirmPerson != null">
+				confirm_person = #{confirmPerson},
+			</if>
+			<if test="confirmDate != null">
+				confirm_date = #{confirmDate},
+			</if>
+			<if test="cancelPerson != null">
+				cancel_person = #{cancelPerson},
+			</if>
+			<if test="cancelDate != null">
+				cancel_date = #{cancelDate},
+			</if>
+			<if test="planCompleteDate != null">
+				plan_complete_date = #{planCompleteDate},
+			</if>
+			<if test="completeDate != null">
+				complete_date = #{completeDate},
+			</if>
+			<if test="isReformed != null">
+				is_reformed = #{isReformed},
+			</if>
+			<if test="isCanceled != null">
+				is_canceled = #{isCanceled},
+			</if>
+			<if test="isConfirmed != null">
+				is_confirmed = #{isConfirmed},
+			</if>
+			<if test="isTimeouted != null">
+				is_timeouted = #{isTimeouted},
+			</if>
+			<if test="isNeedreform != null">
+				is_needreform = #{isNeedreform},
+			</if>
+			<if test="isDelayed != null">
+				is_delayed = #{isDelayed},
+			</if>
+			<if test="confirmStatus != null">
+				confirm_status = #{confirmStatus},
+			</if>
+			<if test="delayCount != null">
+				delay_count = #{delayCount},
+			</if>
+			<if test="confirmRemark != null">
+				confirm_remark = #{confirmRemark},
+			</if>
+			<if test="auditStatus != null">
+				audit_status = #{auditStatus},
+			</if>
+			<if test="comment != null">
+				comment = #{comment},
+			</if>
+			<if test="checkTimeouted != null">
+				check_timeouted = #{checkTimeouted},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+
+	<update id="updateConfirmBatch" parameterType="java.util.Map">
+		update 6c_defect_handle_info set
+		confirm_person = #{confirmPerson},
+		confirm_date = #{confirmDate},
+		is_confirmed = #{isConfirmed}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateCancelBatch" parameterType="java.util.Map">
+		update 6c_defect_handle_info set
+		cancel_person = #{cancelPerson},
+		cancel_date = #{cancelDate},
+		is_canceled = #{isCanceled}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateAuditStatuBatch" parameterType="java.util.Map">
+		update 6c_defect_handle_info set
+		audit_status = #{auditStatus}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updatePlanCompleteDateBatch" parameterType="java.util.Map">
+		update 6c_defect_handle_info set
+		plan_complete_date =
+		#{planCompleteDate}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateDelayCountBatch" parameterType="java.util.Map">
+		update 6c_defect_handle_info
+		set
+		delay_count = delay_count + 1
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateBatch" parameterType="java.util.Map">
+		update 6c_defect_handle_info
+		<trim prefix="set" suffixOverrides=",">
+			<if test="entity.confirmPerson != null">
+				confirm_person = #{entity.confirmPerson},
+			</if>
+			<if test="entity.confirmDate != null">
+				confirm_date = #{entity.confirmDate},
+			</if>
+			<if test="entity.cancelPerson != null">
+				cancel_person = #{entity.cancelPerson},
+			</if>
+			<if test="entity.cancelDate != null">
+				cancel_date = #{entity.cancelDate},
+			</if>
+			<if test="entity.planCompleteDate != null">
+				plan_complete_date = #{entity.planCompleteDate},
+			</if>
+			<if test="entity.completeDate != null">
+				complete_date = #{entity.completeDate},
+			</if>
+			<if test="entity.isReformed != null">
+				is_reformed = #{entity.isReformed},
+			</if>
+			<if test="entity.isCanceled != null">
+				is_canceled = #{entity.isCanceled},
+			</if>
+			<if test="entity.isConfirmed != null">
+				is_confirmed = #{entity.isConfirmed},
+			</if>
+			<if test="entity.isTimeouted != null">
+				is_timeouted = #{entity.isTimeouted},
+			</if>
+			<if test="entity.isNeedreform != null">
+				is_needreform = #{entity.isNeedreform},
+			</if>
+			<if test="entity.isDelayed != null">
+				is_delayed = #{entity.isDelayed},
+			</if>
+			<if test="entity.confirmStatus != null">
+				confirm_status = #{entity.confirmStatus},
+			</if>
+			<if test="entity.delayCount != null">
+				delay_count = #{entity.delayCount},
+			</if>
+			<if test="entity.confirmRemark != null">
+				confirm_remark = #{entity.confirmRemark},
+			</if>
+			<if test="entity.auditStatus != null">
+				audit_status = #{entity.auditStatus},
+			</if>
+			<if test="entity.comment != null">
+				comment = #{entity.comment},
+			</if>
+			<if test="entity.checkTimeouted != null">
+				check_timeouted = #{entity.checkTimeouted},
+			</if>
+		</trim>
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	
+		<update id="updateArchiveRest" parameterType="com.togest.domain.DefectHandleInfo">
+		update 6c_defect_handle_info
+		<trim prefix="set" suffixOverrides=",">
+			<if test="confirmPerson != null">
+				is_confirmed = #{isConfirmed},
+			</if>
+				confirm_person = #{confirmPerson},
+				plan_complete_date = #{planCompleteDate},
+				complete_date = #{completeDate},
+				confirm_date = #{confirmDate},
+				cancel_person = #{cancelPerson},
+				cancel_date = #{cancelDate},
+				is_reformed = #{isReformed},
+				is_canceled = #{isCanceled},
+				is_timeouted = #{isTimeouted},
+				is_needreform = #{isNeedreform},
+				is_delayed = #{isDelayed},
+				check_timeouted = #{checkTimeouted},
+				confirm_status = #{confirmStatus},
+				delay_count = #{delayCount},
+			
+				<if test="confirmRemark != null">
+					confirm_remark = #{confirmRemark},
+				</if>
+				<if test="auditStatus != null">
+				audit_status = #{auditStatus},
+				</if>
+				comment = #{comment}
+		</trim>
+		where
+		id = #{id}
+	</update>
+	<delete id="deleteByKeys" parameterType="java.util.List">
+		delete from
+		6c_defect_handle_info
+		where id in
+		<foreach collection="list" item="item" open="(" close=")"
+			separator="," index="">
+			#{item}
+		</foreach>	
+	</delete>
+	
+</mapper>

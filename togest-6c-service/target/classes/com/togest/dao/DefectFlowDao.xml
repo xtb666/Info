@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectFlowDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectFlow">
+		<id column="id" property="id" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="form_key" property="formKey" />
+		<result column="task_name" property="taskName" />
+		<result column="task_id" property="taskId" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.process_instance_id, a.form_key, a.task_name, a.task_id
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_flow a
+		where
+		a.id = #{id}
+	</select>
+	
+	<select id="getBykeys" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_flow a
+		where a.id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	<select id="getByProcessInstanceIds" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_flow a
+		where a.process_instance_id
+		in
+		<foreach item="item" collection="processInstanceIds" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectFlow">
+		insert into 6c_defect_flow(
+		id, process_instance_id, form_key, task_name, task_id
+		)
+		values(
+		#{id}, #{processInstanceId}, #{formKey}, #{taskName}, #{taskId}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectFlow">
+		update 6c_defect_flow
+		set
+		<if test="processInstanceId!=null">
+		process_instance_id = #{processInstanceId},
+		</if>
+		form_key = #{formKey},
+		task_name = #{taskName},
+		task_id = #{taskId}
+		<where>
+		<choose>
+			<when test="processInstanceId!=null" >
+				process_instance_id = #{processInstanceId}
+			</when>
+			<otherwise>
+				id = #{id}
+			</otherwise>
+		</choose>
+		</where>
+	</update>
+
+</mapper>

@@ -1,0 +1,65 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+      discovery:
+        enabled: false
+        service-id: config-server
+      profile: test
+      label: master
+  application:
+    name: drawing-service
+#  rabbitmq:
+#     host: rabbitHost
+#     port: 5672
+#     username: guest
+#     password: zaq12wsx
+#  zipkin:
+#    base-url: zipkinHost:9411
+#    enabled: true
+  sleuth: 
+    sampler:
+      percentage: 1
+  redis:
+    host: redisHost
+    port: 6379  
+    password: zaq12wsx
+  datasource:
+    username: root
+    password: zaq12wsx
+    url: jdbc:mysql://mysqlHost:3306/togest_platform?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+server:
+  port: 40005
+  # context-path:
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 10     
+  client:
+    enabled: true
+    serviceUrl:
+      defaultZone: http://eurekaHost:8762/eureka/
+      spring:
+mybatis:
+    type-aliases-package: com.togest.domain
+logging:
+  config:
+    classpath: logback.xml
+  path: /log
+  file: jcw_drawing_log.log
+feign:
+  hystrix:
+    enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 50000    
+management:
+  security:
+    enabled: false

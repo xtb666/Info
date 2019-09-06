@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.Check1CSectionDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.Check1CSectionDTO">
+		<id column="id" property="id" />
+		<result column="detect_mileage" property="detectMileage" />
+		<result column="average_speed" property="averageSpeed" />
+		<result column="good_mileage" property="goodMileage" />
+		<result column="qualified_mileage" property="qualifiedMileage" />
+		<result column="unqualified_mileage" property="unqualifiedMileage" />
+		<result column="points" property="points" />
+		<result column="good_points" property="goodPoints" />
+		<result column="qualified_points" property="qualifiedPoints" />
+		<result column="unqualified_detail" property="unqualifiedDetail" />
+		<result column="section_id" property="sectionId" />
+		<result column="check_id" property="checkId" />
+		<result column="sectionName" property="sectionName" />
+		<result column="checkDate" property="checkDate" />
+		<result column="lineId" property="lineId" />
+		<result column="lineName" property="lineName" />
+		<result column="direction" property="direction" />
+		<result column="directionName" property="directionName" />
+		
+		<result column="dept_id" property="deptId" />
+		<result column="work_shop_id" property="workShopId" />
+		<result column="deptName" property="deptName" />
+		<result column="workShopName" property="workShopName" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.detect_mileage, a.average_speed, a.good_mileage, a.qualified_mileage, a.unqualified_mileage, a.points,
+		a.good_points, a.qualified_points, a.unqualified_detail,
+		a.section_id, a.check_id, pd.name as sectionName, pl.name as lineName, checks.check_date as checkDate,checks.line_id as lineId,checks.direction,
+		pdi.name as directionName,a.dept_id,a.work_shop_id,pd1.name as deptName,pd2.name as workShopName
+	</sql>
+
+	<insert id="insert" parameterType="com.togest.domain.Check1CSection">
+		insert into 6c_check_1c_section(
+			id, detect_mileage, average_speed, good_mileage, qualified_mileage, unqualified_mileage, points,
+			good_points, qualified_points, unqualified_detail,
+			section_id, check_id, create_ip, create_by, create_date, del_flag,dept_id,work_shop_id
+		)
+		values(
+			#{id}, #{detectMileage}, #{averageSpeed}, #{goodMileage}, #{qualifiedMileage}, #{unqualifiedMileage}, #{points},
+			#{goodPoints}, #{qualifiedPoints}, #{unqualifiedDetail}, 
+			#{sectionId}, #{checkId}, #{createIp}, #{createBy}, #{createDate}, #{delFlag},#{deptId},#{workShopId}
+		)
+	</insert>
+	<insert id="insertList" parameterType="java.util.List">
+			insert into 6c_check_1c_section(
+			id, detect_mileage, average_speed, good_mileage, qualified_mileage, unqualified_mileage, points,
+			good_points, qualified_points, unqualified_detail,
+			section_id, check_id, create_ip, create_by, create_date, del_flag,dept_id,work_shop_id
+		)
+		<foreach collection="list" item="item" separator="union all" index="index" >
+		select
+		(#{item.id}, #{item.detectMileage}, #{item.averageSpeed}, #{item.goodMileage}, #{item.qualifiedMileage}, #{item.unqualifiedMileage}, #{item.points},
+			#{item.goodPoints}, #{item.qualifiedPoints}, #{item.unqualifiedDetail}, 
+			#{item.sectionId}, #{item.checkId}, #{item.createIp}, #{item.createBy}, #{item.createDate}, #{item.delFlag},#{item.deptId},#{item.workShopId})
+		</foreach>
+	</insert>
+	
+	<select id="findCheckSectionList" resultMap="BaseResultMap" parameterType="com.togest.request.CheckQueryFilter">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_check_1c_section a
+		left join 6c_check_1c checks on checks.id = a.check_id
+		left join p_department pd on pd.id = a.section_id
+		left join p_department pd1 on pd1.id = a.dept_id
+		left join p_department pd2 on pd2.id = a.work_shop_id
+		left join p_line pl on pl.id = checks.line_id
+		left join p_dictionary_item pdi on pdi.id = checks.direction
+		<where>
+			<if test="checkDate != null">
+				and checks.check_date &gt;= #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and checks.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and checks.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and checks.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and checks.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and pl.speed_type = #{speedType}
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(a.dept_id in (select id from
+					p_department where parent_ids like '%${did}%' and del_flag=0)
+					 or a.dept_id =#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.dept_id = #{did}
+				</if>
+			</if>
+			<!-- <if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where parent_ids like '%${workShopId}%' and del_flag=0)
+				 or a.work_shop_id =#{workShopId})
+			</if> -->
+			<if test="checkId != null">
+				and a.check_id = #{checkId}
+			</if>
+			and a.del_flag = 0
+		</where>
+		order by checks.check_date desc,pl.id, checks.direction, a.section_id
+	</select>
+	
+	<select id="findCheckSectionId" resultType="java.lang.String" >
+		select cs.id as id
+ 		from
+		6c_check_1c c
+		left join 6c_check_1c_section cs on c.id = cs.check_id
+		where
+		c.del_flag=0
+		and c.check_date = #{checkDate}
+		and c.line_id = #{lineId}
+		and c.direction = #{direction}
+		and cs.section_id = #{sectionId}
+		and cs.dept_id = #{deptId}
+	</select>
+	
+	<select id="findCheckSectionIds" parameterType="java.util.List"
+		resultType="java.util.Map">
+		<foreach item="entity" collection="entityList" separator="union all" open="" close="" index="">
+			(select cs.id, c.line_id as lineId, c.direction, cs.section_id as sectionId, date_format(c.check_date, '%Y-%m-%d') as checkDate,
+			cs.dept_id as deptId
+	 		from
+			6c_check_1c c
+			left join 6c_check_1c_section cs on c.id = cs.check_id
+			where
+			c.del_flag=0
+			and c.check_date = #{entity.checkDate}
+			and c.line_id = #{entity.lineId}
+			and c.direction = #{entity.direction}
+			and cs.section_id = #{entity.sectionId}
+			and cs.dept_id = #{entity.deptId})
+		</foreach> 
+	</select>
+	
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_check_1c_section a
+		left join 6c_check_1c checks on checks.id = a.check_id
+		left join p_department pd on pd.id = a.section_id
+		left join p_department pd1 on pd1.id = a.dept_id
+		left join p_department pd2 on pd2.id = a.work_shop_id
+		left join p_line pl on pl.id = checks.line_id
+		left join p_dictionary_item pdi on pdi.id = checks.direction
+		where
+		a.del_flag = 0
+		and a.id = #{id}
+	</select>
+	
+	<select id="getByCheckIds"  parameterType="java.lang.String" resultType="java.lang.String">
+		select id
+		from 6c_check_1c_section
+		where
+		check_id in 
+		<foreach item="item" collection="checkIds" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+		and del_flag = 0
+	</select>
+	
+	<select id="unDeleteCounts" resultType="java.lang.Integer" parameterType="java.lang.String">
+		select count(*)
+		from 6c_check_1c_section
+		where 
+		check_id = #{checkId}
+		and del_flag = 0
+	</select>
+	
+	<update id="update" parameterType="com.togest.domain.Check1CSection">
+		update 6c_check_1c_section
+		<trim prefix="set" suffixOverrides=",">
+			<if test="detectMileage != null">
+				detect_mileage = #{detectMileage},
+			</if>
+			<if test="averageSpeed != null">
+				average_speed = #{averageSpeed},
+			</if>
+			<if test="goodMileage != null">
+				good_mileage = #{goodMileage},
+			</if>
+			<if test="qualifiedMileage != null">
+				qualified_mileage = #{qualifiedMileage},
+			</if>
+			<if test="unqualifiedMileage != null">
+				unqualified_mileage = #{unqualifiedMileage},
+			</if>
+			<if test="points != null">
+				points = #{points},
+			</if>
+			<if test="goodPoints != null">
+				good_points = #{goodPoints},
+			</if>
+			<if test="qualifiedPoints != null">
+				qualified_points = #{qualifiedPoints},
+			</if>
+			<if test="unqualifiedDetail != null">
+				unqualified_detail = #{unqualifiedDetail},
+			</if>
+			<if test="updateIp != null">
+				update_ip = #{updateIp},
+			</if>
+			<if test="updateBy != null">
+				update_by = #{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+	
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_check_1c_section set
+		del_flag = 1, delete_ip = #{deleteIp}, delete_by = #{deleteBy}, delete_date = #{deleteDate}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="deleteFalsesByCheckIds" parameterType="java.util.Map">
+		update 6c_check_1c_section set
+		del_flag = 1, delete_ip = #{deleteIp}, delete_by = #{deleteBy}, delete_date = #{deleteDate}
+		where check_id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+</mapper>

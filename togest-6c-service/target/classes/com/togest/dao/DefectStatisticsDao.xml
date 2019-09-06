@@ -1,0 +1,2160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectStatisticsDao">
+
+	<sql id="Line_Column">
+		tab1.lineName ,tab2.processing, tab1.total,tab1.systemId
+	</sql>
+
+	<sql id="Line_Table">
+		6c_defect a
+		left join 6c_defect_handle_info hi on a.id =
+		hi.id
+		left join p_line pl on a.line_id=pl.id
+	</sql>
+
+	<sql id="Base_Table">
+		6c_defect d
+		left join p_department pd on d.work_shop_id =
+		pd.id
+		left join p_department pd1 on d.work_area_id = pd1.id
+		left join
+		p_department pd2 on d.section_id = pd2.id
+		left join p_line pl on
+		d.line_id = pl.id
+		left join p_supply_arm psa on d.psa_id = psa.id
+		left
+		join p_tunnel pt on d.tunnel_id = pt.id
+		left join 6c_defect_type dt on
+		d.defect_type = dt.id
+		left join 6c_defect_check_handle ch on ch.id =
+		d.id
+		left join 6c_defect_reform_handle rh on rh.id = d.id
+		left join
+		6c_defect_flow df on df.id = d.id
+		left join 6c_defect_handle_info
+		dhi on
+		dhi.id = d.id
+	</sql>
+
+	<select id="findLineStatistics" resultType="com.togest.response.statistics.LineStatistics"
+		parameterType="com.togest.request.CQueryFilter">
+		select
+		<include refid="Line_Column" />
+		from
+		(select pl.name as lineName,count(*) as total,d.system_id as
+		systemId
+		from
+		<include refid="Base_Table" />
+		<where>
+		    d.del_flag=0
+			and dhi.is_confirmed=1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and (d.defect_level = #{defectLevel} or d.defect_data_level = #{defectLevel})
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+		</where>
+		group by pl.name,d.system_id
+		) as tab1
+		left join
+		(select pl.name as
+		lineName,count(*) as processing,d.system_id as systemId
+		from
+		<include refid="Base_Table" />
+		<where>
+			 d.del_flag=0
+			and dhi.is_confirmed=1
+			and dhi.is_canceled is null
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and (d.defect_level = #{defectLevel} or d.defect_data_level = #{defectLevel})
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+		</where>
+		group by pl.name,d.system_id
+		) as tab2
+		on tab1.lineName = tab2.lineName
+		and tab1.systemId = tab2.systemId
+		group by tab1.lineName,tab1.systemId
+	</select>
+
+	<select id="findDefectTypeStatistics" resultType="com.togest.response.statistics.DefectTypeStatistics"
+		parameterType="com.togest.request.CQueryFilter">
+		select dt.name as defectTypeName, count(*) as num,d.system_id as
+		systemId
+		from
+		<include refid="Base_Table" />
+		<where>
+			 d.del_flag=0
+			and dhi.is_confirmed=1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and (d.defect_level = #{defectLevel} or d.defect_data_level = #{defectLevel})
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="needCanceledIsNull == true">
+				AND d.defect_status IN ('1','2','3','4','5','7','8' )
+			</if>
+		</where>
+		group by d.defect_type,d.system_id
+	</select>
+
+	<select id="findDefectLevelStatistics"
+		resultType="com.togest.response.statistics.DefectLevelStatistics"
+		parameterType="com.togest.request.CQueryFilter">
+		SELECT pdi.name AS defectLevelName, COUNT(d.id) AS num,
+		d.system_id as systemId,
+		(CASE WHEN d.defect_level IS NULL  THEN d.defect_data_level ELSE d.defect_level END) AS dl
+		FROM 6c_defect d
+		LEFT JOIN 6c_defect_handle_info dhi ON dhi.id = d.id
+		LEFT JOIN p_dictionary_item pdi 
+		ON (CASE WHEN d.defect_level IS NULL  THEN d.defect_data_level ELSE d.defect_level END) = pdi.code
+		<where>
+			 pdi.dictionary_ename = 'defect_grade'
+			 AND d.`del_flag`=0
+			 AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and (d.defect_level = #{defectLevel} or d.defect_data_level = #{defectLevel})
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			and d.del_flag=0
+			and dhi.is_confirmed=1
+			<if test="needCanceledIsNull == true">
+				AND d.defect_status IN ('1','2','3','4','5','7','8' )
+			</if>
+		</where>
+		group by dl,d.system_id
+	</select>
+
+	<select id="untreatedDefect" resultType="java.lang.Integer"
+		parameterType="com.togest.request.CQueryFilter">
+		select count(*)
+		from
+		6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		<where>
+			 d.del_flag = 0
+			 AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			and dhi.is_confirmed = 1
+			and d.defect_status in
+			('2','3','4')
+		</where>
+	</select>
+
+	<select id="currentDefect" resultType="java.lang.Integer"
+		parameterType="com.togest.request.CQueryFilter">
+		select count(*)
+		from
+		6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		<where>
+			 d.del_flag = 0
+			and dhi.is_confirmed = 1
+			AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="needCanceledIsNull == true">
+				AND d.defect_status IN ('1','2','3','4','5','7','8' )
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+		</where>
+	</select>
+
+	<select id="defectLevelStatistics"
+		resultType="com.togest.response.statistics.DefectLevelStatistics"
+		parameterType="com.togest.request.CQueryFilter">
+		select pdi.name as defectLevelName, count(d.id) as num,
+		(CASE WHEN d.defect_level IS NULL  THEN d.defect_data_level ELSE d.defect_level END) AS dl
+		from 6c_defect d
+		left join 6c_defect_handle_info dhi on dhi.id = d.id
+		left join
+		p_dictionary_item pdi on (CASE WHEN d.defect_level IS NULL  THEN d.defect_data_level ELSE d.defect_level END) = pdi.code
+		<where>
+		 d.del_flag=0
+			and dhi.is_confirmed=1
+			AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="needCanceledIsNull == true">
+				AND d.defect_status IN ('1','2','3','4','5','7','8' )
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			and pdi.dictionary_ename = 'defect_grade'
+			AND ( d.defect_level IS NOT NULL
+			OR	d.defect_data_level IS NOT NULL) 
+		</where>
+		group by dl
+	</select>
+
+
+	<select id="cTypeStatistics" resultType="com.togest.response.statistics.CTypeStatistics"
+		parameterType="com.togest.request.CQueryFilter">
+		select sys.name as cName, count(*) as num, d.system_id as systemId
+		from
+		6c_defect d
+		join 6c_defect_handle_info dhi on dhi.id = d.id
+		join
+		6c_system sys on
+		sys.id = d.system_id
+		<where>
+			 d.del_flag=0
+			and dhi.is_confirmed=1
+			AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="needCanceledIsNull == true">
+				AND d.defect_status IN ('1','2','3','4','5','7','8' )
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+		</where>
+		group by d.system_id
+	</select>
+
+	<select id="detectMileageStatistics"
+		resultType="com.togest.response.statistics.DetectMileageStatistics"
+		parameterType="com.togest.request.CQueryFilter">
+		select sys.name as cName, sum(detect_mileage) as detectMileage,
+		p.system_id as systemId
+		from
+		6c_plan p
+		left join 6c_plan_line pl on p.id
+		= pl.plan_id
+		join 6c_system sys on
+		sys.id = p.system_id
+		<where>
+			 p.del_flag = 0
+			<if test="beginCheckDate != null">
+				and p.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and p.plan_date &lt;= #{endCheckDate}
+			</if>
+		</where>
+		group by p.system_id
+	</select>
+
+	<select id="defectNum" resultType="java.lang.Integer"
+		parameterType="com.togest.request.CQueryFilter">
+		select count(*)
+		from
+		6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		<where>
+		 d.del_flag = 0
+			<if test="checkDate != null">
+				and d.check_date = #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="isConfirmed != null">
+				and dhi.is_confirmed = #{isConfirmed}
+			</if>
+			<if test="isReformed != null">
+				and dhi.is_reformed = #{isReformed}
+			</if>
+			<if test="isCanceled != null">
+				and dhi.is_canceled = #{isCanceled}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+		</where>
+	</select>
+
+	<select id="sectionDetectMileageFor1C" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select cs.section_id as id, pd.name as name, sum(cs.detect_mileage) as
+		num
+		from 6c_check_1c check1c
+		left join 6c_check_1c_section cs on
+		cs.check_id = check1c.id
+		left join p_department pd on pd.id =
+		cs.section_id
+		<where>
+		 check1c.del_flag = 0
+			<if test="beginCheckDate != null">
+				and check1c.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and check1c.check_date &lt;= #{endCheckDate}
+			</if>
+		</where>
+		group by cs.section_id
+	</select>
+
+	<select id="sectionDetectMileage" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select pd.name as name, sum(pl.detect_mileage) as num
+		from
+		6c_plan p
+		left join 6c_plan_line pl on pl.plan_id = p.id
+		left join p_department
+		pd on pd.id = p.section_id
+		<where>
+			 p.del_flag = 0
+			<if test="beginCheckDate != null">
+				and p.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and p.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and p.system_id = #{systemId}
+			</if>
+		</where>
+		group by p.section_id
+	</select>
+
+	<select id="lineDetectMileage" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select line.name as name, sum(pl.detect_mileage) as num
+		from
+		6c_plan_line pl
+		left join 6c_plan p on p.id = pl.plan_id
+		left join
+		p_line line on line.id = pl.line_id
+		<where>
+			 p.del_flag = 0
+			<if test="beginCheckDate != null">
+				and p.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and p.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and p.system_id = #{systemId}
+			</if>
+		</where>
+		group by pl.line_id
+	</select>
+
+	<select id="lineDetectMileageFor1C" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select check1c.line_id as id, pl.name as name, sum(detect_mileage) as
+		num
+		from
+		6c_check_1c check1c
+		left join p_line pl on pl.id =
+		check1c.line_id
+		<where>
+		 check1c.del_flag = 0
+			<if test="beginCheckDate != null">
+				and check1c.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and check1c.check_date &lt;= #{endCheckDate}
+			</if>
+		</where>
+		group by check1c.line_id
+	</select>
+
+	<select id="defectType" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select dt.name as name, count(*) as num
+		from
+		6c_defect d
+		left join
+		6c_defect_handle_info dhi on dhi.id = d.id
+		left join 6c_defect_type dt
+		on d.defect_type = dt.id
+		<where>
+			 d.del_flag = 0
+			and dhi.is_confirmed = 1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+		</where>
+		group by d.defect_type
+	</select>
+
+	<select id="defectLine" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select line.name as name, count(*) as num
+		from
+		6c_defect d
+		left join
+		6c_defect_handle_info dhi on dhi.id = d.id
+		left join p_line
+		line on
+		line.id = d.line_id
+		<where>
+		 d.del_flag = 0
+			and dhi.is_confirmed = 1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+		</where>
+		group by d.line_id
+	</select>
+
+	<select id="defectSection" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.CQueryFilter">
+		select pd.name as name, count(*) as num
+		from
+		6c_defect d
+		left join
+		6c_defect_handle_info dhi on dhi.id = d.id
+		left join
+		p_department pd on
+		pd.id = d.section_id
+		<where>
+			d.del_flag = 0
+			and dhi.is_confirmed = 1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+		</where>
+		group by d.section_id
+	</select>
+
+	<select id="defectReformList" resultType="com.togest.response.statistics.DefectReform"
+		parameterType="com.togest.request.CQueryFilter">
+
+		select tab1.sectionName as sectionName, tab1.lineName as lineName,
+		tab1.directionName as directionName,
+		tab2.totalNum as totalNum,
+		tab3.reformNum as reformNum, tab4.leftNum as leftNum,
+		tab5.leftTotalNum as leftTotalNum
+		from
+		(select DISTINCT pd.name as
+		sectionName, line.name as lineName, pdi.name as
+		directionName
+		from
+		6c_defect d
+		left join 6c_defect_handle_info dhi on dhi.id = d.id
+		left
+		join p_line line on line.id = d.line_id
+		left join p_department pd on
+		pd.id = d.section_id
+		left join p_dictionary_item pdi on pdi.id =
+		d.direction
+		where
+		d.del_flag=0
+		) as tab1
+
+		left join
+
+		(select pd.name as
+		sectionName, line.name as lineName, pdi.name as
+		directionName, count(*)
+		as totalNum
+		from 6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		left join p_line line on line.id = d.line_id
+		left join
+		p_department pd on pd.id = d.section_id
+		left join p_dictionary_item pdi
+		on pdi.id = d.direction
+		<where>
+		 d.del_flag=0
+		and dhi.is_confirmed = 1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+		</where>
+		group by d.section_id, d.line_id, d.direction) as tab2
+		on
+		tab1.sectionName = tab2.sectionName and tab1.lineName = tab2.lineName
+		and tab1.directionName = tab2.directionName
+
+		left join
+
+		(select pd.name as
+		sectionName, line.name as lineName, pdi.name as
+		directionName, count(*)
+		as reformNum
+		from 6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		left join p_line line on line.id = d.line_id
+		left join
+		p_department pd on pd.id = d.section_id
+		left join p_dictionary_item pdi
+		on pdi.id = d.direction
+		<where>
+		 d.del_flag=0
+		and dhi.is_reformed = 1
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			
+		</where>
+		group by d.section_id, d.line_id, d.direction) as tab3
+		on
+		tab2.sectionName = tab3.sectionName and tab2.lineName = tab3.lineName
+		and tab2.directionName = tab3.directionName
+
+		left join
+
+		(select pd.name as
+		sectionName, line.name as lineName, pdi.name as
+		directionName, count(*)
+		as leftNum
+		from 6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		left join p_line line on line.id = d.line_id
+		left join
+		p_department pd on pd.id = d.section_id
+		left join p_dictionary_item pdi
+		on pdi.id = d.direction
+		<where>
+			d.del_flag=0
+			and d.check_date &lt;= '2017-12-1'
+			and dhi.complete_date
+			&gt;= '2016-5-1'
+			<!-- <if test="beginCheckDate != null"> and d.check_date &gt;= #{beginCheckDate} 
+				</if> <if test="endCheckDate != null"> and d.check_date &lt;= #{endCheckDate} 
+				</if> -->
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			and dhi.is_reformed = 1
+		</where>
+		group by d.section_id, d.line_id, d.direction) as tab4
+		on
+		tab3.sectionName = tab4.sectionName and tab3.lineName = tab4.lineName
+		and tab3.directionName = tab4.directionName
+
+		left join
+
+		(select pd.name as
+		sectionName, line.name as lineName, pdi.name as
+		directionName, count(*)
+		as leftTotalNum
+		from 6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		left join p_line line on line.id = d.line_id
+		left join
+		p_department pd on pd.id = d.section_id
+		left join p_dictionary_item pdi
+		on pdi.id = d.direction
+		<where>
+			d.del_flag=0
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			and d.defect_type not in ('5','6')
+		</where>
+		group by d.section_id, d.line_id, d.direction) as tab5
+		on
+		tab4.sectionName = tab5.sectionName and tab4.lineName = tab5.lineName
+		and tab4.directionName = tab5.directionName
+		group by tab1.sectionName,
+		tab1.lineName, tab1.directionName,
+		tab2.totalNum, tab3.reformNum,
+		tab4.leftNum, tab5.leftTotalNum
+	</select>
+
+	<select id="findHeaderNames" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		select dt.name
+		from
+		6c_system_defect_type sdf
+		left join
+		6c_defect_type dt on sdf.defect_type_id = dt.id
+		where
+		dt.del_flag = 0
+		and sdf.system_id = #{systemId}
+		order by dt.name asc
+	</select>
+
+	<select id="findRowCounts" resultType="java.lang.Integer"
+		parameterType="com.togest.request.CQueryFilter">
+		select count(d.id)
+		from
+		6c_system_defect_type sdf
+		left join
+		6c_defect_type dt on sdf.defect_type_id = dt.id
+		left join
+		6c_defect d on
+		d.defect_type = dt.id and d.del_flag = 0
+		<if test="lineId != null">
+			and d.line_id = #{lineId}
+		</if>
+		<if test="sectionId != null">
+			and d.section_id = #{sectionId}
+		</if>
+		<if test="beginCheckDate != null">
+			and d.check_date &gt;= #{beginCheckDate}
+		</if>
+		<if test="endCheckDate != null">
+			and d.check_date &lt;= #{endCheckDate}
+		</if>
+		<where>
+		 dt.del_flag=0
+			<if test="systemId != null">
+				and sdf.system_id = #{systemId}
+			</if>
+		</where>
+		group by dt.name
+		order by dt.name asc
+	</select>
+
+	<select id="findAllLineNum" resultType="com.togest.response.statistics.StatisticNum"
+		parameterType="com.togest.request.CQueryFilter">
+
+		select tab1.lineName as name, tab1.untreated, tab2.processed
+		from
+		(select pl.name as lineName,count(*) as untreated
+		from 6c_defect a
+		left
+		join 6c_defect_handle_info hi on a.id = hi.id
+		left join p_line pl on
+		a.line_id=pl.id
+		where hi.is_confirmed=1 and hi.is_reformed is null and
+		a.del_flag=0
+		<if test="beginCheckDate != null">
+			and a.check_date &gt;= #{beginCheckDate}
+		</if>
+		<if test="endCheckDate != null">
+			and a.check_date &lt;= #{endCheckDate}
+		</if>
+		group by pl.name
+		) as tab1
+		left join
+		(select pl.name as lineName,count(*)
+		as processed
+		from 6c_defect a
+		left join
+		6c_defect_handle_info hi on a.id
+		= hi.id
+		left join p_line pl on
+		a.line_id=pl.id
+		where hi.is_confirmed=1
+		and hi.is_reformed=1 and
+		hi.is_canceled is null and a.del_flag=0
+		<if test="beginCheckDate != null">
+			and a.check_date &gt;= #{beginCheckDate}
+		</if>
+		<if test="endCheckDate != null">
+			and a.check_date &lt;= #{endCheckDate}
+		</if>
+		group by pl.name
+		) as tab2
+		on tab1.lineName = tab2.lineName
+		group by
+		tab1.lineName;
+	</select>
+
+
+	<select id="findAllDefectTypeNum" resultType="com.togest.response.statistics.StatisticNum"
+		parameterType="com.togest.request.CQueryFilter">
+
+		select tab1.name, tab1.total, tab2.processed
+		from
+		(select dt.name,
+		count(*) as total
+		from
+		6c_defect d
+		left join
+		6c_defect_type dt on
+		d.defect_type = dt.id
+		left join
+		6c_defect_handle_info dhi on dhi.id =
+		d.id
+		where d.del_flag = 0 and
+		dhi.is_confirmed=1 and dhi.is_canceled is
+		null
+		<if test="beginCheckDate != null">
+			and d.check_date &gt;= #{beginCheckDate}
+		</if>
+		<if test="endCheckDate != null">
+			and d.check_date &lt;= #{endCheckDate}
+		</if>
+		group by dt.name
+		order by dt.sort
+		) as tab1
+		left join
+		(select dt.name,
+		count(*) as processed
+		from
+		6c_defect d
+		left join 6c_defect_type dt on
+		d.defect_type = dt.id
+		left join 6c_defect_handle_info dhi on dhi.id =
+		d.id
+		where d.del_flag = 0 and dhi.is_confirmed=1 and dhi.is_reformed=1
+		and dhi.is_canceled is null
+		<if test="beginCheckDate != null">
+			and d.check_date &gt;= #{beginCheckDate}
+		</if>
+		<if test="endCheckDate != null">
+			and d.check_date &lt;= #{endCheckDate}
+		</if>
+		group by dt.name
+		order by dt.sort
+		) as tab2
+		on tab1.name = tab2.name
+		group by name
+	</select>
+
+	<select id="getStatisticRangeNum" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		<foreach item="entity" collection="entityList" separator="union all"
+			open="" close="" index="">
+			(
+			select count(d.id) from 6c_defect d
+			left join 6c_defect_handle_info
+			dhi on dhi.id = d.id
+			<where>
+				d.del_flag = 0
+				and dhi.is_confirmed = 1
+				<if test="beginCheckDate != null">
+					and d.check_date &gt;= #{beginCheckDate}
+				</if>
+				<if test="endCheckDate != null">
+					and d.check_date &lt;= #{endCheckDate}
+				</if>
+				<if test="lineId != null">
+					and d.line_id = #{lineId}
+				</if>
+				<if test="direction != null">
+					and d.direction = #{direction}
+				</if>
+				<if test="workShopId != null">
+					and d.work_shop_id = #{workShopId}
+				</if>
+				<if test="systemId != null">
+					and d.system_id = #{systemId}
+				</if>
+				<if test="entity.startKm != null">
+					and d.defect_glb &gt;= #{entity.startKm}
+				</if>
+				<if test="entity.endKm != null">
+					and d.defect_glb &lt; #{entity.endKm}
+				</if>
+			</where>
+			)
+		</foreach>
+	</select>
+
+	<select id="findEveryDay" resultType="com.togest.response.statistics.DefectDay"
+		parameterType="com.togest.request.CQueryFilter">
+		select date_format(tab1.check_date,'%e') as day, findNum, canceledNum
+		from
+		(select d.check_date, count(*) as findNum
+		from 6c_defect d
+		left join
+		6c_defect_handle_info dhi on dhi.id = d.id
+		<where>
+			d.del_flag = 0
+			and dhi.is_confirmed=1
+			<if test="checkDate != null">
+				and d.check_date = #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+		</where>
+		group by check_date) as tab1
+		left join
+		(select d.check_date, count(*) as
+		canceledNum
+		from 6c_defect d
+		left join 6c_defect_handle_info dhi on
+		dhi.id = d.id
+		<where>
+			d.del_flag = 0
+			and dhi.is_confirmed=1
+			and dhi.is_canceled=1
+			<if test="checkDate != null">
+				and d.check_date = #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+		</where>
+		group by check_date) as tab2 on tab1.check_date = tab2.check_date
+		order by tab1.check_date
+	</select>
+
+	<sql id="MY_Table">
+		6c_defect a
+		left join 6c_defect_handle_info hi on a.id =
+		hi.id
+	</sql>
+
+	<sql id="MY_WHERE">
+		a.del_flag = 0
+		and hi.is_confirmed = 1
+		<if test="defectLevel != null">
+			and (a.defect_level = #{defectLevel}
+				or a.defect_data_level = #{defectLevel})
+		</if>
+		<if test="systemId != null">
+			and a.system_id = #{systemId}
+		</if>
+		<!-- <if test="sectionId != null"> and a.section_id = #{sectionId} </if> -->
+	</sql>
+
+	<select id="defectMAndYBySection" resultType="com.togest.response.statistics.MoMAndYoY"
+		parameterType="com.togest.request.StatisticsQueryFilter">
+		select tab.section_id, tab1.num, tab2.num as mom, tab3.num as yoy,
+		pd.name
+		from
+		(select distinct section_id from 6c_defect where del_flag =
+		0 and section_id
+		is not null) as tab
+		left join
+		(select a.section_id,
+		count(a.id) num
+		from
+		<include refid="MY_Table" />
+		where
+		<include refid="MY_WHERE" />
+		and a.check_date &gt;= #{thisStart} and a.check_date &lt;= #{thisEnd}
+		group by a.section_id) as tab1 on tab.section_id = tab1.section_id
+		left join
+		(select a.section_id, count(a.id) num
+		from
+		<include refid="MY_Table" />
+		where
+		<include refid="MY_WHERE" />
+		and a.check_date &gt;= #{momStart} and a.check_date &lt;= #{momEnd}
+		group by a.section_id) as tab2 on tab.section_id = tab2.section_id
+		left join
+		(select a.section_id, count(a.id) num
+		from
+		<include refid="MY_Table" />
+		where
+		<include refid="MY_WHERE" />
+		and a.check_date &gt;= #{yoyStart} and a.check_date &lt;= #{yoyEnd}
+		group by a.section_id) as tab3 on tab.section_id = tab3.section_id
+		left join p_department pd on tab.section_id = pd.id
+		<where>
+			<if test="sectionId != null">
+				 tab.section_id = #{sectionId}
+			</if>
+		</where>
+	</select>
+
+	<select id="defectMAndYByLine" resultType="com.togest.response.statistics.MoMAndYoY"
+		parameterType="com.togest.request.StatisticsQueryFilter">
+		select tab.line_id, tab1.num, tab2.num as mom, tab3.num as yoy,
+		line.name
+		from
+		(select distinct line_id from 6c_defect where del_flag =
+		0 and line_id is not
+		null) as tab
+		left join
+		(select a.line_id,
+		count(a.id) num
+		from
+		<include refid="MY_Table" />
+		where
+		<include refid="MY_WHERE" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{thisStart} and a.check_date &lt;= #{thisEnd}
+		group by a.line_id) as tab1 on tab.line_id = tab1.line_id
+		left join
+		(select a.line_id, count(a.id) num
+		from
+		<include refid="MY_Table" />
+		where
+		<include refid="MY_WHERE" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{momStart} and a.check_date &lt;= #{momEnd}
+		group by a.line_id) as tab2 on tab.line_id = tab2.line_id
+		left join
+		(select a.line_id, count(a.id) num
+		from
+		<include refid="MY_Table" />
+		where
+		<include refid="MY_WHERE" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{yoyStart} and a.check_date &lt;= #{yoyEnd}
+		group by a.line_id) as tab3 on tab.line_id = tab3.line_id
+		left join
+		p_line line on tab.line_id = line.id
+	</select>
+
+
+	<sql id="RectifyRate_Table">
+		6c_defect a
+		left join 6c_defect_handle_info dhi on dhi.id =
+		a.id
+		left join 6c_defect_reform_handle drh on drh.id = a.id
+	</sql>
+
+	<sql id="RectifyRate_WHERE_Num">
+		a.del_flag = 0
+		and dhi.is_confirmed = 1
+		<if test="defectLevel != null">
+			and (a.defect_level = #{defectLevel}
+				or a.defect_data_level = #{defectLevel})
+		</if>
+		<if test="systemId != null">
+			and a.system_id = #{systemId}
+		</if>
+		<!-- <if test="sectionId != null"> and a.section_id = #{sectionId} </if> -->
+	</sql>
+
+	<sql id="RectifyRate_WHERE_Reformed">
+		a.del_flag = 0
+		and dhi.is_reformed = 1
+		<if test="defectLevel != null">
+			and (a.defect_level = #{defectLevel}
+				or a.defect_data_level = #{defectLevel})
+		</if>
+		<if test="systemId != null">
+			and a.system_id = #{systemId}
+		</if>
+		<!-- <if test="sectionId != null"> and a.section_id = #{sectionId} </if> -->
+	</sql>
+
+
+	<select id="defectRectifyRateBySection" resultType="com.togest.response.statistics.RectifyRate"
+		parameterType="com.togest.request.StatisticsQueryFilter">
+		select tab.section_id, pd.name, tab2.reformed, tab1.num,
+		tab4.reformedMom, tab3.mom, tab5.reformedYoy, tab6.yoy
+		from
+		(select
+		distinct section_id from 6c_defect where del_flag = 0 and section_id
+		is not null) as tab
+
+		left join
+		(select a.section_id, count(a.id) as num
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Num" />
+		and a.check_date &gt;= #{thisStart} and a.check_date &lt;= #{thisEnd}
+		group by a.section_id) as tab1 on tab.section_id = tab1.section_id
+
+		left join
+		(select a.section_id, count(a.id) as reformed
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Reformed" />
+		and a.check_date &gt;= #{thisStart} and a.check_date &lt;= #{thisEnd}
+		and drh.handle_date &gt;= #{thisStart} and drh.handle_date &lt;=
+		#{thisEnd}
+		group by a.section_id) as tab2 on tab.section_id =
+		tab2.section_id
+
+		left join
+		(select a.section_id, count(a.id) as mom
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Num" />
+		and a.check_date &gt;= #{momStart} and a.check_date &lt;= #{momEnd}
+		group by a.section_id) as tab3 on tab.section_id = tab3.section_id
+
+		left join
+		(select a.section_id, count(a.id) as reformedMom
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Reformed" />
+		and a.check_date &gt;= #{momStart} and a.check_date &lt;= #{momEnd}
+		and drh.handle_date &gt;= #{momStart} and drh.handle_date &lt;=
+		#{momEnd}
+		group by a.section_id) as tab4 on tab.section_id =
+		tab4.section_id
+
+		left join
+		(select a.section_id, count(a.id) as
+		reformedYoy
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Reformed" />
+		and a.check_date &gt;= #{yoyStart} and a.check_date &lt;= #{yoyEnd}
+		and drh.handle_date &gt;= #{yoyStart} and drh.handle_date &lt;=
+		#{yoyEnd}
+		group by a.section_id) as tab5 on tab.section_id =
+		tab5.section_id
+
+		left join
+		(select a.section_id, count(a.id) as yoy
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Num" />
+		and a.check_date &gt;= #{yoyStart} and a.check_date &lt;= #{yoyEnd}
+		group by a.section_id) as tab6 on tab.section_id = tab6.section_id
+		left join p_department pd on tab.section_id = pd.id
+		<where>
+			<if test="sectionId != null">
+				 tab.section_id = #{sectionId}
+			</if>
+		</where>
+	</select>
+
+	<select id="defectRectifyRateByLine" resultType="com.togest.response.statistics.RectifyRate"
+		parameterType="com.togest.request.StatisticsQueryFilter">
+		select tab.line_id, line.name, tab2.reformed, tab1.num,
+		tab4.reformedMom, tab3.mom, tab5.reformedYoy, tab6.yoy
+		from
+		(select
+		distinct line_id from 6c_defect where del_flag = 0 and line_id is not
+		null) as tab
+
+		left join
+		(select a.line_id, count(a.id) as num
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Num" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{thisStart} and a.check_date &lt;= #{thisEnd}
+		group by a.line_id) as tab1 on tab.line_id = tab1.line_id
+
+		left join
+		(select a.line_id, count(a.id) as reformed
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Reformed" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{thisStart} and a.check_date &lt;= #{thisEnd}
+		and drh.handle_date &gt;= #{thisStart} and drh.handle_date &lt;=
+		#{thisEnd}
+		group by a.line_id) as tab2 on tab.line_id = tab2.line_id
+
+		left join
+		(select a.line_id, count(a.id) as mom
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Num" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{momStart} and a.check_date &lt;= #{momEnd}
+		group by a.line_id) as tab3 on tab.line_id = tab3.line_id
+
+		left join
+		(select a.line_id, count(a.id) as reformedMom
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Reformed" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{momStart} and a.check_date &lt;= #{momEnd}
+		and drh.handle_date &gt;= #{momStart} and drh.handle_date &lt;=
+		#{momEnd}
+		group by a.line_id) as tab4 on tab.line_id = tab4.line_id
+
+		left join
+		(select a.line_id, count(a.id) as reformedYoy
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Reformed" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{yoyStart} and a.check_date &lt;= #{yoyEnd}
+		and drh.handle_date &gt;= #{yoyStart} and drh.handle_date &lt;=
+		#{yoyEnd}
+		group by a.line_id) as tab5 on tab.line_id = tab5.line_id
+
+		left join
+		(select a.line_id, count(a.id) as yoy
+		from
+		<include refid="RectifyRate_Table" />
+		where
+		<include refid="RectifyRate_WHERE_Num" />
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		and a.check_date &gt;= #{yoyStart} and a.check_date &lt;= #{yoyEnd}
+		group by a.line_id) as tab6 on tab.line_id = tab6.line_id
+		left join
+		p_line line on tab.line_id = line.id
+
+	</select>
+
+
+
+
+	<select id="defectDataStatistical" resultType="com.togest.response.statistics.PieChartInfo"
+		parameterType="com.togest.request.StatisticsQueryFilter">
+		select count(a.id) as num,a.defect_level as
+		defectLevel,a.defect_status as defectStatus
+		<if test="type==1"> ,a.line_id as id,line.name as name</if>
+		<if test="type==2"> ,a.work_shop_id as id,pd1.name as name</if>
+		<if test="type==3"> ,a.work_area_id as id,pd2.name as name</if>
+		<if test="type==4"> ,a.psa_id as id,psa.name as name</if>
+
+		from 6c_defect a
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+
+		where a.del_flag = 0
+		<if test="systemId != null">
+			and a.system_id = #{systemId}
+		</if>
+		<if test="did != null">
+			<if test="isChild==true">
+				and(a.work_area_id in (select id from
+				p_department where
+				parent_ids like '%${did}%' and del_flag=0)
+				or a.work_area_id =#{did})
+			</if>
+			<if test="isChild ==false">
+				and a.work_area_id =#{did}
+			</if>
+		</if>
+		<if test="workShopId != null">
+			and(a.work_shop_id in (select id from
+			p_department where
+			parent_ids like '%${workShopId}%' and del_flag=0)
+			or a.work_shop_id
+			=#{workShopId})
+		</if>
+		<if test="sectionId != null">
+			and a.section_id = #{sectionId}
+		</if>
+		<if test="thisStart != null">
+			and a.check_date &gt;= #{thisStart}
+		</if>
+		<if test="thisEnd != null">
+			and a.check_date &lt;= #{thisEnd}
+		</if>
+		<if test="type==1">group by a.line_id,a.defect_level,a.defect_status</if>
+		<if test="type==2">group by a.work_shop_id,a.defect_level,a.defect_status
+		</if>
+		<if test="type==3">group by a.work_area_id,a.defect_level,a.defect_status
+		</if>
+		<if test="type==4">group by a.psa_id,a.defect_level,a.defect_status</if>
+	</select>
+
+
+
+
+	<resultMap id="BaseResultMap"
+		type="com.togest.response.statistics.DefectStatusStatistics">
+		<result column="defect_status" property="status" />
+		<result column="count(*)" property="number" />
+	</resultMap>
+	<select id="defectStatisticalDistributionsFromResponse"
+		resultMap="BaseResultMap" parameterType="com.togest.request.StatisticsQueryFilter">
+		select defect_status,count(*) from 6c_defect
+		<where>
+			del_flag = 0
+			<if test="systemId != null">
+				and system_id = #{systemId}
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or work_area_id =#{did})
+				</if>
+				<if test="isChild ==false">
+					and work_area_id =#{did}
+				</if>
+			</if>
+			<if test="workShopId != null">
+				and(work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="sectionId != null">
+				and section_id = #{sectionId}
+			</if>
+			<if test="thisStart != null">
+				and check_date &gt;= #{thisStart}
+			</if>
+			<if test="thisEnd != null">
+				and check_date &lt;= #{thisEnd}
+			</if>
+			and del_flag = 0
+		</where>
+		group by defect_status
+	</select>
+
+
+	<resultMap id="BaseTimeResultMap"
+		type="com.togest.response.statistics.DefectDistributionTrend">
+		<result column="id" property="id" />
+		<result column="name" property="name" />
+		<collection property="data"
+			ofType="com.togest.response.statistics.DefectDay">
+			<result column="checkDate" property="day" />
+			<result column="count(*)" property="findNum" />
+		</collection>
+	</resultMap>
+	<select id="defectDistributionTrendYearFromResponse"
+		parameterType="com.togest.request.StatisticsQueryFilter" resultMap="BaseTimeResultMap">
+		select date_format(a.check_date,'%m') as checkDate,count(*)
+		<if test="type==1"> ,a.line_id as id,line.name as name</if>
+		<if test="type==2"> ,a.work_shop_id as id,pd1.name as name</if>
+		<if test="type==3"> ,a.work_area_id as id,pd2.name as name</if>
+		<if test="type==4"> ,a.psa_id as id,psa.name as name</if>
+
+		from 6c_defect a
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and (a.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="thisStart != null">
+				and a.check_date &gt;= #{thisStart}
+			</if>
+			<if test="thisEnd != null">
+				and a.check_date &lt;= #{thisEnd}
+			</if>
+		</where>
+		group by checkDate
+		<if test="type==1">,a.line_id</if>
+		<if test="type==2">,a.work_shop_id</if>
+		<if test="type==3">,a.work_area_id</if>
+		<if test="type==4">,a.psa_id</if>
+	</select>
+
+	<select id="defectDistributionTrendDayFromResponse"
+		parameterType="com.togest.request.StatisticsQueryFilter" resultMap="BaseTimeResultMap">
+		select date_format(a.check_date,'%d') as checkDate,count(*)
+
+		<if test="type==1"> ,a.line_id as id,line.name as name</if>
+		<if test="type==2"> ,a.work_shop_id as id,pd1.name as name</if>
+		<if test="type==3"> ,a.work_area_id as id,pd2.name as name</if>
+		<if test="type==4"> ,a.psa_id as id,psa.name as name</if>
+		from 6c_defect a
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(a.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="thisStart != null">
+				and a.check_date &gt;= #{thisStart}
+			</if>
+			<if test="thisEnd != null">
+				and a.check_date &lt;= #{thisEnd}
+			</if>
+		</where>
+		group by checkDate
+		<if test="type==1">,a.line_id</if>
+		<if test="type==2">,a.work_shop_id</if>
+		<if test="type==3">,a.work_area_id</if>
+		<if test="type==4">,a.psa_id</if>
+	</select>
+
+	<select id="defectDistributionTrendYearOnYearDataFromResponse"
+		parameterType="com.togest.request.StatisticsQueryFilter" resultMap="BaseTimeResultMap">
+		select date_format(a.check_date,'%d') as checkDate,count(*)
+		<if test="type==1"> ,a.line_id as id,line.name as name</if>
+		<if test="type==2"> ,a.work_shop_id as id,pd1.name as name</if>
+		<if test="type==3"> ,a.work_area_id as id,pd2.name as name</if>
+		<if test="type==4"> ,a.psa_id as id,psa.name as name</if>
+		from 6c_defect a
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(a.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="thisStart != null">
+				and a.check_date &gt;= #{thisStart}
+			</if>
+			<if test="thisEnd != null">
+				and a.check_date &lt;= #{thisEnd}
+			</if>
+		</where>
+		group by checkDate
+		<if test="type==1">,a.line_id</if>
+		<if test="type==2">,a.work_shop_id</if>
+		<if test="type==3">,a.work_area_id</if>
+		<if test="type==4">,a.psa_id</if>
+	</select>
+	
+	<select id="defectStatisticalState" parameterType="com.togest.request.CQueryFilter"
+		resultType="com.togest.response.statistics.DefectStateData">
+		select count(d.id) as num,
+		d.defect_status as defectStatus,
+		d.typical_defect as typicalDefect
+		from 6c_defect d
+		left join p_line pl on
+		d.line_id=pl.id
+		left join p_supply_arm psa on d.psa_id=psa.id
+		left join
+		p_tunnel pt on d.tunnel_id= pt.id
+		left join 6c_defect_type dt on d.defect_type =
+		dt.id
+		left join 6c_defect_flow df on df.id = d.id
+
+		left join 6c_system sys on sys.id = d.system_id
+		left join 6c_defect_history dh on dh.id = d.id
+		left join 6c_defect_handle_info hi on hi.id = d.id
+		
+		<where>
+			d.del_flag = 0
+			AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="confirmDate != null">
+				and Date(hi.confirm_date) = #{confirmDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="pillarId != null">
+				and d.pillar_id = #{pillarId}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+
+			<if test="typicalDefect != null">
+				and d.typical_defect = #{typicalDefect}
+			</if>
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and (d.defect_level = #{defectLevel} or d.defect_data_level = #{defectLevel})
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="startKm != null">
+				and d.defect_glb &gt;= #{startKm}
+			</if>
+			<if test="endKm != null">
+				and d.defect_glb &lt;= #{endKm}
+			</if>
+			<if test="defectStatusList != null">
+				and d.defect_status in
+				<foreach item="item" collection="defectStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="isShow != null">
+				and d.is_show = #{isShow}
+			</if>
+		</where>
+		group by d.defect_status,d.typical_defect
+	</select>
+
+	<select id="defectFromByTopDefect" parameterType="com.togest.request.CQueryFilter"
+		resultType="com.togest.response.statistics.DefectTopDefect">
+		select count(a.id) as num,dt.name as defectTypeName
+		<if test="type==1"> ,a.line_id as id,line.name as workShopName</if>
+		<if test="type==2"> ,a.work_shop_id as id,pd1.name as workShopName</if>
+		<if test="type==3"> ,a.work_area_id as id,pd2.name as workShopName</if>
+		<if test="type==4"> ,a.psa_id as id,psa.name as workShopName</if>
+		from 6c_defect a
+		left join 6c_defect_type dt on a.defect_type=dt.id
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(a.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or a.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="defectStatus != null">
+				and a.defect_status = #{defectStatus}
+			</if>
+		</where>
+		group by a.defect_type
+		<if test="type==1">,a.line_id</if>
+		<if test="type==2">,a.work_shop_id</if>
+		<if test="type==3">,a.work_area_id</if>
+		<if test="type==4">,a.psa_id</if>
+		order by num desc
+	</select>
+
+	<select id="defectFromByStatistics" parameterType="com.togest.request.CQueryFilter"
+		resultType="com.togest.response.statistics.DefectFromStatistics">
+		select count(a.id) as num,a.defect_status as
+		defectStatus,a.defect_level as defectLevel,
+		count(case when
+		a.defect_status in (2) and datediff(dhi.confirm_date,now())=0
+		then
+		a.id end) as numToday
+		<if test="type==1"> ,a.line_id as workShopId,line.name as workShopName</if>
+		<if test="type==2"> ,a.work_shop_id as workShopId,pd1.name as workShopName</if>
+		<if test="type==3"> ,a.work_area_id as workShopId,pd2.name as workShopName</if>
+		<if test="type==4"> ,a.psa_id as workShopId,psa.name as workShopName</if>
+		from 6c_defect a
+		left join 6c_defect_handle_info dhi on a.id = dhi.id
+		left join p_department pd on a.work_shop_id = pd.id
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(a.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or a.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="defectStatus != null">
+				and a.defect_status = #{defectStatus}
+			</if>
+		</where>
+		group by a.defect_status,a.defect_level
+		<if test="type==1">,a.line_id</if>
+		<if test="type==2">,a.work_shop_id</if>
+		<if test="type==3">,a.work_area_id</if>
+		<if test="type==4">,a.psa_id</if>
+	</select>
+
+	<select id="defectFlowCount" parameterType="com.togest.request.CQueryFilter"
+		resultType="com.togest.response.statistics.FlowCountData">
+		select count(d.id) as num,d.defect_status as status
+		from 6c_defect d
+		left join p_line pl on
+		d.line_id=pl.id
+		left join p_supply_arm psa on d.psa_id=psa.id
+		left join
+		p_tunnel pt on d.tunnel_id= pt.id
+		left join 6c_defect_type dt on d.defect_type =
+		dt.id
+		left join 6c_defect_flow df on df.id = d.id
+		left join 6c_system sys on sys.id = d.system_id
+		left join 6c_defect_history dh on dh.id = d.id
+		left join 6c_defect_handle_info hi on hi.id = d.id
+		<where>
+		d.del_flag = 0
+		AND (d.is_show != 0 OR d.is_show IS NULL)
+			<if test="confirmDate != null">
+				and Date(hi.confirm_date) = #{confirmDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or d.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(d.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or d.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and d.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="pillarId != null">
+				and d.pillar_id = #{pillarId}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+
+			<if test="typicalDefect != null">
+				and d.typical_defect = #{typicalDefect}
+			</if>
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and (d.defect_level = #{defectLevel} or d.defect_data_level = #{defectLevel})
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="startKm != null">
+				and d.defect_glb &gt;= #{startKm}
+			</if>
+			<if test="endKm != null">
+				and d.defect_glb &lt;= #{endKm}
+			</if>
+			<if test="defectStatusList != null">
+				and d.defect_status in
+				<foreach item="item" collection="defectStatusList"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>
+			<if test="isShow != null">
+				and d.is_show = #{isShow}
+			</if>
+			</where>
+		group by d.defect_status
+	</select>
+	
+	<select id="DefectInformationDetail" parameterType="com.togest.request.CQueryFilter"
+		resultType="com.togest.response.statistics.DefectFromStatistics">
+		select count(a.id) as num,
+		dt.name as defectType,
+		a.defect_level as defectLevel,
+		count(case when a.defect_status in (6) then a.id end) as numCancel
+		<if test="type==1"> ,a.line_id as id,line.name as workShopName</if>
+		<if test="type==2"> ,a.work_shop_id as id,pd1.name as workShopName</if>
+		<if test="type==3"> ,a.work_area_id as id,pd2.name as workShopName</if>
+		<if test="type==4"> ,a.psa_id as id,psa.name as workShopName</if>
+		from 6c_defect a
+		left join 6c_defect_handle_info dhi on a.id = dhi.id
+		left join 6c_defect_type dt on a.defect_type =dt.id
+		<if test="type==1">left join p_line line on a.line_id = line.id</if>
+		<if test="type==2">left join p_department pd1 on a.work_shop_id = pd1.id</if>
+		<if test="type==3">left join p_department pd2 on a.work_area_id = pd2.id</if>
+		<if test="type==4">left join p_supply_arm psa on a.psa_id = psa.id</if>
+		<where>
+			a.del_flag = 0
+			<if test="confirmDate != null">
+				and Date(dhi.confirm_date) = #{confirmDate}
+			</if>
+			<if test="defectLevel != null">
+				and (a.defect_level = #{defectLevel}
+				or a.defect_data_level = #{defectLevel})
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+			<if test="infoId != null">
+				and a.info_id = #{infoId}
+			</if>
+			<if test="did != null">
+				<if test="isChild==true">
+					and(a.work_area_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or a.work_area_id
+					=#{did})
+				</if>
+				<if test="isChild ==false">
+					and a.work_area_id =#{did}
+				</if>
+			</if>
+			<if test="workShopId != null">
+				and(a.work_shop_id in (select id from
+				p_department where
+				parent_ids like '%${workShopId}%' and del_flag=0)
+				or a.work_shop_id
+				=#{workShopId})
+			</if>
+			<if test="sectionId != null">
+				and a.section_id = #{sectionId}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="defectStatus != null">
+				and a.defect_status in
+				<foreach item="item" collection="defectStatus.split(',')"
+					separator="," open="(" close=")" index="">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+		group by dt.name,a.defect_level
+		<if test="type==1">,a.line_id</if>
+		<if test="type==2">,a.work_shop_id</if>
+		<if test="type==3">,a.work_area_id</if>
+		<if test="type==4">,a.psa_id</if>
+	</select>
+
+</mapper>

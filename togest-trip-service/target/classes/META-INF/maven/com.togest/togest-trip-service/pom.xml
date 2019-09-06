@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.togest</groupId>
+    <artifactId>togest-trip</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>togest-trip-service</artifactId>
+  
+  <!-- <name>togest-trip-service</name>
+	<url>http://maven.apache.org</url> -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<!-- <dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-cms-workflow-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-task-event</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>  -->
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-cms-core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-cache</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-persistence</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-trip-api</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-jcw-base</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-cms-code-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.togest</groupId>
+			<artifactId>togest-file-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.0.19</version>
+		</dependency>
+		<dependency>
+			<groupId>access</groupId>
+			<artifactId>Access_JDBC30</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+	        <groupId>commons-net</groupId>
+	        <artifactId>commons-net</artifactId>
+	        <version>3.6</version>
+    	</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.BdLineBridgeDao">
+
+    <resultMap type="com.togest.domain.dto.BdLineBridgeDTO" id="BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="fileId" column="file_id"/>
+		
+		<result property="lineName" column="lineName"/>
+		<result property="fileName" column="fileName"/>
+    </resultMap>
+    
+    <sql id="Base_Table">
+		bd_line_bridge bld
+		left join p_line pl on bld.line_id = pl.id
+		left join sys_file sf on bld.file_id = sf.id
+	</sql>
+	
+    <sql id="Base_Column_List">
+    	bld.id,
+		bld.line_id,
+		bld.file_id,
+		pl.name as lineName,
+		sf.real_name as fileName
+    </sql>
+    
+    <sql id="baseConditions">
+		<if test="lineId != null"> 
+			and bld.line_id = #{lineId}
+		</if>
+		<if test="fileId != null"> 
+			and bld.file_id = #{fileId}
+		</if>
+		<if test="lineName != null"> 
+			and pl.name = #{lineName}
+		</if>
+		<if test="fileName != null"> 
+			and sf.real_name = #{fileName}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where bld.id = #{id} and bld.del_flag = 0
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where bld.del_flag = 0 and bld.id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.dto.BdLineBridgeDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			bld.del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.dto.BdLineBridgeDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+		 	bld.del_flag = 0
+			<include refid="baseConditions"></include>
+		</where>
+		<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by bld.${orderBy}
+            </when>
+			<otherwise>
+            	 order by convert(pl.name using gbk) asc, bld.sort desc
+			</otherwise>
+        </choose>
+	</select>
+	
+	<select id="findLineBridgeList" parameterType="com.togest.request.BdInfoQueryFilter" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+		 	bld.del_flag = 0
+			<include refid="baseConditions"></include>
+			<if test="deptId !=null and deptId !=''">
+				<if test="isChild==true">
+					and (
+							bld.line_id in 
+							(
+								select distinct pl_id from p_dept_line where dept_id in
+								(select id from p_department where parent_ids like '%${deptId}%')  or dept_id=#{deptId} 
+							)
+						)
+				</if>
+				<if test="isChild==false">
+					and bld.line_id in (select distinct pl_id from p_dept_line where dept_id=#{deptId})
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and bld.line_id in (select distinct pl_id from p_dept_line where section_id=#{sectionId})
+			</if>
+		</where>
+		<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by bld.${orderBy}
+            </when>
+			<otherwise>
+            	 order by convert(pl.name using gbk) asc, bld.sort desc
+			</otherwise>
+        </choose>
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+	</select>
+	
+	<select id="findAllList" parameterType="com.togest.domain.dto.BdLineBridgeDTO" resultMap="BaseResultMap">
+		select <include refid="Base_Column_List"></include>
+		from <include refid="Base_Table"></include>
+		where bld.del_flag = 0
+		order by bld.sort desc
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.dto.BdLineBridgeDTO">
+		insert into bd_line_bridge
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            line_id,
+            file_id,
+			<if test="sort!=null">sort,</if>
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{lineId},
+			#{fileId},
+			<if test="sort!=null">#{sort},</if>
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.dto.BdLineBridgeDTO">
+		update bd_line_bridge 
+		<trim prefix="set" suffixOverrides=",">
+				line_id = #{lineId},
+				file_id = #{fileId},
+				<if test="sort!=null">sort = #{sort},</if>
+				update_ip = #{updateIp},
+				update_by = #{updateBy},
+				update_date = #{updateDate},
+		</trim>
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from bd_line_bridge where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.dto.BdLineBridgeDTO">
+		update bd_line_bridge
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+	</update>
+
+</mapper>

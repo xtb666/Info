@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.WireHeightDataDao">
+
+    <resultMap type="com.togest.domain.WireHeightDataDTO" id="wireHeightMap">
+		<result property="id" column="id"/>
+		<result property="systemId" column="system_id"/>
+		<result property="lineId" column="line_id"/>
+		<result property="sectionId" column="section_id"/>
+		<result property="workShopId" column="work_shop_id"/>
+		<result property="workAreaId" column="work_area_id"/>
+		<result property="direction" column="direction"/>
+		<result property="psaId" column="psa_id"/>
+		<result property="tunnelId" column="tunnel_id"/>
+		<result property="pillarId" column="pillar_id"/>
+		<result property="checkDate" column="check_date"/>
+		<result property="glb" column="glb"/>
+		<result property="speed" column="speed"/>
+		<result property="anchorPoint" column="anchor_point"/>
+		<result property="spanMax" column="span_max"/>
+		<result property="spanMin" column="span_min"/>
+		<result property="reviewValue" column="review_value"/>
+		<result property="reviewValueSource" column="review_value_source"/>
+		<result property="wireHeightControlHistoryId" column="wire_height_control_history_id"/>
+		<result property="adjustWireHeight" column="adjust_wire_height"/>
+		<result property="currentReviewRailHeightValue" column="current_review_rail_height_value"/>
+		<result property="jcwAdjustUpValue" column="jcw_adjust_up_value"/>
+		<result property="defectType" column="defect_type"/>
+		<result property="defectLevel" column="defect_level"/>
+		<result property="reviewDefectLevel" column="review_defect_level"/>
+		<result property="defectEquProperty" column="defect_equ_property"/>
+		<result property="isReviewExist" column="is_review_exist"/>
+		<result property="dymCheckValue" column="dym_check_value"/>
+		<result property="staticCheckValue" column="static_check_value"/>
+		<result property="staticCheckDate" column="static_check_date"/>
+		<result property="passResult" column="pass_result"/>
+		<result property="defectDealPerson" column="defect_deal_person"/>
+		<result property="dealDate" column="deal_date"/>
+		<result property="feedbackLimitDate" column="feedback_limit_date"/>
+		<result property="isOverTimeReview" column="is_over_time_review"/>
+		<result property="sort" column="sort"/>
+		
+		<result property="pillarNum" column="pillarNum"/>
+		<result property="pillarName" column="pillarName"/>
+		<result property="lineName" column="lineName"/>
+		<result property="psaName" column="psaName"/>
+		<result property="workShopName" column="workShopName"/>
+		<result property="workAreaName" column="workAreaName"/>
+		<result property="sectionName" column="sectionName"/>
+		<result property="tunnelName" column="tunnelName"/>
+		<result property="track" column="track"/>
+		<result property="trackName" column="trackName"/>
+		<result property="defectTypeName" column="defectTypeName"/>
+		<result property="yearReviewRailHeightValue" column="yearReviewRailHeightValue"/>
+		
+		<association property="wireHeightControlHistoryDTO" javaType="com.togest.domain.WireHeightControlHistoryDTO">
+			<id column="wire_height_control_history_id" property="id" />
+			<result column="standar_line_height" property="standarLineHeight" />
+			<result column="standar_line_height_up" property="standarLineHeightUp" />
+			<result column="standar_line_height_down" property="standarLineHeightDown" />
+		</association>
+    </resultMap>
+    
+    <sql id="baseColumns">
+    	whd.id,
+    	whd.system_id,
+    	whd.pillar_id,
+    	whd.check_date,
+    	whd.speed,
+    	whd.anchor_point,
+    	whd.span_max,
+    	whd.span_min,
+    	whd.review_value,
+    	whd.review_value_source,
+    	whd.wire_height_control_history_id,
+    	whd.adjust_wire_height,
+    	whd.current_review_rail_height_value,
+    	whd.jcw_adjust_up_value,
+    	whd.defect_type,
+    	whd.defect_level,
+    	whd.review_defect_level,
+    	whd.defect_equ_property,
+    	whd.is_review_exist,
+    	whd.dym_check_value,
+    	whd.static_check_value,
+    	whd.static_check_date,
+    	whd.pass_result,
+    	whd.defect_deal_person,
+    	whd.deal_date,
+    	whd.feedback_limit_date,
+    	whd.is_over_time_review,
+    	whd.sort,
+    	whch.standar_line_height,
+    	whch.standar_line_height_up,
+    	whch.standar_line_height_down,
+    	jepi.section_id section_id,
+    	jepi.pl_id line_id,
+    	jepi.dept_id work_area_id,
+    	jepi.direction direction,
+    	jepi.psa_id psa_id,
+    	jepi.start_km glb,
+    	jepi.num pillarNum,
+    	jepi.name pillarName,
+    	jepi.tunnel_id tunnel_id,
+    	pl.name lineName,
+    	psa.name psaName,
+    	p.name workAreaName, 
+    	p2.name workShopName,
+    	p2.id work_shop_id,
+    	p3.name sectionName,
+    	tunnel.name tunnelName,
+    	track.id track,
+    	track.name trackName,
+    	dt.name defectTypeName,
+    	whyr.year_review_rail_height_value yearReviewRailHeightValue
+    </sql> 
+    
+    <sql id="Base_Table">
+		6c_wire_height_data whd
+		left join 6c_wire_height_control_history whch on whd.wire_height_control_history_id = whch.id
+		left join jcw_equ_pillar_info jepi on whd.pillar_id = jepi.id
+		left join p_department p on jepi.dept_id = p.id
+		left join p_department p2 on p.parent_id = p2.id
+		left join p_department p3 on jepi.section_id = p3.id
+		left join p_line pl on jepi.pl_id = pl.id
+		left join p_supply_arm psa on jepi.psa_id = psa.id
+		left join p_tunnel tunnel on jepi.tunnel_id = tunnel.id
+		left join p_track track on jepi.track = track.id
+		left join 6c_defect_type dt on whd.defect_type = dt.id
+		left join 6c_wire_height_year_review whyr on whd.pillar_id = whyr.pillar_id 
+		and whyr.year = year(whd.check_date)
+	</sql>
+	
+    <sql id="baseConditions">
+		<if test="systemId != null"> 
+			and whd.system_id = #{systemId}
+		</if>
+		<if test="lineId != null"> 
+			and jepi.pl_id = #{lineId}
+		</if>
+		<if test="sectionId != null">
+			and 
+				(jepi.section_id = #{sectionId}
+				or jepi.dept_id in
+				(select id from p_department where parent_ids like '%${sectionId}%') or jepi.dept_id=#{sectionId}
+				)
+		</if>
+		<if test="workShopId != null"> 
+			and p2.id = #{workShopId}
+		</if>
+		<if test="workAreaId !=null and workAreaId !=''">
+			<if test="isChild==true">
+				and jepi.dept_id in 
+				(select id from p_department where parent_ids like '%${workAreaId}%' or id = #{workAreaId})
+			</if>
+			<if test="isChild==false">
+				and jepi.dept_id=#{workAreaId}
+			</if>
+		</if>
+		<if test="direction != null"> 
+			and jepi.direction = #{direction}
+		</if>
+		<if test="psaId != null"> 
+			and jepi.psa_id = #{psaId}
+		</if>
+		<if test="tunnelId != null"> 
+			and jepi.tunnel_id = #{tunnelId}
+		</if>
+		<if test="track != null"> 
+			and jepi.track = #{track}
+		</if>
+		<if test="pillarId != null"> 
+			and whd.pillar_id = #{pillarId}
+		</if>
+		<if test="pillarNum != null"> 
+			and jepi.num = #{pillarNum}
+		</if>
+		<if test="pillarName != null"> 
+			and jepi.name = #{pillarName}
+		</if>
+		<if test="checkDate != null"> 
+			and whd.check_date = #{checkDate}
+		</if>
+		<if test="glb != null"> 
+			and jepi.start_km = #{glb}
+		</if>
+		<if test="speed != null"> 
+			and whd.speed = #{speed}
+		</if>
+		<if test="anchorPoint != null"> 
+			and whd.anchor_point = #{anchorPoint}
+		</if>
+		<if test="spanMax != null"> 
+			and whd.span_max = #{spanMax}
+		</if>
+		<if test="spanMin != null"> 
+			and whd.span_min = #{spanMin}
+		</if>
+		<if test="reviewValue != null"> 
+			and whd.review_value = #{reviewValue}
+		</if>
+		<if test="reviewValueSource != null"> 
+			and whd.review_value_source = #{reviewValueSource}
+		</if>
+		<if test="wireHeightControlHistoryId != null"> 
+			and whd.wire_height_control_history_id = #{wireHeightControlHistoryId}
+		</if>
+		<if test="adjustWireHeight != null"> 
+			and whd.adjust_wire_height = #{adjustWireHeight}
+		</if>
+		<if test="yearReviewRailHeightValue != null"> 
+			and whyr.year_review_rail_height_value = #{yearReviewRailHeightValue}
+		</if>
+		<if test="currentReviewRailHeightValue != null"> 
+			and whd.current_review_rail_height_value = #{currentReviewRailHeightValue}
+		</if>
+		<if test="jcwAdjustUpValue != null"> 
+			and whd.jcw_adjust_up_value = #{jcwAdjustUpValue}
+		</if>
+		<if test="defectType != null"> 
+			and whd.defect_type = #{defectType}
+		</if>
+		<if test="defectLevel != null"> 
+			and whd.defect_level = #{defectLevel}
+		</if>
+		<if test="reviewDefectLevel != null"> 
+			and whd.review_defect_level = #{reviewDefectLevel}
+		</if>
+		<if test="defectEquProperty != null"> 
+			and whd.defect_equ_property = #{defectEquProperty}
+		</if>
+		<if test="isReviewExist != null"> 
+			and whd.is_review_exist = #{isReviewExist}
+		</if>
+		<if test="dymCheckValue != null"> 
+			and whd.dym_check_value = #{dymCheckValue}
+		</if>
+		<if test="staticCheckValue != null"> 
+			and whd.static_check_value = #{staticCheckValue}
+		</if>
+		<if test="staticCheckDate != null"> 
+			and whd.static_check_date = #{staticCheckDate}
+		</if>
+		<if test="passResult != null"> 
+			and whd.pass_result = #{passResult}
+		</if>
+		<if test="defectDealPerson != null"> 
+			and whd.defect_deal_person = #{defectDealPerson}
+		</if>
+		<if test="dealDate != null"> 
+			and whd.deal_date = #{dealDate}
+		</if>
+		<if test="feedbackLimitDate != null"> 
+			and whd.feedback_limit_date = #{feedbackLimitDate}
+		</if>
+		<if test="isOverTimeReview != null"> 
+			and whd.is_over_time_review = #{isOverTimeReview}
+		</if>
+		<if test="delFlag != null"> 
+			and whd.del_flag = #{delFlag}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="wireHeightMap">
+		select <include refid="baseColumns"></include>
+		from <include refid="Base_Table"></include>
+		where whd.id = #{id}
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="wireHeightMap">
+		select <include refid="baseColumns"></include>
+		from <include refid="Base_Table"></include>
+		where whd.id = #{id}
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightMap">
+		select <include refid="baseColumns"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightMap">
+		select <include refid="baseColumns"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			<include refid="baseConditions"></include>
+			<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by whd.${orderBy}
+            </when>
+			<otherwise>
+                order by whd.check_date desc, jepi.pl_id asc, jepi.start_km asc,
+                jepi.dept_id asc, jepi.psa_id asc, jepi.tunnel_id asc, jepi.num asc
+			</otherwise>
+        </choose>
+		</where>
+	</select>
+	
+	<select id="findDataAnaliayByDateList" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightMap">
+		select <include refid="baseColumns"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+		 	whd.del_flag = 0 and jepi.num is not null
+			<if test="entity.systemId != null"> 
+				and whd.system_id = #{entity.systemId}
+			</if>
+			<if test="entity.sectionId != null"> 
+				and jepi.section_id = #{entity.sectionId}
+			</if>
+			<if test="entity.workShopId != null"> 
+				and p2.id = #{entity.workShopId}
+			</if>
+			<if test="entity.workAreaId != null"> 
+				and jepi.dept_id = #{entity.workAreaId}
+			</if>
+			<if test="entity.lineId != null"> 
+				and jepi.pl_id = #{entity.lineId}
+			</if>
+			<if test="entity.psaId != null"> 
+				and jepi.psa_id = #{entity.psaId}
+			</if>
+			<if test="entity.direction != null"> 
+				and jepi.direction = #{entity.direction}
+			</if>
+			<if test="entity.checkDate != null"> 
+				and whd.check_date = #{entity.checkDate}
+			</if>
+			<if test="entity.startKm != null"> 
+				and jepi.start_km &gt;= #{entity.startKm}
+			</if>
+			<if test="entity.endKm != null"> 
+				and jepi.start_km &lt;= #{entity.endKm}
+			</if>
+				order by whd.check_date desc, jepi.pl_id asc, jepi.start_km asc,
+                jepi.dept_id asc, jepi.psa_id asc, jepi.tunnel_id asc, jepi.num asc
+		</where>
+	</select>
+	
+	<select id="findAllList" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightMap">
+		select <include refid="baseColumns"></include>
+		from <include refid="Base_Table"></include>
+		<where>
+			whd.del_flag = 0
+		</where>
+	</select>
+	
+	<resultMap type="com.togest.domain.WireHeightDataDTO" id="wireHeightCheckRepeatMap">
+		<result property="id" column="id"/>
+		<result property="pillarId" column="pillar_id"/>
+		<result property="checkDate" column="check_date"/>
+		<result property="anchorPoint" column="anchor_point"/>
+		<result property="wireHeightControlHistoryId" column="wire_height_control_history_id"/>
+		<result property="defectLevel" column="defect_level"/>
+		<result property="adjustWireHeight" column="adjust_wire_height"/>
+		<result property="currentReviewRailHeightValue" column="current_review_rail_height_value"/>
+		<result property="yearReviewRailHeightValue" column="yearReviewRailHeightValue"/>
+		
+		<association property="wireHeightControlHistoryDTO" javaType="com.togest.domain.WireHeightControlHistoryDTO">
+			<id column="wire_height_control_history_id" property="id" />
+			<result column="standar_line_height" property="standarLineHeight" />
+			<result column="standar_line_height_up" property="standarLineHeightUp" />
+			<result column="standar_line_height_down" property="standarLineHeightDown" />
+		</association>
+    </resultMap>
+    
+    <sql id="simpleBaseColumns">
+    	whd.id,
+    	whd.pillar_id,
+    	whd.check_date,
+    	whd.anchor_point,
+    	whd.wire_height_control_history_id,
+    	whd.defect_level,
+    	whd.adjust_wire_height,
+    	whd.current_review_rail_height_value,
+    	whch.standar_line_height,
+    	whch.standar_line_height_up,
+    	whch.standar_line_height_down,
+    	whyr.year_review_rail_height_value yearReviewRailHeightValue
+    </sql> 
+    
+    <sql id="Simple_Base_Table">
+		6c_wire_height_data whd
+		left join 6c_wire_height_control_history whch on whd.wire_height_control_history_id = whch.id
+		left join 6c_wire_height_year_review whyr on whd.pillar_id = whyr.pillar_id 
+		and whyr.year = year(whd.check_date)
+	</sql>
+	
+	<select id="checkRepeat" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightCheckRepeatMap">
+		select <include refid="simpleBaseColumns"></include>
+		from <include refid="Simple_Base_Table"></include>
+		<where>
+			whd.del_flag = 0
+			<if test="entity.checkDate != null">
+				and whd.check_date = #{entity.checkDate}
+			</if>
+			<if test="entity.pillarId != null"> 
+				and whd.pillar_id = #{entity.pillarId}
+			</if>
+		</where>
+	</select>
+	 
+	<select id="findUpWireHeightData" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightCheckRepeatMap">
+		select <include refid="simpleBaseColumns"></include>
+		from <include refid="Simple_Base_Table"></include>
+		<where>
+			whd.del_flag = 0
+			<if test="entity.checkDate != null"> 
+				and whd.check_date &lt; #{entity.checkDate}
+			</if>
+			<if test="entity.pillarId != null"> 
+				and whd.pillar_id = #{entity.pillarId}
+			</if>
+		</where>
+		order by whd.check_date desc limit 1
+	</select>
+	
+	<select id="findNewLastAnchorPointList" parameterType="java.util.List" resultType="java.util.Map">
+		<foreach item="pillarId" collection="pillarIdList" separator="union all" open="" close="" index="">
+			(
+				select <include refid="simpleBaseColumns"></include>
+				from <include refid="Simple_Base_Table"></include>
+				<where>
+					whd.del_flag = 0
+					<if test="pillarId != null">
+						and whd.pillar_id = #{pillarId}
+					</if>
+				</where>
+				order by whd.check_date desc limit 1
+			)
+		</foreach> 
+	</select>
+	
+	<select id="history" parameterType="com.togest.domain.WireHeightDataDTO" resultMap="wireHeightCheckRepeatMap">
+		select <include refid="simpleBaseColumns"></include>
+		from <include refid="Simple_Base_Table"></include>
+		<where>
+			whd.del_flag = 0
+			<if test="pillarId != null"> 
+			and whd.pillar_id = #{pillarId}
+			</if>
+			order by whd.check_date desc
+		</where> 
+	</select>
+	
+	<select id="findUpWireHeightDataList" parameterType="java.util.List" resultMap="wireHeightCheckRepeatMap">
+		<foreach item="entity" collection="entityList" separator="union all" open="" close="" index="">
+			(
+				select <include refid="simpleBaseColumns"></include>
+				from <include refid="Simple_Base_Table"></include>
+				<where>
+					whd.del_flag = 0
+					<if test="entity.checkDate != null"> 
+						and whd.check_date &lt; #{entity.checkDate}
+					</if>
+					<if test="entity.pillarId != null">
+						and whd.pillar_id = #{entity.pillarId}
+					</if>
+				</where>
+				order by whd.check_date desc limit 1
+			)
+		</foreach> 
+	</select>
+	
+	<insert id="insert" parameterType="com.togest.domain.WireHeightDataDTO">
+		insert into 6c_wire_height_data
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            system_id,
+            line_id,
+            section_id,
+            work_shop_id,
+            work_area_id,
+            direction,
+            psa_id,
+            tunnel_id,
+            pillar_id,
+            check_date,
+            glb,
+            speed,
+            anchor_point,
+            span_max,
+            span_min,
+            review_value,
+            review_value_source,
+            wire_height_control_history_id,
+            adjust_wire_height,
+            current_review_rail_height_value,
+            jcw_adjust_up_value,
+            defect_type,
+            defect_level,
+            review_defect_level,
+            defect_equ_property,
+            is_review_exist,
+            dym_check_value,
+            static_check_value,
+            static_check_date,
+            pass_result,
+            defect_deal_person,
+            deal_date,
+            feedback_limit_date,
+            is_over_time_review,
+            del_flag,
+            create_ip,
+            create_by,
+            create_date,
+			<if test="sort!=null">sort</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{systemId},
+			#{lineId},
+			#{sectionId},
+			#{workShopId},
+			#{workAreaId},
+			#{direction},
+			#{psaId},
+			#{tunnelId},
+			#{pillarId},
+			#{checkDate},
+			#{glb},
+			#{speed},
+			#{anchorPoint},
+			#{spanMax},
+			#{spanMin},
+			#{reviewValue},
+			#{reviewValueSource},
+			#{wireHeightControlHistoryId},
+			#{adjustWireHeight},
+			#{currentReviewRailHeightValue},
+			#{jcwAdjustUpValue},
+			#{defectType},
+			#{defectLevel},
+			#{reviewDefectLevel},
+			#{defectEquProperty},
+			#{isReviewExist},
+			#{dymCheckValue},
+			#{staticCheckValue},
+			#{staticCheckDate},
+			#{passResult},
+			#{defectDealPerson},
+			#{dealDate},
+			#{feedbackLimitDate},
+			#{isOverTimeReview},
+			#{delFlag},
+			#{createIp},
+			#{createBy},
+			#{createDate},
+			<if test="sort!=null">#{sort}</if>
+		</trim>
+	</insert>
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into 6c_wire_height_data
+		(
+			id,
+            system_id,
+            line_id,
+            section_id,
+            work_shop_id,
+            work_area_id,
+            direction,
+            psa_id,
+            tunnel_id,
+            pillar_id,
+            check_date,
+            glb,
+            speed,
+            anchor_point,
+            span_max,
+            span_min,
+            review_value,
+            review_value_source,
+            wire_height_control_history_id,
+            adjust_wire_height,
+            current_review_rail_height_value,
+            jcw_adjust_up_value,
+            defect_type,
+            defect_level,
+            review_defect_level,
+            defect_equ_property,
+            is_review_exist,
+            dym_check_value,
+            static_check_value,
+            static_check_date,
+            pass_result,
+            defect_deal_person,
+            deal_date,
+            feedback_limit_date,
+            is_over_time_review,
+            del_flag,
+            create_ip,
+            create_by,
+            create_date
+		)
+		values
+		<foreach collection="list" item="item" index="index" separator=","> 
+		(
+			#{item.id},
+			#{item.systemId},
+			#{item.lineId},
+			#{item.sectionId},
+			#{item.workShopId},
+			#{item.workAreaId},
+			#{item.direction},
+			#{item.psaId},
+			#{item.tunnelId},
+			#{item.pillarId},
+			#{item.checkDate},
+			#{item.glb},
+			#{item.speed},
+			#{item.anchorPoint},
+			#{item.spanMax},
+			#{item.spanMin},
+			#{item.reviewValue},
+			#{item.reviewValueSource},
+			#{item.wireHeightControlHistoryId},
+			#{item.adjustWireHeight},
+			#{item.currentReviewRailHeightValue},
+			#{item.jcwAdjustUpValue},
+			#{item.defectType},
+			#{item.defectLevel},
+			#{item.reviewDefectLevel},
+			#{item.defectEquProperty},
+			#{item.isReviewExist},
+			#{item.dymCheckValue},
+			#{item.staticCheckValue},
+			#{item.staticCheckDate},
+			#{item.passResult},
+			#{item.defectDealPerson},
+			#{item.dealDate},
+			#{item.feedbackLimitDate},
+			#{item.isOverTimeReview},
+			#{item.delFlag},
+			#{item.createIp},
+			#{item.createBy},
+			#{item.createDate}
+		)
+    	</foreach> 
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.WireHeightDataDTO">
+		update 6c_wire_height_data 
+		<set>
+		system_id = #{systemId},
+		line_id = #{lineId},
+		section_id = #{sectionId},
+		work_shop_id = #{workShopId},
+		work_area_id = #{workAreaId},
+		direction = #{direction},
+		psa_id = #{psaId},
+		tunnel_id = #{tunnelId},
+		pillar_id = #{pillarId},
+		check_date = #{checkDate},
+		glb = #{glb},
+		speed = #{speed},
+		anchor_point = #{anchorPoint},
+		span_max = #{spanMax},
+		span_min = #{spanMin},
+		review_value = #{reviewValue},
+		review_value_source =#{reviewValueSource},
+		wire_height_control_history_id =#{wireHeightControlHistoryId},
+		adjust_wire_height = #{adjustWireHeight},
+		current_review_rail_height_value = #{currentReviewRailHeightValue},
+		jcw_adjust_up_value = #{jcwAdjustUpValue},
+		defect_type = #{defectType},
+		defect_level = #{defectLevel},
+		review_defect_level = #{reviewDefectLevel},
+		defect_equ_property = #{defectEquProperty},
+		is_review_exist = #{isReviewExist},
+		dym_check_value = #{dymCheckValue},
+		static_check_value = #{staticCheckValue},
+		static_check_date = #{staticCheckDate},
+		pass_result = #{passResult},
+		defect_deal_person = #{defectDealPerson},
+		deal_date = #{dealDate},
+		feedback_limit_date = #{feedbackLimitDate},
+		is_over_time_review = #{isOverTimeReview},
+		update_ip = #{updateIp},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		<if test="sort!=null">sort = #{sort}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from 6c_wire_height_data where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.WireHeightDataDTO">
+		update 6c_wire_height_data
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+
+</mapper>

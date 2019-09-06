@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DataDrawingDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DataDrawingDTO">
+		<id column="id" property="id" />
+		<result column="dept_id" property="deptId" />
+		<result column="name" property="name" />
+		<result column="code" property="code" />
+		<result column="type" property="type" />
+		<result column="assortment_id" property="assortmentId" />
+		<result column="version" property="version" />
+		<result column="upload_date" property="uploadDate" />
+		<result column="file_id" property="fileId" />
+		<result column="remark" property="remark" />
+		<result column="field1" property="field1" />
+		<result column="field2" property="field2" />
+		<result column="field3" property="field3" />
+		<result column="field4" property="field4" />
+		<result column="field5" property="field5" />
+		<result column="field6" property="field6" />
+		<result column="field7" property="field7" />
+		<result column="field8" property="field8" />
+		<result column="field9" property="field9" />
+		<result column="field10" property="field10" />
+		<result column="pavilion_id" property="pavilionId" />
+		<result column="sort" property="sort" />
+		<result column="fileName" property="fileName" />
+		<result column="assortmentName" property="assortmentName" />
+		<result column="pavilionName" property="pavilionName" />
+		<result column="psa_id" property="psaId" />
+		<result column="psaName" property="psaName" />
+		<result column="line_id" property="lineId" />
+		<result column="lineName" property="lineName" />
+	</resultMap>
+
+
+	<sql id="columns">
+		a.id,
+		a.dept_id,
+		a.name,
+		a.code,
+		a.type,
+		a.assortment_id,
+		a.version,
+		a.upload_date,
+		a.file_id,
+		a.remark,
+		a.field1,
+		a.field2,
+		a.field3,
+		a.field4,
+		a.field5,
+		a.field6,
+		a.field7,
+		a.field8,
+		a.field9,
+		a.field10,
+		a.sort,
+		d.name as deptName,
+		p.name as assortmentName,
+		f.real_name as fileName,
+		a.pavilion_id,
+		a.psa_id,
+		psa.name as psaName,
+		pl.name as pavilionName,
+		a.line_id,
+		pli.name as lineName
+	</sql>
+
+
+	<sql id="conditions">
+		<if test="deptId != null">
+			a.dept_id = #{deptId}
+		</if>
+		<if test="name != null">
+			and a.name = #{name}
+		</if>
+		<if test="code != null">
+			and a.code = #{code}
+		</if>
+		<if test="type != null">
+			and a.type = #{type}
+		</if>
+		<if test="assortmentId != null">
+			and a.assortment_id = #{assortmentId}
+		</if>
+		<if test="version != null">
+			and a.version = #{version}
+		</if>
+		<if test="uploadDate != null">
+			and a.upload_date = #{uploadDate}
+		</if>
+		<if test="fileId != null">
+			and a.file_id = #{fileId}
+		</if>
+		<if test="remark != null">
+			and a.remark = #{remark}
+		</if>
+		<if test="field1 != null">
+			and a.field1 = #{field1}
+		</if>
+		<if test="field2 != null">
+			and a.field2 = #{field2}
+		</if>
+		<if test="field3 != null">
+			and a.field3 = #{field3}
+		</if>
+		<if test="field4 != null">
+			and a.field4 = #{field4}
+		</if>
+		<if test="field5 != null">
+			and a.field5 = #{field5}
+		</if>
+		<if test="field6 != null">
+			and a.field6 = #{field6}
+		</if>
+		<if test="field7 != null">
+			and a.field7 = #{field7}
+		</if>
+		<if test="field8 != null">
+			and a.field8 = #{field8}
+		</if>
+		<if test="field9 != null">
+			and a.field9 = #{field9}
+		</if>
+		<if test="field10 != null">
+			and a.field10 = #{field10}
+		</if>
+		<if test="sort != null">
+			and a.sort = #{sort}
+		</if>
+		<if test="pavilionId != null">
+			and a.pavilion_id = #{pavilionId}
+		</if>
+		<if test="psaId != null">
+			and a.psa_id = #{psaId}
+		</if>
+		<if test="lineId != null">
+			and a.line_id = #{lineId}
+		</if>
+		and a.del_flag=0
+	</sql>
+
+	<sql id="tables">
+		jcw_equ_data_drawing a left join sys_assortment p on
+		a.assortment_id = p.id left join sys_file f on
+		a.file_id = f.id left
+		join p_department d on a.dept_id = d.id
+		left join p_pavilion pl on
+		a.pavilion_id=pl.id
+		left join p_supply_arm psa on
+		a.psa_id=psa.id
+		left join p_line pli on 
+		a.line_id = pli.id
+	</sql>
+
+	<select id="getListByTypeOrDeptIdsOrAssortmentIdsOrName"
+		parameterType="java.util.Map" resultMap="BaseResultMap">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		<where>
+			<if test="type !=null">
+				a.type=#{type}
+			</if>
+			<if test="deptIds !=null and deptIds !=''">
+				and (a.dept_id in
+				(select id from p_department where
+				parent_ids like '%${deptIds}%') or a.dept_id=#{deptIds} )
+			</if>
+			<if test="assortmentIds !=null and assortmentIds !=''">
+				and (a.assortment_id in
+				(select id from sys_assortment
+				where parent_ids like '%${assortmentIds}%')
+				or
+				a.assortment_id=#{assortmentIds})
+			</if>
+			<if test="name !=null and name !=''">
+				and a.name like '%${name}%'
+			</if>
+			and a.del_flag=0
+		</where>
+	</select>
+	<select id="getListByDataDrawingRequest" parameterType="com.togest.request.DataDrawingRequest"
+		resultMap="BaseResultMap">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		<where>
+			a.del_flag=0
+			<if test="type !=null">
+				and a.type=#{type}
+			</if>
+			<if test="code !=null">
+				and a.code=#{code}
+			</if>
+			<if test="pavilionId !=null and pavilionId !=''">
+				and a.pavilion_id=#{pavilionId}
+			</if>
+			<if test="psaId !=null and psaId !=''">
+				and a.psa_id=#{psaId}
+			</if>
+			<if test="deptId !=null and deptId !=''">
+				<if test="isChild==true">
+				and (
+					a.dept_id in
+					(select id from p_department where
+					parent_ids like '%${deptId}%') 
+					or a.dept_id=#{deptId} 
+					or 
+					a.line_id in (select distinct pl_id from p_dept_line where dept_id in
+					(select id from p_department where parent_ids like '%${deptId}%' )  or dept_id=#{deptId} )
+					)
+				</if>
+				<if test="isChild==false">
+					and a.dept_id=#{deptId}
+				</if>
+			</if>
+			<if test="assortmentId !=null and assortmentId !=''">
+				and (a.assortment_id in
+				(select id from sys_assortment
+				where parent_ids like '%${assortmentId}%')
+				or
+				a.assortment_id=#{assortmentId})
+			</if>
+			<if test="assortmentName !=null and assortmentName !=''">
+				and p.name like '%${assortmentName}%'
+			</if>
+			<if test="lineId !=null and lineId !=''">
+				and a.line_id=#{lineId}
+			</if>
+			<if test="lineName !=null and lineName !=''">
+				and pli.name like '%${lineName}%'
+			</if>
+			<if test="name !=null and name !=''">
+				and a.name like '%${name}%'
+			</if>
+			<if test="fileId != null">
+				and a.file_id = #{fileId}
+			</if>
+			<if test="fileName != null">
+				and f.real_name like '%${fileName}%'
+			</if>
+			<if test="version != null">
+				and a.version = #{version}
+			</if>
+			<if test="uploadDate != null">
+				and a.upload_date = #{uploadDate}
+			</if>
+			<if test="remark != null">
+				and a.remark = #{remark}
+			</if>
+			<if test="sectionId != null">
+				and (pl.section_id = #{sectionId}
+				or a.dept_id in
+					(select id from p_department where
+					parent_ids like '%${sectionId}%') or a.dept_id=#{sectionId}
+				or a.line_id in (select distinct pl_id from p_dept_line where section_id=#{sectionId})
+				)
+			</if>
+			<choose>
+	            <when test="orderBy!=null and orderBy!=''">
+	                order by ${orderBy}
+	            </when>
+				<otherwise>
+	                order by a.line_id, a.upload_date desc
+				</otherwise>
+       		</choose>
+		</where>
+		
+	</select>
+	<select id="getByKey" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		where a.id=#{id} and a.del_flag=0
+	</select>
+	<select id="getByEntity" parameterType="com.togest.domain.DataDrawingDTO"
+		resultMap="BaseResultMap">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		<where>
+			<include refid="conditions"></include>
+		</where>
+	</select>
+	<select id="getListByKeys" parameterType="java.util.List"
+		resultMap="BaseResultMap">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		<where>
+			<choose>
+				<when test="ids!=null">
+					a.id in
+					<foreach item="item" collection="ids" separator="," open="("
+						close=")" index="">
+						#{item}
+					</foreach>
+				</when>
+				<otherwise>
+					1=0
+				</otherwise>
+			</choose>
+			and a.del_flag=0
+		</where>
+
+	</select>
+	<select id="findList" parameterType="com.togest.domain.DataDrawingDTO"
+		resultMap="BaseResultMap">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		<where>
+			<include refid="conditions"></include>
+		</where>
+		order by a.sort
+	</select>
+	<select id="findAllList">
+		select
+		<include refid="columns"></include>
+		from
+		<include refid="tables"></include>
+		order by a.sort
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DataDrawingDTO">
+		insert into
+		jcw_equ_data_drawing(id,dept_id, name, code,
+		type, assortment_id,
+		version,
+		upload_date, file_id, remark,
+		field1, field2, field3,
+		field4,
+		field5, field6,
+		field7, field8, field9,
+		field10, sort, del_flag,
+		create_by, create_date,pavilion_id,psa_id,line_id
+		)
+		values (#{id},#{deptId}, #{name},
+		#{code},
+		#{type}, #{assortmentId}, #{version},
+		#{uploadDate}, #{fileId},
+		#{remark},
+		#{field1}, #{field2}, #{field3},
+		#{field4}, #{field5},
+		#{field6},
+		#{field7}, #{field8}, #{field9},
+		#{field10}, #{sort},
+		#{delFlag},
+		#{createBy},current_timestamp,#{pavilionId},#{psaId},#{lineId})
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DataDrawingDTO">
+		update
+		jcw_equ_data_drawing set
+		dept_id = #{deptId},
+		name = #{name},
+		code = #{code},
+		type = #{type},
+		assortment_id = #{assortmentId},
+		version = #{version},
+		upload_date =
+		#{uploadDate},
+		file_id = #{fileId},
+		remark = #{remark},
+		field1 =
+		#{field1},
+		field2 = #{field2},
+		field3 = #{field3},
+		field4 = #{field4},
+		field5 = #{field5},
+		field6 = #{field6},
+		field7 = #{field7},
+		field8 =
+		#{field8},
+		field9 = #{field9},
+		field10 = #{field10},
+		sort = #{sort},
+		psa_id = #{psaId},
+		pavilion_id = #{pavilionId},
+		line_id=#{lineId}
+		where
+		id=#{id}
+	</update>
+
+	<update id="deleteFalse" parameterType="com.togest.domain.DataDrawingDTO">
+		update
+		jcw_equ_data_drawing
+		set
+		del_flag=1,delete_by=#{deleteBy},delete_date=current_timestamp
+		where
+		id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from
+		jcw_equ_data_drawing
+		where id=#{id}
+	</delete>
+
+	<delete id="deleteByEntity" parameterType="com.togest.domain.DataDrawingDTO">
+		delete from jcw_equ_data_drawing a
+		<where>
+			<include refid="conditions"></include>
+		</where>
+	</delete>
+
+</mapper>

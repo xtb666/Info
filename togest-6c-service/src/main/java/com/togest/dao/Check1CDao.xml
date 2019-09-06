@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.Check1CDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.Check1CDTO">
+		<id column="id" property="id" />
+		<result column="check_date" property="checkDate" />
+		<result column="line_id" property="lineId" />
+		<result column="direction" property="direction" />
+		<result column="detect_mileage" property="detectMileage" />
+		<result column="average_speed" property="averageSpeed" />
+		<result column="good_mileage" property="goodMileage" />
+		<result column="qualified_mileage" property="qualifiedMileage" />
+		<result column="unqualified_mileage" property="unqualifiedMileage" />
+		<result column="points" property="points" />
+		<result column="good_points" property="goodPoints" />
+		<result column="qualified_points" property="qualifiedPoints" />
+		<result column="unqualified_detail" property="unqualifiedDetail" />
+		<result column="sort" property="sort" />
+		<result column="lineName" property="lineName" />
+		<result column="train_id" property="trainId" />
+		<result column="trainName" property="trainName" />
+		
+		<collection property="check1CSectionList" ofType="com.togest.domain.Check1CSectionDTO">  
+        	<id column="check1CSectionId" property="id" />
+			<result column="detectMileage" property="detectMileage" />
+			<result column="averageSpeed" property="averageSpeed" />
+			<result column="goodMileage" property="goodMileage" />
+			<result column="qualifiedMileage" property="qualifiedMileage" />
+			<result column="unqualifiedMileage" property="unqualifiedMileage" />
+			<result column="points2" property="points" />
+			<result column="good_points2" property="goodPoints" />
+			<result column="qualified_points2" property="qualifiedPoints" />
+			<result column="unqualified_detail2" property="unqualifiedDetail" />
+			<result column="section_id" property="sectionId" />
+			<result column="check_id" property="checkId" />
+			<result column="sectionName" property="sectionName" />
+        </collection>
+	</resultMap>
+	
+	<resultMap id="CheckBaseResultMap" type="com.togest.domain.Check1CDTO">
+		<id column="id" property="id" />
+		<result column="check_date" property="checkDate" />
+		<result column="line_id" property="lineId" />
+		<result column="direction" property="direction" />
+		<result column="detect_mileage" property="detectMileage" />
+		<result column="average_speed" property="averageSpeed" />
+		<result column="good_mileage" property="goodMileage" />
+		<result column="qualified_mileage" property="qualifiedMileage" />
+		<result column="unqualified_mileage" property="unqualifiedMileage" />
+		<result column="points" property="points" />
+		<result column="good_points" property="goodPoints" />
+		<result column="qualified_points" property="qualifiedPoints" />
+		<result column="unqualified_detail" property="unqualifiedDetail" />
+		<result column="sort" property="sort" />
+		<result column="lineName" property="lineName" />
+		<result column="train_id" property="trainId" />
+		<result column="trainName" property="trainName" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.check_date, a.line_id, a.direction, a.detect_mileage, a.average_speed, a.good_mileage,
+		a.qualified_mileage, a.unqualified_mileage, a.points, a.good_points, a.qualified_points, a.unqualified_detail,
+		a.sort,a.train_id,ct.train_num as trainName,
+		line.name as lineName,
+		cs.id as check1CSectionId, cs.detect_mileage as detectMileage, cs.average_speed as averageSpeed, 
+		cs.good_mileage as goodMileage, cs.qualified_mileage as qualifiedMileage, cs.unqualified_mileage as unqualifiedMileage,
+		cs.points as points2, cs.good_points as good_points2, cs.qualified_points as qualified_points2, cs.unqualified_detail as unqualified_detail2,
+		cs.section_id, cs.check_id, pd.name as sectionName
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_check_1c a
+		left join p_line line on line.id = a.line_id
+		left join 6c_check_1c_section cs on a.id = cs.check_id
+		left join p_department pd on pd.id = cs.section_id
+		left join 6c_check_train ct on ct.id = a.train_id
+		where
+		a.id = #{id}
+	</select>
+	<select id="getByKeys" resultMap="BaseResultMap" parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_check_1c a
+		left join p_line line on line.id = a.line_id
+		left join 6c_check_1c_section cs on a.id = cs.check_id
+		left join p_department pd on pd.id = cs.section_id
+		left join 6c_check_train ct on ct.id = a.train_id
+		where
+		a.id in 
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="findCheckNoticeList" resultMap="BaseResultMap" parameterType="com.togest.request.CheckQueryFilter">
+		select
+		<include refid="Base_Column_List" />
+		from
+		(select distinct a.*
+		 from 	
+		6c_check_1c a
+		left join p_line line on line.id = a.line_id
+		left join 6c_check_1c_section cs on a.id = cs.check_id
+		left join p_department pd on pd.id = cs.section_id
+		left join 6c_check_train ct on ct.id = a.train_id
+		<where>
+			<if test="checkDate != null">
+				and a.check_date &gt;= #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and a.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and a.direction = #{direction}
+			</if>
+			<if test="trainId != null">
+				and a.train_id = #{trainId}
+			</if>
+			and a.id not in (select check_id from 6c_notice_check)
+			and cs.id in (select distinct info_id from 6c_defect where del_flag = 0 and system_id='C1' and defect_level= '1' and info_id is not null)
+			and a.del_flag = 0
+			and cs.del_flag = 0
+			and a.is_show = 1
+		</where>
+		order by a.check_date desc,line.id, a.direction
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+		 )  a
+		left join p_line line on line.id = a.line_id
+		left join 6c_check_1c_section cs on a.id = cs.check_id
+		left join p_department pd on pd.id = cs.section_id
+		left join 6c_check_train ct on ct.id = a.train_id
+		<where>
+			<if test="checkDate != null">
+				and a.check_date &gt;= #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and a.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and a.direction = #{direction}
+			</if>
+			<if test="trainId != null">
+				and a.train_id = #{trainId}
+			</if>
+			and a.id not in (select check_id from 6c_notice_check)
+			and cs.id in (select distinct info_id from 6c_defect where del_flag = 0 and system_id='C1' and defect_level= '1' and info_id is not null)
+			and a.del_flag = 0
+			and cs.del_flag = 0
+			and a.is_show = 1
+		</where>
+		order by a.check_date desc,line.id, a.direction
+	</select>
+	<select id="findCheckNoticeListCounts" parameterType="com.togest.request.CheckQueryFilter" resultType="java.lang.Integer">
+	select
+		count(distinct a.id)
+		from
+		6c_check_1c a
+		left join p_line line on line.id = a.line_id
+		left join 6c_check_1c_section cs on a.id = cs.check_id
+		left join p_department pd on pd.id = cs.section_id
+		left join 6c_check_train ct on ct.id = a.train_id
+		<where>
+			<if test="checkDate != null">
+				and a.check_date &gt;= #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and a.line_id = #{lineId}
+			</if>
+			<if test="speedType != null">
+				and line.speed_type = #{speedType}
+			</if>
+			<if test="direction != null">
+				and a.direction = #{direction}
+			</if>
+			<if test="trainId != null">
+				and a.train_id = #{trainId}
+			</if>
+			and a.id not in (select check_id from 6c_notice_check)
+			and cs.id in (select distinct info_id from 6c_defect where del_flag = 0 and system_id='C1' and defect_level= '1' and info_id is not null)
+			and a.del_flag = 0
+			and cs.del_flag = 0
+			and a.is_show = 1
+		</where>
+		order by a.check_date desc,line.id, a.direction
+	
+	</select>
+	
+	<select id="findCheckList" resultMap="CheckBaseResultMap" parameterType="com.togest.request.CheckQueryFilter">
+		select
+		a.id, a.check_date, a.line_id, a.direction, a.detect_mileage, a.average_speed, a.good_mileage,
+		a.qualified_mileage, a.unqualified_mileage, a.points, a.good_points, a.qualified_points, a.sort,
+		line.name as lineName,a.train_id,ct.train_num as trainName,a.unqualified_detail
+		<!-- <include refid="Base_Column_List" /> -->
+		from
+		6c_check_1c a
+		left join p_line line on line.id = a.line_id
+		left join 6c_check_train ct on ct.id = a.train_id
+		<where>
+			<if test="checkDate != null">
+				and a.check_date &gt;= #{checkDate}
+			</if>
+			<if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and a.line_id = #{lineId}
+			</if>
+			<if test="speedType != null">
+				and line.speed_type = #{speedType}
+			</if>
+			<if test="direction != null">
+				and a.direction = #{direction}
+			</if>
+			<if test="trainId != null">
+				and a.train_id = #{trainId}
+			</if>
+			and a.del_flag = 0
+			and a.is_show = 1
+		</where>
+		order by a.check_date desc,line.id, a.direction
+	</select>
+	
+	<insert id="insert" parameterType="com.togest.domain.Check1C">
+		insert into 6c_check_1c(
+			id, check_date, line_id, direction, detect_mileage, average_speed, good_mileage,
+			qualified_mileage, unqualified_mileage, points, good_points, qualified_points, unqualified_detail,
+			del_flag, is_show, create_ip, create_by, create_date,plan_id,train_id
+		)
+		values(
+			#{id}, #{checkDate}, #{lineId}, #{direction}, #{detectMileage}, #{averageSpeed}, #{goodMileage},
+			#{qualifiedMileage}, #{unqualifiedMileage}, #{points}, #{goodPoints}, #{qualifiedPoints}, #{unqualifiedDetail},
+			#{delFlag}, #{isShow}, #{createIp}, #{createBy}, #{createDate},#{planId},#{trainId}
+		)
+	</insert>
+
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_check_1c set
+		del_flag = 1, delete_ip = #{deleteIp}, delete_by = #{deleteBy}, delete_date = #{deleteDate}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="check1CRepeat" resultMap="BaseResultMap">
+		select
+		a.id, a.check_date, a.line_id, a.direction, a.detect_mileage, a.average_speed, a.good_mileage,
+		a.qualified_mileage, a.unqualified_mileage, a.sort,
+		line.name as lineName, pdi.name as directionName
+		from
+		6c_check_1c a
+		left join p_line line on line.id = a.line_id
+		left join p_dictionary_item pdi on pdi.id = a.direction
+		where a.del_flag = 0
+		and a.check_date = #{checkDate}
+		and a.line_id = #{lineId}
+		and a.direction = #{direction}
+		and a.train_id = #{trainId}
+	</select>
+
+	<update id="update" parameterType="com.togest.domain.Check1C">
+		update 6c_check_1c
+		<trim prefix="set" suffixOverrides=",">
+			<if test="checkDate != null">
+				check_date = #{checkDate},
+			</if>
+			<if test="detectMileage != null">
+				detect_mileage = #{detectMileage},
+			</if>
+			<if test="averageSpeed != null">
+				average_speed = #{averageSpeed},
+			</if>
+			<if test="goodMileage != null">
+				good_mileage = #{goodMileage},
+			</if>
+			<if test="qualifiedMileage != null">
+				qualified_mileage = #{qualifiedMileage},
+			</if>
+			<if test="unqualifiedMileage != null">
+				unqualified_mileage = #{unqualifiedMileage},
+			</if>
+			<if test="points != null">
+				points = #{points},
+			</if>
+			<if test="goodPoints != null">
+				good_points = #{goodPoints},
+			</if>
+			<if test="qualifiedPoints != null">
+				qualified_points = #{qualifiedPoints},
+			</if>
+			<if test="unqualifiedDetail != null">
+				unqualified_detail = #{unqualifiedDetail},
+			</if>
+			<if test="updateIp != null">
+				update_ip = #{updateIp},
+			</if>
+			<if test="updateBy != null">
+				update_by = #{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>
+			<if test="trainId != null">
+				train_id = #{trainId},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+
+</mapper>

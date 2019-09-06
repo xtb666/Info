@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.togest.dao.CInfoDao">
+
+    <resultMap type="com.togest.domain.CInfo" id="cInfoMap">
+		<result property="id" column="id"/>
+		<result property="plan_id" column="planId"/>
+		<result property="source" column="source"/>
+		<result property="checkDate" column="check_date"/>
+		<result property="lineId" column="line_id"/>
+		<result property="direction" column="direction"/>
+		<result property="startStation" column="start_station"/>
+		<result property="endStation" column="end_station"/>
+		<result property="startStationName" column="start_station_name"/>
+		<result property="endStationName" column="end_station_name"/>
+		<result property="analyst" column="analyst"/>
+		<result property="analyDate" column="analy_date"/>
+		<result property="uploadPerson" column="upload_person"/>
+		<result property="uploadDate" column="upload_date"/>
+		<result property="dataSize" column="data_size"/>
+		<result property="packageName" column="package_name"/>
+		<result property="packagePath" column="package_path"/>
+		<result property="analyStatus" column="analy_status"/>
+		<result property="defectDataStatus" column="defect_data_status"/>
+		<result property="rawdataStatus" column="rawdata_status"/>
+		<result property="systemId" column="system_id"/>
+		<result property="sectionId" column="section_id"/>
+		<result property="sort" column="sort"/>
+    </resultMap>
+    
+    <sql id="baseColumns">
+    	a.id,
+    	a.plan_id,
+    	a.source,
+    	a.check_date,
+    	a.line_id,
+    	a.direction,
+    	a.start_station,
+    	a.end_station,
+    	psa1.name as startStationName,
+    	psa2.name as endStationName,
+    	a.analyst,
+    	a.analy_date,
+    	a.upload_person,
+    	a.upload_date,
+    	a.data_size,
+    	a.package_name,
+    	a.package_path,
+    	a.analy_status,
+    	a.defect_data_status,
+    	a.rawdata_status,
+    	a.system_id,
+    	a.section_id,
+    	a.start_station_name, 
+    	a.end_station_name,
+    	a.sort
+    </sql>
+    
+    <sql id="baseConditions">
+   			 <if test="beginCheckDate != null">
+				and a.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.check_date &lt;= #{endCheckDate}
+			</if>
+		<if test="planId != null"> 
+			and a.plan_id = #{planId}
+		</if>
+		<if test="source != null"> 
+			and a.source = #{source}
+		</if>
+		<if test="checkDate != null"> 
+			and a.check_date = #{checkDate}
+		</if>
+		<if test="lineId != null"> 
+			and a.line_id = #{lineId}
+		</if>
+		<if test="direction != null"> 
+			and a.direction = #{direction}
+		</if>
+		<if test="startStation != null"> 
+			and a.start_station = #{startStation}
+		</if>
+		<if test="endStation != null"> 
+			and a.end_station = #{endStation}
+		</if>
+		<if test="analyst != null"> 
+			and a.analyst = #{analyst}
+		</if>
+		<if test="analyDate != null"> 
+			and a.analy_date = #{analyDate}
+		</if>
+		<if test="uploadPerson != null"> 
+			and a.upload_person = #{uploadPerson}
+		</if>
+		<if test="uploadDate != null"> 
+			and a.upload_date = #{uploadDate}
+		</if>
+		<if test="dataSize != null"> 
+			and a.data_size = #{dataSize}
+		</if>
+		<if test="packageName != null"> 
+			and a.package_name = #{packageName}
+		</if>
+		<if test="packagePath != null"> 
+			and a.package_path = #{packagePath}
+		</if>
+		<if test="analyStatus != null"> 
+			and a.analy_status = #{analyStatus}
+		</if>
+		<if test="defectDataStatus != null"> 
+			and a.defect_data_status = #{defectDataStatus}
+		</if>
+		<if test="rawdataStatus != null"> 
+			and a.rawdata_status = #{rawdataStatus}
+		</if>
+		<if test="systemId != null"> 
+			and a.system_id = #{systemId}
+		</if>
+		<if test="sectionId != null"> 
+			and a.section_id = #{sectionId}
+		</if>
+		<if test="delFlag != null"> 
+			and a.del_flag = #{delFlag}
+		</if>
+    </sql>
+
+	<select id="getByKey" parameterType="java.lang.String" resultMap="cInfoMap">
+		select <include refid="baseColumns"></include>
+		from 6c_info a
+		<!-- left join p_supply_arm psa1 on a.start_station = psa1.id
+		left join p_supply_arm psa2 on a.end_station = psa2.id -->
+		where a.id = #{id}
+	</select>
+	
+	<select id="getListByKeys" parameterType="java.util.List" resultMap="cInfoMap">
+		select <include refid="baseColumns"></include>
+		from 6c_info a
+		<!-- left join p_supply_arm psa1 on a.start_station = psa1.id
+		left join p_supply_arm psa2 on a.end_station = psa2.id -->
+		where a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+					close=")" index="">
+					#{item}
+		</foreach>
+	</select>
+	
+	<select id="getByEntity" parameterType="com.togest.domain.CInfo" resultMap="cInfoMap">
+		select <include refid="baseColumns"></include>
+		from 6c_info a
+		<!-- left join p_supply_arm psa1 on a.start_station = psa1.id
+		left join p_supply_arm psa2 on a.end_station = psa2.id -->
+		<where>
+			<include refid="baseConditions"></include>
+		</where>
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.CInfo" resultMap="cInfoMap">
+		select <include refid="baseColumns"></include>
+		from 6c_info a
+		<where>
+			<include refid="baseConditions"></include>
+			<choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by ${orderBy}
+            </when>
+			<otherwise>
+                order by a.sort desc
+			</otherwise>
+        </choose>
+		</where>
+	</select>
+	<select id="findLists" parameterType="com.togest.request.InfoQueryFilter" resultMap="cInfoMap">
+		select <include refid="baseColumns"></include>
+		from 6c_info a
+		<where>
+			<include refid="baseConditions"></include>
+			<!-- <choose>
+            <when test="orderBy!=null and orderBy!=''">
+                order by ${orderBy}
+            </when>
+			<otherwise>
+                order by sort desc
+			</otherwise>
+        </choose> -->
+		</where>
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+	</select>
+	<select id="findAllList" parameterType="com.togest.domain.CInfo" resultMap="cInfoMap">
+		select <include refid="baseColumns"></include>
+		from 6c_info a
+		<where>
+			a.del_flag = 0
+		</where>
+	</select>
+	 
+	<insert id="insert" parameterType="com.togest.domain.CInfo">
+		insert into 6c_info
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+            id,
+            plan_id,
+            source,
+            check_date,
+            line_id,
+            direction,
+            start_station,
+            end_station,
+            analyst,
+            analy_date,
+            upload_person,
+            upload_date,
+            data_size,
+            package_name,
+            package_path,
+            analy_status,
+            defect_data_status,
+            rawdata_status,
+            system_id,
+            section_id,
+            del_flag,
+			<if test="sort!=null">sort,</if>
+            create_ip,
+            create_by,
+            create_date,
+            start_station_name,
+            end_station_name
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			#{id},
+			#{planId},
+			#{source},
+			#{checkDate},
+			#{lineId},
+			#{direction},
+			#{startStation},
+			#{endStation},
+			#{analyst},
+			#{analyDate},
+			#{uploadPerson},
+			#{uploadDate},
+			#{dataSize},
+			#{packageName},
+			#{packagePath},
+			#{analyStatus},
+			#{defectDataStatus},
+			#{rawdataStatus},
+			#{systemId},
+			#{sectionId},
+			#{delFlag},
+			<if test="sort!=null">#{sort},</if>
+			#{createIp},
+			#{createBy},
+			#{createDate},
+			#{startStationName},
+			#{endStationName}
+		</trim>
+	</insert>
+	 
+	<update id="update" parameterType="com.togest.domain.CInfo">
+		update 6c_info 
+		<set >
+		plan_id = #{planId},
+		source = #{source},
+		check_date = #{checkDate},
+		line_id = #{lineId},
+		direction = #{direction},
+		start_station = #{startStation},
+		start_station_name = #{startStationName},
+		end_station = #{endStation},
+		end_station_name = #{endStationName},
+		analyst = #{analyst},
+		analy_date = #{analyDate},
+		upload_person = #{uploadPerson},
+		upload_date = #{uploadDate},
+		data_size = #{dataSize},
+		package_name = #{packageName},
+		package_path = #{packagePath},
+		analy_status = #{analyStatus},
+		defect_data_status = #{defectDataStatus},
+		rawdata_status = #{rawdataStatus},
+		system_id = #{systemId},
+		section_id = #{sectionId},
+		<if test="sort!=null">sort = #{sort},</if>
+		update_ip = #{updateIp},
+		update_by = #{updateBy},
+		update_date = #{updateDate},
+		</set >
+		where id = #{id}
+	</update>
+	
+	
+	<delete id="deleteByKey">
+		delete from 6c_info where id in 
+		<foreach item="item" collection="id.split(',')" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="delete" parameterType="com.togest.domain.CInfo">
+		update 6c_info
+		set del_flag=#{delFlag},delete_by=#{deleteBy},delete_date=#{deleteDate},delete_ip=#{deleteIp}
+		where 
+		id in 
+		<foreach item="item" collection="id.split(',')" separator="," open="("
+					close=")">
+					#{item}
+		</foreach>
+
+	</update>
+		<update id="deleteFalsesByPlanBaseId" parameterType="java.util.Map">
+		update 6c_info
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = NOW()
+		where 
+		plan_id in (select pd.id from 6c_plan_detail pd Left join 6c_plan_base pb on pd.plan_base_id=pb.id where pb.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+		)
+	</update>
+	<update id="deleteFalsesByPlanExecuteId" parameterType="java.util.Map">
+		update 6c_info
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = NOW()
+		where 
+		plan_id in (select pd.id from 6c_plan_detail pd Left join 6c_plan_execute pe on pe.plan_detail_id=pd.id 
+		where pe.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+		)
+	</update>
+		<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_c1_info
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = NOW()
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	
+	<select id="findCAndSize" parameterType="com.togest.request.InfoQueryFilter"  resultType="com.togest.response.statistics.InfoCAndSize">
+		select 
+			count(a.id) as num,a.system_id as systemId,sum(a.data_size)/(1024*1024) as size,a.line_id as lineId,l.name as lineName
+		from  6c_info a
+		LEFT JOIN p_line l ON line_id = l.id
+		<where>
+		a.del_flag = 0
+		<include refid="baseConditions"></include>
+		</where>
+		group by a.line_id , a.system_id
+	</select>
+	<select id="findYAndMon" parameterType="com.togest.request.InfoQueryFilter"  resultType="com.togest.response.statistics.InfoCAndSize">
+		SELECT 
+		COUNT(a.id) as num,YEAR(a.check_date) AS year,MONTH(a.check_date) AS mon
+		FROM  `6c_info`  a
+		LEFT JOIN p_line l ON line_id = l.id
+		<where>
+		a.del_flag = 0
+		<include refid="baseConditions"></include>
+		</where>
+	 GROUP BY year,mon
+	</select>
+
+</mapper>

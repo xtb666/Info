@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectRepeatCountDao">
+
+	<insert id="insert" parameterType="com.togest.domain.DefectRepeatCount">
+		insert into
+		6c_defect_repeat_count
+		(id,count,countb,countc,countd,counte,countf,countg,count1,count2,count3,count4,count5,count6,count7,defect_id1,defect_id2,defect_id3,defect_id4,defect_id5,defect_id6,defect_id7,
+		defect_repeat_ids,defect_repeat_idsb,defect_repeat_idsc,defect_repeat_idsd,defect_repeat_idse,defect_repeat_idsf,defect_repeat_idsg)
+		values
+		(#{id},#{count},#{countb},#{countc},#{countd},#{counte},#{countf},#{countg},#{count1},#{count2},#{count3},#{count4},#{count5},#{count6},#{count7},#{defectId1},#{defectId2},#{defectId3},#{defectId4},#{defectId5},#{defectId6},#{defectId7},
+		#{defectRepeatIds},#{defectRepeatIdsb},#{defectRepeatIdsc},#{defectRepeatIdsd},#{defectRepeatIdse},#{defectRepeatIdsf},#{defectRepeatIdsg})
+	</insert>
+
+
+	<update id="updateRepeatCount" parameterType="com.togest.domain.DefectRepeatCount">
+		update 6c_defect_repeat_count
+		<set>
+			<if test="count!=null">
+				count = #{count},
+			</if>
+			<if test="countb!=null">
+				countb = #{countb},
+			</if>
+			<if test="countc!=null">
+				countc = #{countc},
+			</if>
+			<if test="countd!=null">
+				countd = #{countd},
+			</if>
+			<if test="counte!=null">
+				counte = #{counte},
+			</if>
+			<if test="countf!=null">
+				countf = #{countf},
+			</if>
+			<if test="countg!=null">
+				countg = #{countg},
+			</if>																		
+			<if test="count1!=null">
+				count1 = #{count1},
+			</if>
+			<if test="count2!=null">
+				count2 = #{count2},
+			</if>
+			<if test="count3!=null">
+				count3 = #{count3},
+			</if>
+			<if test="count4!=null">
+				count4 = #{count4},
+			</if>
+			<if test="count5!=null">
+				count5 = #{count5},
+			</if>
+			<if test="count6!=null">
+				count6 = #{count6},
+			</if>
+			<if test="count7!=null">
+				count7 = #{count7},
+			</if>												
+			<if test="defectId1!=null">
+				defect_id1 = #{defectId1},
+			</if>
+			<if test="defectId2!=null">
+				defect_id2 = #{defectId2},
+			</if>
+			<if test="defectId3!=null">
+				defect_id3 = #{defectId3},
+			</if>
+			<if test="defectId4!=null">
+				defect_id4 = #{defectId4},
+			</if>
+			<if test="defectId5!=null">
+				defect_id5 = #{defectId5},
+			</if>
+			<if test="defectId6!=null">
+				defect_id6 = #{defectId6},
+			</if>
+			<if test="defectId7!=null">
+				defect_id7 = #{defectId7},
+			</if>									
+			<if test="defectRepeatIds!=null">
+				defect_repeat_ids = #{defectRepeatIds},
+			</if>
+			<if test="defectRepeatIdsb!=null">
+				defect_repeat_idsb = #{defectRepeatIdsb},
+			</if>
+			<if test="defectRepeatIdsc!=null">
+				defect_repeat_idsc = #{defectRepeatIdsc},
+			</if>
+			<if test="defectRepeatIdsd!=null">
+				defect_repeat_idsd = #{defectRepeatIdsd},
+			</if>
+			<if test="defectRepeatIdse!=null">
+				defect_repeat_idse = #{defectRepeatIdse},
+			</if>
+			<if test="defectRepeatIdsf!=null">
+				defect_repeat_idsf = #{defectRepeatIdsf},
+			</if>
+			<if test="defectRepeatIdsg!=null">
+				defect_repeat_idsg = #{defectRepeatIdsg},
+			</if>																							
+		</set>
+		where id = #{id}
+	</update>
+
+	<select id="getByKey" parameterType="java.lang.String"
+		resultType="com.togest.domain.DefectRepeatCount">
+		select id,count,countb,countc,countd,counte,countf,countg,count1,count2,count3,count4,count5,count6,count7,
+		defect_id1 as defectId1,
+		defect_id2 as defectId2,
+		defect_id3 as defectId3,
+		defect_id4 as defectId4,
+		defect_id5 as defectId5,
+		defect_id6 as defectId6,
+		defect_id7 as defectId7,
+		defect_repeat_ids as defectRepeatIds,
+		defect_repeat_idsb as defectRepeatIdsb,
+		defect_repeat_idsc as defectRepeatIdsc,
+		defect_repeat_idsd as defectRepeatIdsd,
+		defect_repeat_idse as defectRepeatIdse,
+		defect_repeat_idsf as defectRepeatIdsf,
+		defect_repeat_idsg as defectRepeatIdsg											
+		from
+		6c_defect_repeat_count
+		where id = #{id}
+	</select>
+	<select id="getByKey2" parameterType="java.util.Map"
+		resultType="com.togest.domain.DefectRepeatCount">
+		select id,count,countb,countc,countd,counte,countf,countg,count1,count2,count3,count4,count5,count6,count7,
+		defect_id1 as defectId1,
+		defect_id2 as defectId2,
+		defect_id3 as defectId3,
+		defect_id4 as defectId4,
+		defect_id5 as defectId5,
+		defect_id6 as defectId6,
+		defect_id7 as defectId7,
+		<if test="glbDistance==null or glbDistance==0.02">defect_repeat_ids as defectRepeatIds</if>
+		<if test="glbDistance==0.03">defect_repeat_idsb as defectRepeatIds</if>
+		<if test="glbDistance==0.04">defect_repeat_idsc as defectRepeatIds</if>
+		<if test="glbDistance==0.05">defect_repeat_idsd as defectRepeatIds</if>
+		<if test="glbDistance==0.1">defect_repeat_idse as defectRepeatIds</if>
+		<if test="glbDistance==0.15">defect_repeat_idsf as defectRepeatIds</if>
+		<if test="glbDistance==0.2">defect_repeat_idsg as defectRepeatIds</if>										
+		from
+		6c_defect_repeat_count
+		where id = #{id}
+	</select>
+	<select id="getByKeys" parameterType="java.util.List"
+		resultType="com.togest.domain.DefectRepeatCount">
+		select id,count,countb,countc,countd,counte,countf,countg,count1,count2,count3,count4,count5,count6,count7,
+		defect_id1 as defectId1,
+		defect_id2 as defectId2,
+		defect_id3 as defectId3,
+		defect_id4 as defectId4,
+		defect_id5 as defectId5,
+		defect_id6 as defectId6,
+		defect_id7 as defectId7,
+		defect_repeat_ids as defectRepeatIds,
+		defect_repeat_idsb as defectRepeatIdsb,
+		defect_repeat_idsc as defectRepeatIdsc,
+		defect_repeat_idsd as defectRepeatIdsd,
+		defect_repeat_idse as defectRepeatIdse,
+		defect_repeat_idsf as defectRepeatIdsf,
+		defect_repeat_idsg as defectRepeatIdsg
+		from
+		6c_defect_repeat_count
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+	<!-- <select id="getByKeys2" parameterType="java.util.Map"
+		resultType="com.togest.domain.DefectRepeatCount">
+		select id,count,countb,countc,countd,counte,countf,countg,count1,count2,count3,count4,count5,count6,count7,
+		defect_id1 as defectId1,
+		defect_id2 as defectId2,
+		defect_id3 as defectId3,
+		defect_id4 as defectId4,
+		defect_id5 as defectId5,
+		defect_id6 as defectId6,
+		defect_id7 as defectId7,
+		<if test="glbDistance==0.02">drc.defect_repeat_ids as defectRepeatIds</if>
+		<if test="glbDistance==0.03">drc.defect_repeat_idsb as defectRepeatIds</if>
+		<if test="glbDistance==0.04">drc.defect_repeat_idsc as defectRepeatIds</if>
+		<if test="glbDistance==0.05">drc.defect_repeat_idsd as defectRepeatIds</if>
+		<if test="glbDistance==0.1">drc.defect_repeat_idse as defectRepeatIds</if>
+		<if test="glbDistance==0.15">drc.defect_repeat_idsf as defectRepeatIds</if>
+		<if test="glbDistance==0.2">drc.defect_repeat_idsg as defectRepeatIds</if>	
+		from
+		6c_defect_repeat_count
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>	 -->
+	<select id="deleteByKeys" parameterType="java.util.List">
+		delete from
+		6c_defect_repeat_count
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+</mapper>
+

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectHistoryDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectHistory">
+		<id column="id" property="id" />
+		<result column="pillar_id" property="pillarId" />
+		<result column="defect_type" property="defectType" />
+		<result column="system_id" property="systemId" />
+		<result column="count" property="count" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.pillar_id, a.defect_type, a.system_id, a.count
+	</sql>
+	
+	<sql id="Base_Table">
+		6c_defect_history a
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		<include refid="Base_Table" />
+		where
+		a.id = #{id}
+	</select>
+
+	<select id="getByEntity" parameterType="com.togest.domain.DefectHistory"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		<include refid="Base_Table" />
+		<where>
+		<if test="pillarId != null">
+			a.pillar_id = #{pillarId}
+		</if>	
+		<if test="defectType != null">
+			and	a.defect_type = #{defectType}
+		</if>
+		<if test="systemId != null">
+			and	a.system_id = #{systemId}
+		</if>
+		<if test="count != null">
+			and	a.count = #{count}
+		</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectHistory">
+		insert into 6c_defect_history(
+		id, pillar_id, defect_type, system_id, count
+		)
+		values(
+		#{id}, #{pillarId}, #{defectType}, #{systemId}, #{count}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectHistory">
+		update 6c_defect_history
+		<trim prefix="set" suffixOverrides=",">
+			<if test="pillarId != null">
+				pillar_id = #{pillarId},
+			</if>	
+			<if test="defectType != null">
+				defect_type = #{defectType},
+			</if>
+			<if test="systemId != null">
+				system_id = #{systemId},
+			</if>
+			<if test="count != null">
+				count = #{count},
+			</if>	
+		</trim>
+		where
+		id = #{id}
+	</update>
+	
+	<update id="updateCount" parameterType="java.lang.String">
+		update 6c_defect_history
+		set
+		count = count + 1
+		where
+		id = #{id}
+	</update>
+	
+</mapper>

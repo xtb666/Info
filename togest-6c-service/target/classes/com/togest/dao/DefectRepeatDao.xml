@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectRepeatDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectRepeat">
+		<id column="id" property="id" />
+		<result column="check_date" property="checkDate" />
+		<result column="defect_id" property="defectId" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.check_date, a.defect_id
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_repeat a
+		where
+		a.id = #{id}
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectRepeat">
+		insert into 6c_defect_repeat(
+		id, check_date, defect_id
+		)
+		values(
+		#{id}, #{checkDate}, #{defectId}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectRepeat">
+		update 6c_defect_repeat
+		set
+		check_date = #{checkDate},
+		defect_id = #{defectId}
+		where
+		id = #{id}
+	</update>
+
+
+</mapper>

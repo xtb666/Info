@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectTypeDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectTypeDTO">
+		<id column="id" property="id" />
+		<result column="code" property="code" />
+		<result column="name" property="name" />
+		<result column="descrption" property="descrption" />
+		<result column="target_param_id" property="targetParamId" />
+		<result column="parent_id" property="parentId" />
+		<result column="parent_ids" property="parentIds" />
+		<result column="sort" property="sort" />
+		<result column="parentName" property="parentName" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.code, a.name, a.descrption, a.target_param_id, a.parent_id,
+		a.parent_ids, a.sort,p.name as parentName
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+		where
+		a.id = #{id} and a.del_flag=0
+	</select>
+	<select id="getByEntity" parameterType="com.togest.domain.DefectTypeDTO"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+		<where>
+			<if test="code != null">
+				and a.code = #{code}
+			</if>
+			<if test="name != null">
+				and a.name = #{name}
+			</if>
+			<if test="descrption != null">
+				and a.descrption = #{descrption}
+			</if>
+			<if test="targetParamId != null">
+				and a.target_param_id = #{targetParamId}
+			</if>
+			<if test="parentId != null">
+				and a.parent_id = #{parentId}
+			</if>
+			<if test="parentIds != null">
+				and a.parent_ids = #{parentIds}
+			</if>
+			<if test="sort != null">
+				and a.sort = #{sort}
+			</if>
+			and a.del_flag=0
+		</where>
+	</select>
+	<select id="getListByKeys" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+		<where>
+			a.id in
+			<foreach collection="ids" item="item" index="index" open="("
+				separator="," close=")">#{item}</foreach>
+			and a.del_flag=0
+		</where>
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+
+		where a.del_flag=0
+		order by a.sort
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.DefectTypeDTO"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+		<where>
+			<if test="code != null">
+				and a.code = #{code}
+			</if>
+			<if test="name != null">
+				and a.name = #{name}
+			</if>
+			<if test="descrption != null">
+				and a.descrption = #{descrption}
+			</if>
+			<if test="targetParamId != null">
+				and a.target_param_id = #{targetParamId}
+			</if>
+			<if test="parentId != null">
+				and a.parent_id = #{parentId}
+			</if>
+			<if test="parentIds != null">
+				and a.parent_ids = #{parentIds}
+			</if>
+			<if test="sort != null">
+				and a.sort = #{sort}
+			</if>
+			and a.del_flag=0
+		</where>
+		order by a.sort
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectTypeDTO">
+		insert into 6c_defect_type
+		(id, code, name,
+		descrption, target_param_id,
+		parent_id, parent_ids,
+		del_flag, create_ip,create_by,create_date
+		<if test="sort!=null or sort==0">,sort</if>
+		)
+		values
+		(#{id}, #{code}, #{name},
+		#{descrption}, #{targetParamId},
+		#{parentId}, #{parentIds},
+		#{delFlag}, #{createIp}, #{createBy},
+		current_timestamp
+		<if test="sort!=null or sort==0">,#{sort}</if>
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectTypeDTO">
+		update 6c_defect_type
+		set
+		<if test="sort!=null or sort==0">sort=#{sort},</if>
+		code = #{code},
+		name = #{name},
+		descrption = #{descrption},
+		target_param_id = #{targetParamId},
+		parent_id = #{parentId},
+		parent_ids
+		= #{parentIds},
+		update_ip = #{updateIp},
+		update_by = #{updateBy},
+		update_date = current_timestamp
+
+		where
+		id = #{id}
+	</update>
+
+	<update id="deleteFalse" parameterType="com.togest.domain.DefectTypeDTO">
+		update
+		6c_defect_type
+		set
+		del_flag=1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = current_timestamp
+		where
+		id = #{id} and del_flag=0
+	</update>
+
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from
+		6c_defect_type
+		where id = #{id}
+		and del_flag=0
+	</delete>
+
+	<select id="findByParentIdsLike" parameterType="com.togest.domain.DefectTypeDTO"
+		resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM 6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+		WHERE
+		a.parent_ids LIKE '${parentIds}%' and a.del_flag=0
+		order by a.sort
+	</select>
+	<select id="getListBySystemCode" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		SELECT
+		distinct <include refid="Base_Column_List" />
+		FROM 6c_defect_type a left join 6c_defect_type p on a.parent_id = p.id 
+		join 6c_system_defect_type st on st.defect_type_id=a.id
+		join 6c_system s on s.id = st.system_id
+		WHERE
+		<if test="systemCode!=null">s.code=#{systemCode} and </if>
+		 a.del_flag=0
+		order by a.sort
+	</select>
+	<select id="getFalseId" parameterType="java.lang.String" resultType="java.lang.String">
+		select id from 6c_defect_type where id=#{id} and del_flag=1
+	</select>
+		
+	<select id="getDefectTypeByRanHu"  resultType="java.lang.String">
+		select id from 6c_defect_type where name like '%燃弧%' and del_flag=0
+	</select>	
+		
+	<select id="getDefectTypeByJiHe"  resultType="java.lang.String">
+		select id from 6c_defect_type where name like '%几何%' and del_flag=0
+	</select>	
+	<select id="getDefectTypeChildById"  parameterType="java.lang.String" resultType="java.lang.String">
+		select id from 6c_defect_type where parent_ids like '%,${id},%' and del_flag=0
+	</select>	
+</mapper>

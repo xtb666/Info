@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.PlanDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.Plan">
+		<id column="id" property="id" />
+		<result column="plan_date" property="planDate" />
+		<result column="complete_date" property="completeDate" />
+		<result column="train_number" property="trainNumber" />
+		<result column="train_id" property="trainId" />
+		<result column="start_psa_id" property="startPsaId" />
+		<result column="end_psa_id" property="endPsaId" />
+		<result column="patcher" property="patcher" />
+		<result column="dept_id" property="deptId" />
+		<result column="section_id" property="sectionId" />
+		<result column="plan_status" property="planStatus" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="remark" property="remark" />
+		<result column="implementation" property="implementation" />
+		<result column="system_id" property="systemId" />
+		<result column="sort" property="sort" />
+		<result column="detectMileage" property="detectMileage" />
+		<result column="contacts" property="contacts" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.plan_date, a.complete_date, a.train_number,
+		a.train_id, a.start_psa_id, a.end_psa_id,
+		a.patcher, a.dept_id,
+		a.section_id, a.plan_status, a.audit_status,
+		a.remark, a.implementation, a.system_id, a.sort,a.contacts
+	</sql>
+
+	<sql id="Base_Table">
+		6c_plan a
+		left join 6c_plan_line pl on a.id = pl.plan_id
+	</sql>
+
+	<select id="getByKey" resultMap="DTOResultMap" parameterType="java.lang.String">
+		select
+		<include refid="DTO_Column_List" />
+		from
+		<include refid="DTO_Table" />
+		where
+		a.id = #{id} and a.del_flag=0
+		and pl.del_flag = 0
+	</select>
+
+	<select id="checkRepeat" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.Plan">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_plan a
+		<where>
+			a.del_flag=0
+			<if test="planDate != null">
+				and a.plan_date = #{planDate}
+			</if>
+			<if test="trainId != null">
+				and a.train_id = #{trainId}
+			</if>
+			<if test="trainNumber != null">
+				and a.train_number = #{trainNumber}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.Plan">
+		insert into 6c_plan(
+		id, plan_date, complete_date, train_number,
+		train_id, start_psa_id, end_psa_id, patcher, dept_id, section_id,
+		plan_status, audit_status, remark, implementation, system_id,
+		del_flag,
+		create_ip, create_by, create_date,contacts
+		<if test="sort!=null or sort==0">,sort</if>
+		)
+		values(
+		#{id}, #{planDate}, #{completeDate}, #{trainNumber},
+		#{trainId}, #{startPsaId}, #{endPsaId}, #{patcher}, #{deptId},
+		#{sectionId},
+		#{planStatus}, #{auditStatus}, #{remark}, #{implementation}, #{systemId},
+		#{delFlag},
+		#{createIp}, #{createBy}, #{createDate},#{contacts}
+		<if test="sort!=null or sort==0">,#{sort}</if>
+		)
+	</insert>
+
+	<update id="updatePlanStatus" parameterType="java.util.Map">
+		update 6c_plan set
+		plan_status = #{planStatus}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateAuditStatus" parameterType="java.util.Map">
+		update 6c_plan set
+		audit_status = #{auditStatus}
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="update" parameterType="com.togest.domain.Plan">
+		update 6c_plan
+		<trim prefix="set" suffixOverrides=",">
+			<if test="planDate != null">
+				plan_date = #{planDate},
+			</if>
+			<if test="completeDate != null">
+				complete_date = #{completeDate},
+			</if>
+			<if test="trainNumber != null">
+				train_number = #{trainNumber},
+			</if>
+			<if test="trainId != null">
+				train_id = #{trainId},
+			</if>
+			<if test="startPsaId != null">
+				start_psa_id = #{startPsaId},
+			</if>
+			<if test="endPsaId != null">
+				end_psa_id = #{endPsaId},
+			</if>
+			<if test="patcher != null">
+				patcher = #{patcher},
+			</if>
+			<if test="deptId != null">
+				dept_id = #{deptId},
+			</if>
+			<if test="planStatus != null">
+				plan_status = #{planStatus},
+			</if>
+			<if test="auditStatus != null">
+				audit_status = #{auditStatus},
+			</if>
+			<if test="remark != null">
+				remark = #{remark},
+			</if>
+			<if test="implementation != null">
+				implementation = #{implementation},
+			</if>
+			<if test="updateIp != null">
+				update_ip = #{updateIp},
+			</if>
+			<if test="updateBy != null">
+				update_by = #{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date = #{updateDate},
+			</if>
+			<if test="contacts != null">
+				contacts = #{contacts},
+			</if>
+		</trim>
+		where
+		id = #{id}
+	</update>
+
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_plan set
+		del_flag=1, delete_ip = #{deleteIp},
+		delete_by=#{deleteBy}, delete_date=current_timestamp
+		where id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+
+
+	<resultMap id="DTOResultMap" type="com.togest.domain.PlanDTO">
+		<id column="id" property="id" />
+		<result column="plan_date" property="planDate" />
+		<result column="complete_date" property="completeDate" />
+		<result column="train_number" property="trainNumber" />
+		<result column="train_id" property="trainId" />
+		<result column="start_psa_id" property="startPsaId" />
+		<result column="end_psa_id" property="endPsaId" />
+		<result column="patcher" property="patcher" />
+		<result column="dept_id" property="deptId" />
+		<result column="section_id" property="sectionId" />
+		<result column="plan_status" property="planStatus" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="remark" property="remark" />
+		<result column="implementation" property="implementation" />
+		<result column="system_id" property="systemId" />
+		<result column="sort" property="sort" />
+		<result column="startPsaName" property="startPsaName" />
+		<result column="endPsaName" property="endPsaName" />
+		<result column="deptName" property="deptName" />
+		<result column="flowId" property="flowId" />
+		<result column="trainName" property="trainName" />
+		<result column="detectMileage" property="detectMileage" />
+		<result column="systemName" property="systemName" />
+		<result column="contacts" property="contacts" />
+
+		<collection property="planLineList" ofType="com.togest.domain.PlanLineDTO">
+			<id column="planLineId" property="id" />
+			<result column="line_id" property="lineId" />
+			<result column="direction" property="direction" />
+			<result column="start_km" property="startKm" />
+			<result column="end_km" property="endKm" />
+			<result column="start_station" property="startStation" />
+			<result column="end_station" property="endStation" />
+			<result column="detect_mileage" property="detectMileage" />
+			<result column="plan_id" property="planId" />
+			<result column="lineName" property="lineName" />
+			<result column="startStationName" property="startStationName" />
+			<result column="endStationName" property="endStationName" />
+		</collection>
+		<collection property="deptList" ofType="com.togest.domain.Naming">
+			<id column="d_dept_id" property="id" />
+			<result column="d_name" property="name" />
+		</collection>
+	</resultMap>
+
+	<sql id="DTO_Column_List">
+		a.id, a.plan_date, a.complete_date, a.train_number,
+		a.train_id, a.start_psa_id, a.end_psa_id,
+		a.patcher, a.dept_id,
+		a.section_id, a.plan_status, a.audit_status,
+		a.remark,
+		a.implementation, a.system_id, a.sort,a.contacts,
+		psa1.name as
+		startPsaName, psa2.name as endPsaName, pd.name as deptName,
+		pl.id as
+		planLineId, pl.line_id, pl.direction, pl.start_km, pl.end_km,
+		pl.detect_mileage,
+		pl.plan_id, pl.start_station, pl.end_station,
+		psa3.name as startStationName, psa4.name as endStationName,
+		line.name
+		as lineName,df.process_instance_id as flowId,ct.train_num as
+		trainName,sys.name as systemName,d.id as d_dept_id,d.name as d_name
+	</sql>
+
+	<sql id="DTO_Table">
+		6c_plan a
+		left join 6c_plan_line pl on a.id = pl.plan_id
+		left join p_department pd on a.dept_id = pd.id
+		left join p_supply_arm
+		psa1 on a.start_psa_id = psa1.id
+		left join p_supply_arm psa2 on
+		a.end_psa_id = psa2.id
+		left join p_line line on pl.line_id = line.id
+		left join 6c_defect_flow df on a.id=df.id
+		left join 6c_check_train ct
+		on a.train_id=ct.id
+		left join p_supply_arm psa3 on psa3.id =
+		pl.start_station
+		left join p_supply_arm psa4 on psa4.id =
+		pl.end_station
+		left join 6c_system sys on sys.id = a.system_id
+		left join 6c_plan_dept cpd on cpd.plan_id = a.id
+		left join p_department d on cpd.dept_id = d.id
+	</sql>
+
+	<select id="getByKeys" parameterType="java.util.List" resultMap="DTOResultMap">
+		select
+		<include refid="DTO_Column_List" />
+		from
+		<include refid="DTO_Table" />
+		where
+		a.id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+
+
+	</select>
+
+	<select id="findPlanDTOList" resultMap="DTOResultMap"
+		parameterType="com.togest.request.PlanQueryFilter">
+		select
+		<include refid="DTO_Column_List" />
+		from
+		<include refid="DTO_Table" />
+		<where>
+			a.del_flag=0
+			and pl.del_flag = 0
+			<if test="beginCheckDate != null">
+				and a.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pl.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pl.direction = #{direction}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(cpd.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or cpd.dept_id = #{did})
+				</if>
+				<if test="isChild == false">
+					and cpd.dept_id = #{did}
+				</if>
+			</if>
+			<if test="planStatus != null">
+				and a.plan_status = #{planStatus}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+		</where>
+		group by a.id, pl.id
+	</select>
+
+	<select id="findPlanTaskFlow" parameterType="java.util.List"
+		resultType="com.togest.response.PlanTaskFlowResponse">
+		select a.id,
+		a.dept_id as deptId,a.patcher as patcher,
+		d.process_instance_id as
+		processInstanceId, d.form_key as formKey,
+		d.task_name as taskName, d.task_id as taskId
+		from 6c_plan a left join
+		6c_defect_flow d on a.id=d.id
+		where a.id
+		in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findLists" resultMap="DTOResultMap"
+		parameterType="com.togest.request.PlanQueryFilter">
+		select
+		<include refid="DTO_Column_List" />
+		from
+		(select distinct a.*
+		from 6c_plan a
+		left join 6c_plan_line pl on
+		a.id = pl.plan_id
+		left join p_department pd on a.dept_id = pd.id
+		left
+		join p_supply_arm psa1 on a.start_psa_id = psa1.id
+		left join
+		p_supply_arm psa2 on a.end_psa_id = psa2.id
+		left join p_line line on
+		pl.line_id = line.id
+		left join 6c_defect_flow df on a.id=df.id
+		left join
+		6c_check_train ct on a.train_id=ct.id
+		left join p_supply_arm psa3 on
+		psa3.id = pl.start_station
+		left join p_supply_arm psa4 on psa4.id =
+		pl.end_station
+		left join 6c_system sys on sys.id = a.system_id
+		left join 6c_plan_dept cpd on cpd.plan_id = a.id
+		left join p_department d on cpd.dept_id = d.id
+		<where>
+			a.del_flag=0
+			and pl.del_flag = 0
+			<if test="beginCheckDate != null">
+				and a.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pl.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pl.direction = #{direction}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(cpd.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or cpd.dept_id = #{did})
+				</if>
+				<if test="isChild == false">
+					and cpd.dept_id = #{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="planStatus != null">
+				and a.plan_status = #{planStatus}
+			</if>
+			<!-- <if test="planStatus == null">
+				and a.plan_status != '1'
+			</if> -->
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+		</where>
+		order by a.plan_date desc,a.sort
+		<if test="page!=null and page.startNum!=null and page.endNum !=null">
+			limit #{page.startNum},#{page.endNum}
+		</if>
+		) a
+
+		left join 6c_plan_line pl on a.id = pl.plan_id
+		left join p_department pd on
+		a.dept_id = pd.id
+		left join p_supply_arm psa1 on a.start_psa_id =
+		psa1.id
+		left join p_supply_arm psa2 on a.end_psa_id = psa2.id
+		left join
+		p_line line on pl.line_id = line.id
+		left join 6c_defect_flow df on
+		a.id=df.id
+		left join 6c_check_train ct on a.train_id=ct.id
+		left join
+		p_supply_arm psa3 on psa3.id = pl.start_station
+		left join p_supply_arm
+		psa4 on psa4.id = pl.end_station
+		left join 6c_system sys on sys.id =
+		a.system_id
+		left join 6c_plan_dept cpd on cpd.plan_id = a.id
+		left join p_department d on cpd.dept_id = d.id
+		<where>
+			a.del_flag=0
+			and pl.del_flag = 0
+			<if test="beginCheckDate != null">
+				and a.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pl.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pl.direction = #{direction}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(cpd.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or cpd.dept_id = #{did})
+				</if>
+				<if test="isChild == false">
+					and cpd.dept_id = #{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="planStatus != null">
+				and a.plan_status = #{planStatus}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+		</where>
+		order by a.plan_date desc,a.sort
+	</select>
+
+	<select id="counts" parameterType="com.togest.request.PlanQueryFilter"
+		resultType="java.lang.Integer">
+		select
+		count(distinct a.id)
+		from
+		<include refid="DTO_Table" />
+		<where>
+			a.del_flag=0
+			<if test="beginCheckDate != null">
+				and a.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pl.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pl.direction = #{direction}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(cpd.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or cpd.dept_id = #{did})
+				</if>
+				<if test="isChild == false">
+					and cpd.dept_id = #{did}
+				</if>
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="planStatus != null">
+				and a.plan_status = #{planStatus}
+			</if>
+			<if test="systemId != null">
+				and a.system_id = #{systemId}
+			</if>
+		</where>
+		order by a.plan_date desc,a.sort
+	</select>
+
+	<insert id="insertPlanDept" parameterType="java.util.Map">
+		insert into 6c_plan_dept(plan_id,dept_id)
+		values(#{planId},#{deptId})
+	</insert>
+
+	<delete id="deletePlanDept">
+		delete from 6c_plan_dept
+		<where>
+			<if test="planId!=null">
+				plan_id = #{planId}
+			</if>
+			<if test="deptId!=null">
+				and dept_id = #{deptId}
+			</if>
+			<if test="planId==null and deptId==null">
+				and 1=0
+			</if>
+		</where>
+	</delete>
+	
+	<select id="getPlanDeptList" parameterType="java.util.Map" resultType="java.util.Map">
+	select plan_id as planId,dept_id as deptId from 6c_plan_dept
+		<where>
+			<if test="planId!=null">
+				plan_id = #{planId}
+			</if>
+			<if test="deptId!=null">
+				and dept_id = #{deptId}
+			</if>
+			<if test="planId==null and deptId==null">
+				and 1=0
+			</if>
+		</where>
+	
+	</select>
+	
+	<select id="findNoticePlanList" resultMap="DTOResultMap"
+		parameterType="com.togest.request.PlanQueryFilter">
+	
+		select
+		<include refid="DTO_Column_List" />
+		from
+		<include refid="DTO_Table" />
+		<where>
+			a.del_flag=0
+			and pl.del_flag = 0
+			<if test="beginCheckDate != null">
+				and a.plan_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and a.plan_date &lt;= #{endCheckDate}
+			</if>
+			<if test="lineId != null">
+				and pl.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and pl.direction = #{direction}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(cpd.dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or cpd.dept_id = #{did})
+				</if>
+				<if test="isChild == false">
+					and cpd.dept_id = #{did}
+				</if>
+			</if>
+			<if test="planStatus != null">
+				and a.plan_status = #{planStatus}
+			</if>
+			and a.system_id = 'C1'
+			and a.id not in (select check_id from 6c_notice_check)
+			and a.id in (select distinct plan_id from 6c_defect where del_flag = 0 and system_id='C1' and defect_level= '1' and plan_id is not null)
+			</where>
+			order by a.plan_date desc
+		
+	</select>
+
+
+</mapper>

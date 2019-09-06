@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.PlanDetailDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.PlanDetailDTO">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="line_id" property="lineId" jdbcType="VARCHAR" />
+		<result column="direction" property="direction" jdbcType="VARCHAR" />
+		<result column="patcher" property="patcher" jdbcType="VARCHAR" />
+		<result column="plan_base_id" property="planBaseId" jdbcType="VARCHAR" />
+		<result column="check_region" property="checkRegion" jdbcType="VARCHAR" />
+		<result column="start_station" property="startStation" jdbcType="VARCHAR"/>
+		<result column="end_station" property="endStation" jdbcType="VARCHAR"/>
+		<result column="detect_mileage" property="detectMileage" jdbcType="DECIMAL" />
+		<result column="start_station_name" property="startStationName" jdbcType="VARCHAR" />
+		<result column="end_station_name" property="endStationName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, line_id, direction, patcher, plan_base_id,check_region,start_station,end_station,detect_mileage
+	</sql>
+
+	<!-- <select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_detail
+		where id = #{id,jdbcType=VARCHAR}
+	</select> -->
+	<select id="getByEntity" resultMap="BaseResultMap"
+		parameterType="com.togest.domain.PlanDetailDTO">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_detail
+		<where>
+			<if test="lineId!=null">
+				line_id =#{lineId}
+			</if>
+			<if test="direction!=null">
+				and direction =#{direction}
+			</if>
+			<if test="planBaseId!=null">
+				and plan_base_id =#{planBaseId}
+			</if>
+			<if test="startStation !=null">
+				and start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and end_station =#{endStation}
+			</if>
+			and del_flag = 0
+		</where>
+	</select>
+	<select id="getListByKeys" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from 6c_plan_detail
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.PlanDetailDTO">
+		insert into 6c_plan_detail
+		(id, line_id, direction,
+		patcher, plan_base_id,start_station,end_station,detect_mileage,
+		del_flag,
+		create_ip,
+		create_by, create_date,
+		check_region,
+		start_station_name,
+		end_station_name)
+		values 
+		(#{id,jdbcType=VARCHAR},
+		#{lineId,jdbcType=VARCHAR},
+		#{direction,jdbcType=VARCHAR},
+		#{patcher,jdbcType=VARCHAR}, #{planBaseId,jdbcType=VARCHAR},
+		#{startStation,jdbcType=VARCHAR},
+		#{endStation,jdbcType=VARCHAR},
+		#{detectMileage,jdbcType=DECIMAL},
+		#{delFlag,jdbcType=SMALLINT},
+		#{createIp,jdbcType=VARCHAR},
+		#{createBy,jdbcType=VARCHAR},
+		#{createDate,jdbcType=TIMESTAMP}, #{checkRegion,jdbcType=LONGVARCHAR},
+		#{startStationName,jdbcType=VARCHAR}, #{endStationName,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertList" parameterType="java.util.List">
+		insert into 6c_plan_detail
+		(id, line_id, direction,
+		patcher, plan_base_id, start_station,end_station,detect_mileage,
+		del_flag,
+		create_ip,
+		create_by, create_date,
+		check_region,
+		start_station_name,
+		end_station_name)
+		values 
+		<foreach collection="list" item="item" separator="," index="">
+		(#{item.id,jdbcType=VARCHAR},
+		#{item.lineId,jdbcType=VARCHAR},
+		#{item.direction,jdbcType=VARCHAR},
+		#{item.patcher,jdbcType=VARCHAR}, #{item.planBaseId,jdbcType=VARCHAR},
+		#{item.startStation,jdbcType=VARCHAR},
+		#{item.endStation,jdbcType=VARCHAR},
+		#{item.detectMileage,jdbcType=DECIMAL},
+		#{item.delFlag,jdbcType=SMALLINT},
+		#{item.createIp,jdbcType=VARCHAR},
+		#{item.createBy,jdbcType=VARCHAR},
+		#{item.createDate,jdbcType=TIMESTAMP}, #{item.checkRegion,jdbcType=LONGVARCHAR},
+		#{startStationName,jdbcType=VARCHAR}, #{endStationName,jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.PlanDetailDTO">
+		update 6c_plan_detail
+		set
+		line_id = #{lineId,jdbcType=VARCHAR},
+		direction =
+		#{direction,jdbcType=VARCHAR},
+		patcher = #{patcher,jdbcType=VARCHAR},
+		plan_base_id = #{planBaseId,jdbcType=VARCHAR},
+		check_region=#{checkRegion},
+		start_station=#{startStation,jdbcType=VARCHAR},
+		end_station=#{endStation,jdbcType=VARCHAR},
+		detect_mileage=#{detectMileage,jdbcType=DECIMAL},
+		start_station_name = #{startStationName,jdbcType=VARCHAR},
+		end_station_name = #{endStationName,jdbcType=VARCHAR},
+		update_ip =
+		#{updateIp,jdbcType=VARCHAR},
+		update_by = #{updateBy,jdbcType=VARCHAR},
+		update_date = #{updateDate,jdbcType=TIMESTAMP}
+		where id =
+		#{id,jdbcType=VARCHAR}
+	</update>
+
+	<update id="deleteFalses" parameterType="java.util.Map">
+		update 6c_plan_detail
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalsesByPlanBaseId" parameterType="java.util.Map">
+		update 6c_plan_detail
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where plan_base_id in
+		<foreach item="item" collection="planBaseIds" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	<update id="deleteFalsesByPlanDetailId" parameterType="java.util.Map">
+		update 6c_plan_detail
+		set
+		del_flag = 1,
+		delete_ip = #{deleteIp},
+		delete_by = #{deleteBy},
+		delete_date = #{deleteDate}
+		where plan_base_id in
+		<foreach item="item" collection="planDetailIds" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</update>
+	
+	<resultMap id="BaseDetailResultMap" type="com.togest.domain.PlanDetailDTO">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="line_id" property="lineId" jdbcType="VARCHAR" />
+		<result column="direction" property="direction" jdbcType="VARCHAR" />
+		<result column="patcher" property="patcher" jdbcType="VARCHAR" />
+		<result column="plan_base_id" property="planBaseId" jdbcType="VARCHAR" />
+		<result column="check_region" property="checkRegion" jdbcType="VARCHAR" />
+		<result column="start_station" property="startStation" jdbcType="VARCHAR"/>
+		<result column="end_station" property="endStation" jdbcType="VARCHAR"/>
+		<result column="start_station_name" property="startStationName" jdbcType="VARCHAR"/>
+		<result column="end_station_name" property="endStationName" jdbcType="VARCHAR"/>
+		<result column="detect_mileage" property="detectMileage" jdbcType="DECIMAL" />
+		<result column="lineName" property="lineName" jdbcType="VARCHAR" />
+		<collection property="depts" javaType="java.util.List" ofType="com.togest.domain.Naming">
+		<id column="d_id" property="id" jdbcType="VARCHAR" />
+		<result column="d_name" property="name" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	
+	<sql id="BaseDetailColumn">
+	a.id, a.line_id, a.direction, a.patcher, a.plan_base_id,a.check_region,
+	d.id as d_id,d.name as d_name,pl.name as lineName,a.start_station,
+	a.end_station,
+	<!-- p1.name as startStationName,p2.name as endStationName, -->
+	a.start_station_name, a.end_station_name,
+	a.detect_mileage
+	</sql>
+	<sql id="BaseDetailTable">
+	6c_plan_detail a
+	left join 6c_plan_execute pe on pe.plan_detail_id = a.id and pe.del_flag=0
+	left join p_department d on pe.responsible_dept_id = d.id
+	left join p_line pl on pl.id = a.line_id
+	<!-- left join p_supply_arm p1 on a.start_station = p1.id
+	left join p_supply_arm p2 on a.end_station = p2.id -->
+	
+	
+	</sql>
+	<select id="getByKey" resultMap="BaseDetailResultMap" parameterType="java.lang.String">
+		select
+		<include refid="BaseDetailColumn" />
+		from 
+		<include refid="BaseDetailTable" />
+		where a.id = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findLists" resultMap="BaseDetailResultMap" parameterType="com.togest.request.PlanQueryFilter">
+	select
+		<include refid="BaseDetailColumn" />
+		from 
+		<include refid="BaseDetailTable" />
+		<where>
+			a.del_flag = 0
+			<if test="planBaseId!=null">
+				and a.plan_base_id =#{planBaseId}
+			</if>
+			<if test="lineId != null">
+				and a.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and a.direction = #{direction}
+			</if>
+			<if test="startStation !=null">
+				and a.start_station =#{startStation}
+			</if>
+			<if test="endStation !=null">
+				and a.end_station =#{endStation}
+			</if>
+			<if test="did != null">
+				<if test="isChild == true">
+					and(pe.responsible_dept_id in (select id from
+					p_department where
+					parent_ids like '%${did}%' and del_flag=0)
+					or pe.responsible_dept_id = #{did})
+				</if>
+				<if test="isChild == false">
+					and pe.responsible_dept_id = #{did}
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	
+</mapper>

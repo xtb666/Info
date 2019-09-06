@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectRepeatHistoryDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectRepeatHistory">
+		<id column="id" property="id" />
+		<result column="check_date" property="checkDate" />
+		<result column="section_id" property="sectionId" />
+		<result column="direction" property="direction" />
+		<result column="line_id" property="lineId" />	
+		<result column="system_id" property="systemId" />	
+		<result column="defect_id" property="defectId" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.check_date, a.section_id, a.direction, a.line_id, a.system_id, a.defect_id
+	</sql>
+
+		<insert id="insertBatch" parameterType="com.togest.domain.C1InfoDTO">
+		insert into 6c_defect_repeat_history(
+			id, check_date, section_id, direction, line_id, system_id, defect_id
+		)
+		values
+		<foreach collection="list" item="item" index="index" separator=","> 
+		(
+			#{item.id}, #{item.checkDate}, #{item.sectionId}, #{item.direction}, #{item.lineId}, #{item.systemId}, #{item.defectId}
+		)
+    	</foreach> 
+		
+	</insert>
+	<insert id="insert" parameterType="com.togest.domain.DefectRepeatHistory">
+		insert into 6c_defect_repeat_history(
+			id, check_date, section_id, direction, line_id, system_id, defect_id
+		)
+		values(
+			#{id}, #{checkDate}, #{sectionId}, #{direction}, #{lineId}, #{systemId}, #{defectId}
+		)
+	</insert>
+
+	<delete id="delete" parameterType="java.util.Map">
+		delete from 6c_defect_repeat_history
+		where id in
+		<foreach item="item" collection="ids" separator="," open="("
+			close=")" index="">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

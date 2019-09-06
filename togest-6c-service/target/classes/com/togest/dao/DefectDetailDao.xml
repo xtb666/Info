@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectDetailDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectDetail">
+		<id column="id" property="id" />
+		<result column="check_date" property="checkDate" />
+		<result column="check_time" property="checkTime" />
+		<result column="section_id" property="sectionId" />
+		<result column="sectionName" property="sectionId" />
+		<result column="line_id" property="lineId" />
+		<result column="sectionName" property="sectionName" />
+		<result column="direction" property="direction" />
+		<result column="speed_type" property="speedType" />
+		<result column="work_shop_id" property="workShopId" />
+		<result column="workShopName" property="workShopName" />
+		<result column="work_area_id" property="workAreaId" />
+		<result column="workAreaName" property="workAreaName" />
+		<result column="psa_id" property="psaId" />
+		<result column="psaName" property="psaName" />
+		<result column="tunnel_id" property="tunnelId" />
+		<result column="tunnelName" property="tunnelName" />
+		<result column="track_no" property="trackNo" />
+		<result column="speed" property="speed" />
+		<result column="pillar_id" property="pillarId" />
+		<result column="pillar_name" property="pillarName" />
+		<result column="defect_name" property="defectName" />
+		<result column="defect_type" property="defectType" />
+		<result column="defectTypeName" property="defectTypeName" />
+		<result column="defect_level" property="defectLevel" />
+		<result column="defect_glb" property="defectGlb" />
+		<result column="defect_status" property="defectStatus" />
+		<result column="flow_id" property="flowId" />
+		<result column="train_id" property="trainId" />
+		<result column="info_id" property="infoId" />
+		<result column="plan_id" property="planId" />
+		<result column="longitude" property="longitude" />
+		<result column="latitude" property="latitude" />
+		<result column="system_id" property="systemId" />
+		<result column="del_flag" property="delFlag" />
+		
+		<result column="review_person" property="reviewPerson" />
+		<result column="review_date" property="reviewDate" />
+		<result column="review_conclusion" property="reviewConclusion" />
+		<result column="review_photo" property="reviewPhoto" />
+		<result column="review_value" property="reviewValue" />
+		<result column="is_reform" property="isReform" />
+		<result column="reviewRemark" property="reviewRemark" />
+		<result column="reviewInformant" property="reviewInformant" />
+		<result column="reviewPillarPhoto" property="reviewPillarPhoto" />
+		<result column="defect_device_attributes" property="defectDeviceAttributes" />
+		
+		<result column="handle_person" property="handlePerson" />
+		<result column="handle_date" property="handleDate" />
+		<result column="handle_scheme" property="handleScheme" />
+		<result column="handle_photo" property="handlePhoto" />
+		<result column="handle_value" property="handleValue" />
+		<result column="handleInformant" property="handleInformant" />
+		<result column="handle_before_photo" property="handleBeforePhoto" />
+		<result column="handlePillarPhoto" property="handlePillarPhoto" />
+		<result column="handleRemark" property="handleRemark" />
+		<result column="handle_status" property="handleStatus" />
+		<result column="audit_status" property="auditStatus" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		d.id, d.check_date, d.check_time, d.section_id, d.line_id, d.direction, d.speed_type,
+		d.work_shop_id, d.work_area_id, d.psa_id, d.tunnel_id, d.track_no, d.speed, d.pillar_id,d.pillar_name,
+		d.defect_name, d.defect_type, d.defect_level, d.defect_glb, d.defect_status, df.process_instance_id as flow_id,
+		d.train_id, d.info_id, d.plan_id, d.longitude, d.latitude, d.system_id, d.del_flag,
+		pd.name as workShopName, pd1.name as workAreaName, pd2.name as sectionName,
+		pl.name as lineName, psa.name as psaName, pt.name as tunnelName,
+		dt.name as defectTypeName,
+		ch.review_person, ch.review_date, ch.review_conclusion, ch.review_photo, ch.review_value,
+		ch.is_reform, ch.remark as reviewRemark, ch.informant as reviewInformant, ch.pillar_photo as reviewPillarPhoto,
+		ch.defect_device_attributes,
+		rh.handle_person, rh.handle_date, rh.handle_scheme, rh.handle_photo, rh.handle_value, rh.informant as handleInformant,
+		rh.handle_before_photo, rh.pillar_photo as handlePillarPhoto, rh.remark as handleRemark, rh.handle_status,
+		dhi.audit_status
+	</sql>
+	
+	<sql id="Base_Table">
+		6c_defect d
+		left join p_department pd on d.work_shop_id = pd.id
+		left join p_department pd1 on d.work_area_id = pd1.id
+		left join p_department pd2 on d.section_id = pd2.id
+		left join p_line pl  on d.line_id=pl.id
+		left join p_supply_arm psa on d.psa_id=psa.id
+		left join p_tunnel pt on d.tunnel_id= pt.id
+		left join 6c_defect_type dt on d.defect_type = dt.id
+		left join 6c_defect_check_handle ch on ch.id = d.id 
+		left join 6c_defect_reform_handle rh on rh.id = d.id 
+		left join 6c_defect_flow df on df.id = d.id
+		left join 6c_defect_handle_info dhi on  dhi.id=d.id
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		<include refid="Base_Table"></include>
+		where
+		d.id = #{id} and d.del_flag=0
+	</select>
+
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		<include refid="Base_Table"></include>
+		where d.del_flag=0
+	</select>
+	
+	<select id="getListRegisterDefect" parameterType="com.togest.request.CQueryFilter" 
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		<include refid="Base_Table"></include>
+		<where>
+			<if test="beginCheckDate != null">
+				and d.check_date &gt;= #{beginCheckDate}
+			</if>
+			<if test="endCheckDate != null">
+				and d.check_date &lt;= #{endCheckDate}
+			</if>
+			<if test="sectionId != null">
+				and d.section_id = #{sectionId}
+			</if>
+			<if test="lineId != null">
+				and d.line_id = #{lineId}
+			</if>
+			<if test="direction != null">
+				and d.direction = #{direction}
+			</if>
+			<if test="speedType != null">
+				and d.speed_type = #{speedType}
+			</if>
+			<if test="workShopId != null">
+				and(d.work_shop_id in (select id from
+				p_department where parent_ids like '%${workShopId}%' and del_flag=0)
+				 or d.work_shop_id =#{workShopId})
+			</if>
+			<if test="did != null">
+			<if test="isChild==true">
+				and(d.work_area_id in (select id from
+				p_department where parent_ids like '%${did}%' and del_flag=0)
+				or d.work_area_id =#{did})
+			</if>
+			<if test="isChild ==false">
+				and d.work_area_id =#{did}
+			</if>
+			</if>
+			<if test="pillarName != null">
+				and d.pillar_name = #{pillarName}
+			</if>
+			<if test="psaId != null">
+				and d.psa_id = #{psaId}
+			</if>
+			<if test="tunnelId != null">
+				and d.tunnel_id = #{tunnelId}
+			</if>
+			<if test="trackNo != null">
+				and d.track_no = #{trackNo}
+			</if>
+			
+			<if test="defectType != null">
+				and d.defect_type = #{defectType}
+			</if>
+			<if test="defectLevel != null">
+				and d.defect_level = #{defectLevel}
+			</if>
+			<if test="defectGlb != null">
+				and d.defect_glb = #{defectGlb}
+			</if>
+			<if test="startKm != null">
+				and d.defect_glb &gt;= #{startKm}
+			</if>
+			<if test="endKm != null">
+				and d.defect_glb &lt;= #{endKm}
+			</if>
+			<if test="defectStatusList != null">
+				and d.defect_status in
+				<foreach item="item" collection="defectStatusList" separator="," open="("
+					close=")" index="">
+					#{item}
+				</foreach>
+			</if>	
+			<if test="systemId != null">
+				and d.system_id = #{systemId}
+			</if>	
+			and d.del_flag=0	
+		</where>
+	</select>
+</mapper>

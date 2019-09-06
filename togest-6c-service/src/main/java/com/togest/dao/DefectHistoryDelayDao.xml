@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.togest.dao.DefectHistoryDelayDao">
+	<resultMap id="BaseResultMap" type="com.togest.domain.DefectHistoryDelay">
+		<id column="id" property="id" />
+		<result column="delay_person" property="delayPerson" />
+		<result column="delay_date" property="delayDate" />
+		<result column="delay_to_date" property="delayToDate" />
+		<result column="remark" property="remark" />
+		<result column="defect_id" property="defectId" />
+		<result column="delay_status" property="delayStatus" />
+		<result column="sort" property="sort" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		a.id, a.delay_person, a.delay_date, a.delay_to_date, a.remark, a.defect_id,
+		a.delay_status, a.sort
+	</sql>
+
+	<select id="getByKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_history_delay a
+		where
+		a.id = #{id}
+	</select>
+	
+	<select id="findAllList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_history_delay a
+	</select>
+
+	<select id="findList" parameterType="com.togest.domain.DefectHistoryDelay"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from
+		6c_defect_history_delay a
+		<where>
+			<if test="delayPerson != null">
+				and a.delay_person = #{delayPerson}
+			</if>
+			<if test="delayDate != null">
+				and a.delay_date = #{delayDate}
+			</if>
+			<if test="delayToDate != null">
+				and a.delay_to_date = #{delayToDate}
+			</if>
+			<if test="remark != null">
+				and a.remark = #{remark}
+			</if>
+			<if test="defectId != null">
+				and a.defect_id = #{defectId}
+			</if>
+			<if test="delayStatus != null">
+				and a.delay_status = #{delayStatus}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insert" parameterType="com.togest.domain.DefectHistoryDelay">
+		insert into 6c_defect_history_delay(
+		id, delay_person, delay_date, delay_to_date, remark, defect_id,
+		delay_status
+		<if test="sort!=null or sort==0">,sort</if>
+		)
+		values(
+		#{id}, #{delayPerson}, #{delayDate}, #{delayToDate}, #{remark}, #{defectId}, 
+		#{delayStatus}
+		<if test="sort!=null or sort==0">,#{sort}</if>
+		)
+	</insert>
+
+	<update id="update" parameterType="com.togest.domain.DefectHistoryDelay">
+		update 6c_defect_history_delay
+		set
+		delay_person = #{delayPerson}, 
+		delay_date = #{delayDate}, 
+		delay_to_date = #{delayToDate}, 
+		remark = #{remark}, 
+		defect_id = #{defectId},
+		delay_status = #{delayStatus}
+		where
+		id = #{id}
+	</update>
+</mapper>
